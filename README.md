@@ -38,7 +38,7 @@ All three have free plans that are enough for the club.
 ### 2. Netlify (hosting)
 
 1. At [netlify.com](https://netlify.com), **Add new project > Import an existing project > GitHub**, pick this repository.
-2. Netlify detects Next.js; keep the suggested build settings.
+2. Build settings come from [`netlify.toml`](netlify.toml) in this repository (build command `npm run build`, publish directory `.next`, Node 22), so the dashboard's build fields don't matter.
 3. Under **Environment variables**, add (see [`.env.example`](.env.example)):
 
    | Name | Value |
