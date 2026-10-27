@@ -17,7 +17,14 @@ All three have free plans that are enough for the club.
 1. Create a free project at [supabase.com](https://supabase.com), region **Singapore**.
 2. Open **SQL Editor**, paste all of [`supabase/migrations/0001_base.sql`](supabase/migrations/0001_base.sql) and click **Run**.
 3. **Authentication > Sign In / Providers > Email**: keep Email on and "Confirm email" on.
-4. **Authentication > Emails > Templates**: in both **Confirm signup** and **Magic Link**, replace the body with:
+4. **Set up the club Gmail as the sender.** Supabase only lets you edit email templates
+   once you use your own sender, and its default emails send a link, not the code the
+   site asks for. In the club Gmail, turn on 2-Step Verification, then create an
+   [app password](https://myaccount.google.com/apppasswords). In **Authentication >
+   Emails > Set up SMTP**: sender and username = the club Gmail address, sender name
+   `UNM Archery Club`, host `smtp.gmail.com`, port `465`, password = the app password.
+5. **Authentication > Emails > Templates**: in both **Confirm signup** and **Magic Link**,
+   switch the body to **Source** and replace it with:
 
    ```html
    <h2>Your UNM Archery Club code</h2>
@@ -25,11 +32,6 @@ All three have free plans that are enough for the club.
    <p>It expires in 1 hour. If you didn't ask for it, you can ignore this email.</p>
    ```
 
-5. **Before real students use it**, set up the club Gmail as the sender
-   (**Authentication > Emails > SMTP Settings**: host `smtp.gmail.com`, port `465`,
-   username = the club Gmail address, password = a Gmail
-   [app password](https://myaccount.google.com/apppasswords)). Supabase's built-in
-   sender only allows a few emails an hour, which is fine for testing only.
 6. **Project Settings > API Keys**: you'll need the **Project URL**, the
    **publishable key** and a **secret key** in step 2.
 
