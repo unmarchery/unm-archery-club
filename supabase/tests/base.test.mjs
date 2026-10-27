@@ -287,3 +287,26 @@ test('nobody decides their own member check', async () => {
   const [{ request_member_check: id }] = await asUser(exco, 'select request_member_check(null)')
   await rejects(asUser(exco, 'select decide_member_request($1, true)', [id]), 'OWN_REQUEST')
 })
+
+test('starter accounts must change their password; overview lists who can get one', async () => {
+  const exco = await ownerId()
+  const row = await one(
+    `insert into auth.users (email, raw_user_meta_data) values ($1, $2) returning id`,
+    ['star60@nottingham.edu.my', JSON.stringify({ student_id: '20000060', full_name: 'Star Sixty', must_change_password: true })],
+  )
+  assert.equal((await one('select must_change_password as m from profiles where id = $1', [row.id])).m, true)
+  await asUser(row.id, 'select password_changed()')
+  assert.equal((await one('select must_change_password as m from profiles where id = $1', [row.id])).m, false)
+
+  await db.query(`insert into members (student_id, full_name, email) values
+    ('20000061', 'Ready Archer', 'ready61@nottingham.edu.my'),
+    ('20000062', 'Gmail Archer', 'gmail62@gmail.com')`)
+  const guest = (await one(`select id from profiles where student_id = '20000021'`)).id
+  await rejects(asUser(guest, 'select member_account_overview()'), 'NOT_ALLOWED')
+
+  const [{ member_account_overview: o }] = await asUser(exco, 'select member_account_overview()')
+  assert.ok(o.ready.some((m) => m.student_id === '20000061'))
+  assert.ok(o.blocked.some((m) => m.student_id === '20000062'))
+  assert.ok(!o.ready.some((m) => m.student_id === '20000010')) // already has an account
+  assert.ok(o.with_account >= 1 && o.total >= o.with_account)
+})

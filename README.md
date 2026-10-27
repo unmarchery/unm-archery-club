@@ -79,6 +79,20 @@ insert into permissions (user_id, permission)
 select id, 'manage_members' from profiles where student_id = '20xxxxxx';
 ```
 
+### Starter accounts for members (no email code needed)
+
+Needs [`supabase/migrations/0003_starter_accounts.sql`](supabase/migrations/0003_starter_accounts.sql) run once, and the member list synced (step 4).
+Open **Exco > Accounts** and tap **Create starter accounts**. Each member on the list with a uni
+email gets an account whose first password is the first word of their name on the form, in
+lowercase, followed by their student ID (Alex Tan, 20512034 → `alex20512034`). They must choose
+their own password at first login, and a starter password stops working after
+`starter_password_days` (14) days, after which they use **Forgot password**. The page has a
+ready-made message to post in the members' WhatsApp group. If more than about 60 accounts are
+waiting, tap the button again until none are left.
+
+Anyone who knows a member's first name and student ID can guess the starter password, so
+ask members to log in soon after you post the message.
+
 ### Giving a non-member passes (until the top-up page is built)
 
 ```sql

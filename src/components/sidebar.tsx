@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
-import { CalendarIcon, CheckCircleIcon, ClipboardIcon, HomeIcon, LogoutIcon, ThemeIcon, UsersIcon, WalletIcon } from "./icons";
+import { CalendarIcon, CheckCircleIcon, ClipboardIcon, HomeIcon, KeyIcon, LogoutIcon, ThemeIcon, UsersIcon, WalletIcon } from "./icons";
 
 type Props = {
   name: string;
@@ -61,6 +61,11 @@ export function Sidebar({ name, membership, isExco, memberRequests }: Props) {
               <Link href="/exco/members" className={item("/exco/members")} aria-current={path === "/exco/members" ? "page" : undefined}>
                 <UsersIcon />Members
                 {memberRequests > 0 && <span className="badge">{memberRequests}</span>}
+              </Link>
+            )}
+            {memberRequests !== null && (
+              <Link href="/exco/accounts" className={item("/exco/accounts")} aria-current={path === "/exco/accounts" ? "page" : undefined}>
+                <KeyIcon />Accounts
               </Link>
             )}
             <span className="menu-item soon" aria-disabled="true">
