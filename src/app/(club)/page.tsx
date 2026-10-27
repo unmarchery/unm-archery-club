@@ -3,6 +3,8 @@ import { ArrowIcon, InfoIcon, TargetRings } from "@/components/icons";
 import { clockLabel, longDay, requestTime, timeRange } from "@/lib/format";
 import { gearTags, type Gear } from "@/lib/gear";
 import { getSession } from "@/lib/session";
+import { createClient } from "@/lib/supabase/server";
+import { MemberCheck } from "./member-check";
 
 type Upcoming = {
   id: string;
@@ -13,8 +15,10 @@ type Upcoming = {
 };
 
 export default async function HomePage() {
-  const { supabase, profile, status } = await getSession();
-  const [{ data: upcoming }, { data: cfg }] = await Promise.all([
+  // Everything in one round of requests: the database is far from the server, so each wave costs.
+  const supabase = await createClient();
+  const [{ profile, status }, { data: upcoming }, { data: cfg }] = await Promise.all([
+    getSession(),
     supabase
       .from("bookings")
       .select("id, pass_kind, full_day_group, equipment, slots!inner(starts_at, ends_at)")
@@ -90,13 +94,7 @@ export default async function HomePage() {
               <div><div className="big">{status.single}</div><div className="pass-label">Single</div></div>
               <div><div className="big">{status.full}</div><div className="pass-label">Full day</div></div>
             </div>
-            {status.membership === "pending" ? (
-              <p className="small muted" style={{ margin: 0 }}>
-                Your student ID is on the member list but the email didn&apos;t match. The exco will confirm it soon; until then you book as a non-member.
-              </p>
-            ) : (
-              <span className="pill" style={{ alignSelf: "flex-start" }}>Top-up page coming soon</span>
-            )}
+            <span className="pill" style={{ alignSelf: "flex-start" }}>Top-up page coming soon</span>
           </section>
         )}
 
@@ -124,6 +122,8 @@ export default async function HomePage() {
             <Link href="/sessions" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }}>See sessions</Link>
           </section>
         )}
+
+        {status.membership !== "member" && <MemberCheck membership={status.membership} request={status.request} />}
       </div>
     </>
   );

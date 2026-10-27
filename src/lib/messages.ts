@@ -15,7 +15,14 @@ const MESSAGES: Record<string, string> = {
   BOOKING_NOT_FOUND: "We couldn't find that booking.",
   NOT_CANCELLABLE: "That booking can't be cancelled any more.",
   ALREADY_STARTED: "That session has already started, so it can't be cancelled.",
+  ALREADY_MEMBER: "You're already a member.",
+  REQUEST_PENDING: "You already have a member check waiting for the exco.",
+  NOT_ALLOWED: "You don't have permission to do that.",
+  REQUEST_NOT_FOUND: "That request has already been handled.",
+  OWN_REQUEST: "Another exco member needs to decide your own request.",
 };
+
+export type ActionResult = { ok: true; refunded?: boolean } | { ok: false; message: string };
 
 export function messageFor(error: { message?: string } | null | undefined) {
   const text = error?.message ?? "";

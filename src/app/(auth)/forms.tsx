@@ -11,7 +11,14 @@ function Submit({ children }: { children: React.ReactNode }) {
   const { pending } = useFormStatus();
   return (
     <button className="btn" type="submit" disabled={pending}>
-      {pending ? "Please wait…" : children}
+      {pending ? (
+        <>
+          <span className="spinner" aria-hidden="true" />
+          Please wait…
+        </>
+      ) : (
+        children
+      )}
     </button>
   );
 }

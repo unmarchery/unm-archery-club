@@ -2,6 +2,7 @@ import { LockIcon } from "@/components/icons";
 import { clockLabel, dayKey, longDay, openingLabel, requestTime, shortDay, shortTimeRange, weekLabel } from "@/lib/format";
 import type { ClubBows, Gear } from "@/lib/gear";
 import { getSession } from "@/lib/session";
+import { createClient } from "@/lib/supabase/server";
 import { BookButton, CancelButton } from "./booking";
 
 type Row = {
@@ -36,10 +37,12 @@ function minutes(t: string) {
 }
 
 export default async function SessionsPage() {
-  const { supabase, profile, status } = await getSession();
-  await supabase.rpc("ensure_slots");
-
-  const [{ data: windowData }, { data: cfg }] = await Promise.all([
+  // Two rounds of requests instead of four: slots must exist before availability is read,
+  // but everything else runs alongside creating them.
+  const supabase = await createClient();
+  const [{ profile, status }, , { data: windowData }, { data: cfg }] = await Promise.all([
+    getSession(),
+    supabase.rpc("ensure_slots"),
     supabase.rpc("booking_window"),
     supabase.from("settings").select("nonmember_refund_hours, club_bows, day_start, day_end, slot_minutes").single(),
   ]);

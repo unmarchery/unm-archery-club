@@ -139,7 +139,7 @@ function BookingDialog({ slotId, title, fullDayTitle, member, singles, fullDay, 
         <div className="muted small">This is a preference. Club bows are shared, so it isn&apos;t guaranteed.</div>
         {error && <p className="error" role="alert">{error}</p>}
         <button type="button" className="btn" onClick={confirm} disabled={!canConfirm || pending}>
-          <ArrowIcon />
+          {pending ? <span className="spinner" aria-hidden="true" /> : <ArrowIcon />}
           {pending ? "Booking…" : "Confirm booking"}
         </button>
       </div>
