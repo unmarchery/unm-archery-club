@@ -3,6 +3,7 @@ import { ArrowIcon, InfoIcon, TargetRings } from "@/components/icons";
 import { clockLabel, longDay, requestTime, timeRange } from "@/lib/format";
 import { gearTags, type Gear } from "@/lib/gear";
 import { getSession } from "@/lib/session";
+import { createClient } from "@/lib/supabase/server";
 import { MemberCheck } from "./member-check";
 
 type Upcoming = {
@@ -14,8 +15,10 @@ type Upcoming = {
 };
 
 export default async function HomePage() {
-  const { supabase, profile, status } = await getSession();
-  const [{ data: upcoming }, { data: cfg }] = await Promise.all([
+  // Everything in one round of requests: the database is far from the server, so each wave costs.
+  const supabase = await createClient();
+  const [{ profile, status }, { data: upcoming }, { data: cfg }] = await Promise.all([
+    getSession(),
     supabase
       .from("bookings")
       .select("id, pass_kind, full_day_group, equipment, slots!inner(starts_at, ends_at)")

@@ -91,6 +91,7 @@ function RequestDialog({ onClose }: { onClose: () => void }) {
         </label>
         {error && <p className="error" role="alert">{error}</p>}
         <button type="button" className="btn" onClick={send} disabled={pending}>
+          {pending && <span className="spinner" aria-hidden="true" />}
           {pending ? "Sending…" : "Send request"}
         </button>
       </div>
