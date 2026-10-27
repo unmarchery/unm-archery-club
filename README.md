@@ -16,6 +16,7 @@ All three have free plans that are enough for the club.
 
 1. Create a free project at [supabase.com](https://supabase.com), region **Singapore**.
 2. Open **SQL Editor**, paste all of [`supabase/migrations/0001_base.sql`](supabase/migrations/0001_base.sql) and click **Run**.
+   Then do the same with each later file in [`supabase/migrations/`](supabase/migrations/), in number order.
 3. **Authentication > Sign In / Providers > Email**: keep Email on and "Confirm email" on.
 4. **Set up the club Gmail as the sender.** Supabase only lets you edit email templates
    once you use your own sender, and its default emails send a link, not the code the
@@ -65,11 +66,17 @@ Follow the steps at the top of [`scripts/members-sync.gs`](scripts/members-sync.
 After that, every new form response reaches the website within seconds, and anyone
 whose student ID **and** email match the form becomes a Member automatically.
 
-To confirm someone whose ID matches but whose email doesn't (for example they
-used Gmail on the form):
+Students who show as non-members can tap **Request member check** on Home. The
+request appears under **Exco > Members** for anyone with the `manage_members`
+permission (the President has it). Approving makes them a member; rejecting shows
+them your reason. This needs [`supabase/migrations/0002_member_requests.sql`](supabase/migrations/0002_member_requests.sql):
+run it once in the SQL Editor, after `0001_base.sql`.
+
+To give another exco member that permission:
 
 ```sql
-update profiles set member_override = true where student_id = '20xxxxxx';
+insert into permissions (user_id, permission)
+select id, 'manage_members' from profiles where student_id = '20xxxxxx';
 ```
 
 ### Giving a non-member passes (until the top-up page is built)
@@ -115,7 +122,7 @@ npm run lint
 | `supabase/migrations/` | Database tables, booking rules and security |
 | `supabase/tests/` | Database tests (run in PGlite) |
 | `src/app/(auth)/` | Sign up, email code, log in, password reset |
-| `src/app/(club)/` | Signed-in pages: Home and Sessions |
+| `src/app/(club)/` | Signed-in pages: Home, Sessions, and Exco > Members (member check requests) |
 | `src/app/api/members/sync/` | Receives the membership list from Google Sheets |
 | `src/proxy.ts` | Keeps the login session fresh and protects pages |
 | `scripts/members-sync.gs` | Google Apps Script for the membership form |

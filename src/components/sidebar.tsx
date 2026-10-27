@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
-import { CalendarIcon, CheckCircleIcon, ClipboardIcon, HomeIcon, LogoutIcon, ThemeIcon, WalletIcon } from "./icons";
+import { CalendarIcon, CheckCircleIcon, ClipboardIcon, HomeIcon, LogoutIcon, ThemeIcon, UsersIcon, WalletIcon } from "./icons";
 
 type Props = {
   name: string;
   membership: "member" | "pending" | "none";
   isExco: boolean;
+  memberRequests: number | null; // pending count for member managers, null for everyone else
 };
 
 function initials(name: string) {
@@ -28,7 +29,7 @@ function toggleTheme() {
   document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax`;
 }
 
-export function Sidebar({ name, membership, isExco }: Props) {
+export function Sidebar({ name, membership, isExco, memberRequests }: Props) {
   const path = usePathname();
   const item = (href: string) => `menu-item${path === href ? " on" : ""}`;
 
@@ -56,6 +57,12 @@ export function Sidebar({ name, membership, isExco }: Props) {
         {isExco && (
           <>
             <div className="menu-label">Exco</div>
+            {memberRequests !== null && (
+              <Link href="/exco/members" className={item("/exco/members")} aria-current={path === "/exco/members" ? "page" : undefined}>
+                <UsersIcon />Members
+                {memberRequests > 0 && <span className="badge">{memberRequests}</span>}
+              </Link>
+            )}
             <span className="menu-item soon" aria-disabled="true">
               <CheckCircleIcon />Approvals<span className="soon-tag">Soon</span>
             </span>

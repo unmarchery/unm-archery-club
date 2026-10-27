@@ -23,11 +23,9 @@
   --font-display: var(--font-poppins), var(--font-inter), sans-serif;
 }
 
-/* In a layer, so component classes like .btn and .menu-item can set their own link colours. */
-@layer base {
-  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); }
-  a { color: var(--gold-text); }
-}
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); }
+/* Plain text links only: styled links (.btn, .menu-item, .brand) keep their own colours. */
+a:not([class]) { color: var(--gold-text); }
 
 @layer components {
   /* Layout: sidebar on laptops, top bar on phones */
@@ -43,6 +41,7 @@
   .menu-item.on { background: var(--gold-tint); color: var(--gold-text); }
   .menu-item.soon { opacity: 0.55; cursor: default; }
   .menu-item svg { width: 20px; height: 20px; flex: none; }
+  .badge { margin-left: auto; min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 11px; background: var(--gold); color: var(--on-gold); font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
   .soon-tag { margin-left: auto; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
   .side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
   .me { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); }
@@ -120,6 +119,7 @@
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field-label { font-size: 13px; font-weight: 600; color: var(--ink); }
   .input { min-height: 46px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--ink); padding: 0 14px; font: 500 15px var(--font-sans); box-sizing: border-box; width: 100%; }
+  textarea.input { min-height: 96px; padding: 12px 14px; resize: vertical; line-height: 1.45; }
   .input:focus-visible, .btn:focus-visible, .chip:focus-visible, .opt:focus-visible, .seg button:focus-visible, .menu-item:focus-visible, .icon-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
   .check input { width: 20px; height: 20px; margin-top: 1px; accent-color: var(--gold); flex: none; }
@@ -169,6 +169,7 @@
   .h1 { font-size: 24px; }
   .page-head { flex-direction: column; align-items: stretch; }
   .page-head .btn-sm { width: 100%; }
+  .page-head .tag { align-self: flex-start; }
   .grid { grid-template-columns: minmax(0, 1fr); }
   .pass-card { min-height: 0; }
   .big { font-size: 40px; }

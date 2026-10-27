@@ -20,7 +20,14 @@ export type Status = {
   banned_until: string | null;
   noshows: number;
   is_exco: boolean;
+  perms: string[];
+  request: { status: "pending" | "approved" | "rejected"; reason: string | null } | null;
+  pending_member_requests: number;
 };
+
+export function can(status: Status, permission: string) {
+  return status.perms.includes("owner") || status.perms.includes(permission);
+}
 
 // The signed-in archer, read once per request. Sends signed-out visitors to /login.
 export const getSession = cache(async () => {
@@ -38,5 +45,11 @@ export const getSession = cache(async () => {
   ]);
   if (!profile || !status) redirect("/login?e=no-profile");
 
-  return { supabase, profile, status: status as Status };
+  // Defaults keep pages working on a database that hasn't run the newer migrations yet.
+  const s = status as Partial<Status>;
+  return {
+    supabase,
+    profile,
+    status: { ...s, perms: s.perms ?? [], request: s.request ?? null, pending_member_requests: s.pending_member_requests ?? 0 } as Status,
+  };
 });

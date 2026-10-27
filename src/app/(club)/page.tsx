@@ -3,6 +3,7 @@ import { ArrowIcon, InfoIcon, TargetRings } from "@/components/icons";
 import { clockLabel, longDay, requestTime, timeRange } from "@/lib/format";
 import { gearTags, type Gear } from "@/lib/gear";
 import { getSession } from "@/lib/session";
+import { MemberCheck } from "./member-check";
 
 type Upcoming = {
   id: string;
@@ -90,13 +91,7 @@ export default async function HomePage() {
               <div><div className="big">{status.single}</div><div className="pass-label">Single</div></div>
               <div><div className="big">{status.full}</div><div className="pass-label">Full day</div></div>
             </div>
-            {status.membership === "pending" ? (
-              <p className="small muted" style={{ margin: 0 }}>
-                Your student ID is on the member list but the email didn&apos;t match. The exco will confirm it soon; until then you book as a non-member.
-              </p>
-            ) : (
-              <span className="pill" style={{ alignSelf: "flex-start" }}>Top-up page coming soon</span>
-            )}
+            <span className="pill" style={{ alignSelf: "flex-start" }}>Top-up page coming soon</span>
           </section>
         )}
 
@@ -124,6 +119,8 @@ export default async function HomePage() {
             <Link href="/sessions" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }}>See sessions</Link>
           </section>
         )}
+
+        {status.membership !== "member" && <MemberCheck membership={status.membership} request={status.request} />}
       </div>
     </>
   );

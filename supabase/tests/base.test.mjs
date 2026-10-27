@@ -1,8 +1,8 @@
-// Runs the base migration in PGlite (Postgres in WebAssembly) and checks the booking rules.
+// Runs the migrations in PGlite (Postgres in WebAssembly) and checks the booking rules.
 // Run with: npm run test:db
 import { test, before } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import { PGlite } from '@electric-sql/pglite'
 
 const here = new URL('.', import.meta.url)
@@ -62,7 +62,10 @@ async function testDay() {
 before(async () => {
   db = new PGlite()
   await db.exec(await readFile(new URL('supabase-stubs.sql', here), 'utf8'))
-  await db.exec(await readFile(new URL('../migrations/0001_base.sql', here), 'utf8'))
+  const dir = new URL('../migrations/', here)
+  for (const file of (await readdir(dir)).filter((f) => f.endsWith('.sql')).sort()) {
+    await db.exec(await readFile(new URL(file, dir), 'utf8'))
+  }
 })
 
 test('signup creates a profile and rejects bad input', async () => {
@@ -227,4 +230,60 @@ test('row level security keeps each archer to their own data', async () => {
   const avail = await asUser(a, `select * from slot_availability(now() - interval '1 day', now() + interval '30 days')`)
   assert.ok(avail.length > 0)
   assert.ok(!('user_id' in avail[0]))
+})
+
+const ownerId = async () => (await one(`select user_id from permissions where permission = 'owner'`)).user_id
+
+test('non-members can request a member check, one at a time', async () => {
+  const uid = await signUp('20000050', 'req50@nottingham.edu.my', 'Request Tester')
+  const [{ request_member_check: id }] = await asUser(uid, `select request_member_check('Used my gmail on the form')`)
+  assert.ok(id)
+  await rejects(asUser(uid, 'select request_member_check(null)'), 'REQUEST_PENDING')
+  const [status] = await asUser(uid, 'select my_status() as s')
+  assert.equal(status.s.request.status, 'pending')
+
+  const member = (await one(`select id from profiles where student_id = '20000010'`)).id
+  await rejects(asUser(member, 'select request_member_check(null)'), 'ALREADY_MEMBER')
+})
+
+test('only member managers review requests; approving makes a member', async () => {
+  const exco = await ownerId()
+  const requester = (await one(`select id from profiles where student_id = '20000050'`)).id
+  const guest = (await one(`select id from profiles where student_id = '20000021'`)).id
+
+  await rejects(asUser(guest, 'select * from member_requests_for_review()'), 'NOT_ALLOWED')
+  assert.equal((await asUser(guest, 'select * from member_requests')).length, 0)
+
+  const rows = await asUser(exco, 'select * from member_requests_for_review()')
+  const row = rows.find((r) => r.student_id === '20000050')
+  assert.equal(row.on_form, false)
+  assert.equal(row.note, 'Used my gmail on the form')
+  const [badge] = await asUser(exco, 'select my_status() as s')
+  assert.ok(badge.s.pending_member_requests >= 1)
+  assert.ok(badge.s.perms.includes('owner'))
+
+  await rejects(asUser(guest, 'select decide_member_request($1, true)', [row.request_id]), 'NOT_ALLOWED')
+  await asUser(exco, 'select decide_member_request($1, true)', [row.request_id])
+  assert.equal((await one('select membership_status($1) as s', [requester])).s, 'member')
+  assert.equal((await one(`select count(*)::int as n from members where student_id = '20000050'`)).n, 1)
+  await rejects(asUser(exco, 'select decide_member_request($1, true)', [row.request_id]), 'REQUEST_NOT_FOUND')
+})
+
+test('a rejected request shows the reason and can be sent again', async () => {
+  const exco = await ownerId()
+  const uid = await signUp('20000051', 'req51@nottingham.edu.my')
+  const [{ request_member_check: id }] = await asUser(uid, 'select request_member_check(null)')
+  await asUser(exco, `select decide_member_request($1, false, 'Not on our list yet')`, [id])
+
+  const [status] = await asUser(uid, 'select my_status() as s')
+  assert.equal(status.s.request.status, 'rejected')
+  assert.equal(status.s.request.reason, 'Not on our list yet')
+  assert.equal(status.s.membership, 'none')
+  await asUser(uid, 'select request_member_check(null)')
+})
+
+test('nobody decides their own member check', async () => {
+  const exco = await ownerId()
+  const [{ request_member_check: id }] = await asUser(exco, 'select request_member_check(null)')
+  await rejects(asUser(exco, 'select decide_member_request($1, true)', [id]), 'OWN_REQUEST')
 })

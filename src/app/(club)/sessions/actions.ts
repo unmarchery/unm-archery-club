@@ -2,10 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { messageFor } from "@/lib/messages";
+import { messageFor, type ActionResult } from "@/lib/messages";
 import { BOW_TYPES, type Gear } from "@/lib/gear";
-
-export type ActionResult = { ok: true; refunded?: boolean } | { ok: false; message: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
