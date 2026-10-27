@@ -126,6 +126,7 @@ export async function setPassword(_: FormState, fd: FormData): Promise<FormState
         : "We couldn't save the password. Please try again.",
     };
   }
+  await supabase.rpc("password_changed");
   redirect("/");
 }
 
@@ -144,7 +145,24 @@ export async function login(_: FormState, fd: FormData): Promise<FormState> {
         : "Student ID or password is incorrect.",
     };
   }
+  if (await starterPasswordExpired(studentId)) {
+    await supabase.auth.signOut();
+    return { error: "Your starter password has expired. Tap “Forgot password?” to set a new one." };
+  }
   redirect("/");
+}
+
+// A starter password (first name + student ID) is easy to guess, so it only works for
+// starter_password_days after the exco created the account.
+async function starterPasswordExpired(studentId: string) {
+  const admin = createAdminClient();
+  const [{ data: profile }, { data: settings }] = await Promise.all([
+    admin.from("profiles").select("*").eq("student_id", studentId).maybeSingle(),
+    admin.from("settings").select("*").eq("id", 1).maybeSingle(),
+  ]);
+  if (!profile?.must_change_password) return false;
+  const days = Number(settings?.starter_password_days ?? 14);
+  return Date.parse(profile.created_at) + days * 86_400_000 < Date.now();
 }
 
 export async function forgot(_: FormState, fd: FormData): Promise<FormState> {

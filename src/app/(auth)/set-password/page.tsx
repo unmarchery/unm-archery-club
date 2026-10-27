@@ -1,11 +1,16 @@
 import { SetPasswordForm } from "../forms";
 
-export default function SetPasswordPage() {
+export default async function SetPasswordPage({ searchParams }: PageProps<"/set-password">) {
+  const { first } = await searchParams;
   return (
     <>
       <div>
-        <h1 className="h1">Set your password</h1>
-        <p className="sub">From now on you&apos;ll log in with your student ID and this password.</p>
+        <h1 className="h1">{first ? "Welcome! Choose your password" : "Set your password"}</h1>
+        <p className="sub">
+          {first
+            ? "Your starter password only works once. Pick your own; from now on you'll log in with your student ID and this password."
+            : "From now on you'll log in with your student ID and this password."}
+        </p>
       </div>
       <SetPasswordForm />
     </>

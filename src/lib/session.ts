@@ -11,6 +11,7 @@ export type Profile = Gear & {
   email: string;
   phone: string | null;
   banned_until: string | null;
+  must_change_password?: boolean; // starter accounts; missing before migration 0003
 };
 
 export type Status = {
@@ -38,7 +39,8 @@ export const getSession = cache(async () => {
   const [{ data: profile }, { data: status }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, student_id, full_name, email, phone, hand, draw_lbs, own_bow, own_bow_type, own_bow_lbs, banned_until")
+      // "*" so the page still loads on a database that hasn't added newer columns yet.
+      .select("*")
       .eq("id", data.claims.sub)
       .maybeSingle<Profile>(),
     supabase.rpc("my_status").returns<Status>(),
