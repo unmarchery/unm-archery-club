@@ -6,3 +6,9 @@
 [build.environment]
   # Next.js 16 needs Node.js 20.9 or newer.
   NODE_VERSION = "22"
+
+# Netlify's Next.js runtime turns the build into working pages and server functions.
+# It is normally added automatically, but this project was linked before it had any
+# code, so it is declared here (pinned in package.json devDependencies).
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
