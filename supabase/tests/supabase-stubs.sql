@@ -1,7 +1,7 @@
 -- Minimal stand-ins for what Supabase provides, so the migration runs in PGlite.
 create role anon nologin;
 create role authenticated nologin;
-create role service_role nologin;
+create role service_role nologin bypassrls; -- like Supabase: the secret key skips Row Level Security
 
 create schema auth;
 create table auth.users (
