@@ -118,7 +118,8 @@ Settings page in Phase 1 will edit it; until then, change it in Supabase **Table
 - Row Level Security is on for every table. Archers can read only their own profile,
   bookings and passes; bookings and passes change only through the database functions.
 - The secret key is used only on the server (finding a student's email at login, and the member sync).
-  Never put it in code or in a `NEXT_PUBLIC_` variable.
+  Never put it in code or in a `NEXT_PUBLIC_` variable. [`0004_server_grants.sql`](supabase/migrations/0004_server_grants.sql)
+  gives it the table access it needs; without it, every login says "Student ID or password is incorrect".
 - `npm run test:db` runs the database rules, including the security checks, against a local Postgres.
 
 ## Working on the code

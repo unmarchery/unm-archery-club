@@ -310,3 +310,19 @@ test('starter accounts must change their password; overview lists who can get on
   assert.ok(!o.ready.some((m) => m.student_id === '20000010')) // already has an account
   assert.ok(o.with_account >= 1 && o.total >= o.with_account)
 })
+
+// The website's server uses the secret key (service_role) to find a student's email at
+// login and to save the member list. Newer Supabase projects grant it nothing by default.
+test('the server can find accounts at login and save the member list', async () => {
+  await signUp('20000070', 'server70@nottingham.edu.my')
+  await db.exec('set role service_role')
+  try {
+    const found = (await db.query(`select email from profiles where student_id = '20000070'`)).rows
+    assert.equal(found[0]?.email, 'server70@nottingham.edu.my')
+    await db.query('select starter_password_days from settings where id = 1')
+    await db.query(`insert into members (student_id, full_name, email) values ('20000071', 'Form Row', 'row71@nottingham.edu.my')
+      on conflict (student_id) do update set full_name = excluded.full_name`)
+  } finally {
+    await db.exec('reset role')
+  }
+})

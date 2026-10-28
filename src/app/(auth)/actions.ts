@@ -19,10 +19,19 @@ function normalizeEmail(raw: string) {
   return v.includes("@") ? v : `${v}${DOMAIN}`;
 }
 
+// Shown when the server can't read accounts: the secret key or the database grants are
+// set up wrong, so it isn't the archer's fault.
+const SETUP_ERROR = "Login isn't working on our side right now. Please tell the exco (the website can't read accounts).";
+
 // Looks up a student's email on the server. The email is never sent to the browser.
+// Returns null when no account has this ID, and undefined when the lookup itself failed.
 async function emailForStudent(studentId: string) {
   if (!/^\d{8}$/.test(studentId)) return null;
-  const { data } = await createAdminClient().from("profiles").select("email").eq("student_id", studentId).maybeSingle();
+  const { data, error } = await createAdminClient().from("profiles").select("email").eq("student_id", studentId).maybeSingle();
+  if (error) {
+    console.error("Student lookup failed:", error.message);
+    return undefined;
+  }
   return (data?.email as string | undefined) ?? null;
 }
 
@@ -50,6 +59,10 @@ export async function signup(_: FormState, fd: FormData): Promise<FormState> {
     admin.from("profiles").select("id, student_id, email").eq("student_id", studentId).maybeSingle(),
     admin.from("profiles").select("id, student_id, email").eq("email", email).maybeSingle(),
   ]);
+  if (byId.error || byEmail.error) {
+    console.error("Signup lookup failed:", (byId.error ?? byEmail.error)?.message);
+    return { error: SETUP_ERROR };
+  }
   const existing = [byId.data, byEmail.data].filter(
     (row, i, all): row is { id: string; student_id: string; email: string } =>
       Boolean(row) && all.findIndex((r) => r?.id === row?.id) === i,
@@ -134,16 +147,16 @@ export async function login(_: FormState, fd: FormData): Promise<FormState> {
   const studentId = field(fd, "student_id");
   const password = String(fd.get("password") ?? "");
   const email = await emailForStudent(studentId);
+  if (email === undefined) return { error: SETUP_ERROR };
   if (!email || !password) return { error: "Student ID or password is incorrect." };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
-    return {
-      error: /not confirmed/i.test(error.message)
-        ? "Finish signing up first: enter the code we emailed you."
-        : "Student ID or password is incorrect.",
-    };
+    if (/not confirmed/i.test(error.message)) return { error: "Finish signing up first: enter the code we emailed you." };
+    if (/rate limit|too many/i.test(error.message)) return { error: "Too many tries. Please wait a few minutes and try again." };
+    if (!/invalid login credentials/i.test(error.message)) console.error("Login failed:", error.message);
+    return { error: "Student ID or password is incorrect." };
   }
   if (await starterPasswordExpired(studentId)) {
     await supabase.auth.signOut();
