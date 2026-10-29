@@ -20,6 +20,17 @@ const MESSAGES: Record<string, string> = {
   NOT_ALLOWED: "You don't have permission to do that.",
   REQUEST_NOT_FOUND: "That request has already been handled.",
   OWN_REQUEST: "Another exco member needs to decide your own request.",
+  MEMBERS_FREE: "Members train for free, so there's no need to top up.",
+  INVALID_METHOD: "Choose DuitNow QR or cash.",
+  INVALID_QUANTITY: "Choose between 1 and 20 passes of each kind.",
+  BANK_REF_REQUIRED: "Enter the transaction reference number from your banking app.",
+  RECEIPT_REQUIRED: "Add a screenshot of your payment receipt.",
+  BANK_REF_USED: "That transaction reference has already been sent. Check the number, or ask the treasurer.",
+  TOO_MANY_PENDING: "You already have 3 top-ups waiting. Please wait until the treasurer checks them.",
+  TOPUP_NOT_FOUND: "That top-up has already been handled.",
+  REASON_REQUIRED: "Write a reason, so the archer knows what to fix.",
+  INVALID_LINK: "Paste a WhatsApp group invite link (it starts with https://chat.whatsapp.com/).",
+  INVALID_PATH: "That picture couldn't be saved. Please try again.",
 };
 
 export type ActionResult = { ok: true; refunded?: boolean } | { ok: false; message: string };

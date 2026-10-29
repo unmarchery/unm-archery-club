@@ -24,6 +24,7 @@ export type Status = {
   perms: string[];
   request: { status: "pending" | "approved" | "rejected"; reason: string | null } | null;
   pending_member_requests: number;
+  pending_topups: number; // for approvers; missing before migration 0005
 };
 
 export function can(status: Status, permission: string) {
@@ -52,6 +53,12 @@ export const getSession = cache(async () => {
   return {
     supabase,
     profile,
-    status: { ...s, perms: s.perms ?? [], request: s.request ?? null, pending_member_requests: s.pending_member_requests ?? 0 } as Status,
+    status: {
+      ...s,
+      perms: s.perms ?? [],
+      request: s.request ?? null,
+      pending_member_requests: s.pending_member_requests ?? 0,
+      pending_topups: s.pending_topups ?? 0,
+    } as Status,
   };
 });
