@@ -7,8 +7,8 @@ non-members book with single or full-day passes.
 This is the **base** of Phase 1: accounts, the member check, Home, and Sessions
 with booking and cancelling. Top-up, approvals, duty and attendance come next.
 
-Built with Next.js 16, Supabase (database, login, email codes) and Netlify (hosting).
-All three have free plans that are enough for the club.
+Built with Next.js 16, Supabase (database, login, email codes) and Vercel (hosting), both in
+Singapore. All three have free plans that are enough for the club.
 
 ## One-time setup
 
@@ -36,11 +36,16 @@ All three have free plans that are enough for the club.
 6. **Project Settings > API Keys**: you'll need the **Project URL**, the
    **publishable key** and a **secret key** in step 2.
 
-### 2. Netlify (hosting)
+### 2. Vercel (hosting)
 
-1. At [netlify.com](https://netlify.com), **Add new project > Import an existing project > GitHub**, pick this repository.
-2. Build settings come from [`netlify.toml`](netlify.toml) in this repository (build command `npm run build`, publish directory `.next`, Node 22), so the dashboard's build fields don't matter.
-3. Under **Environment variables**, add (see [`.env.example`](.env.example)):
+Keep the server in the same region as the database: every page talks to the database several
+times, so a server in another continent makes each page slow. [`vercel.json`](vercel.json) runs
+the server in Singapore (`sin1`). Netlify's free plan can't choose a region (its server runs in
+Ohio), so use Vercel, or Netlify only with a Supabase project in the US.
+
+1. At [vercel.com](https://vercel.com), sign in with GitHub, then **Add New > Project** and import this repository.
+2. Vercel detects Next.js; leave the build settings as they are.
+3. Under **Environment Variables**, add (see [`.env.example`](.env.example)):
 
    | Name | Value |
    | --- | --- |
@@ -49,7 +54,7 @@ All three have free plans that are enough for the club.
    | `SUPABASE_SECRET_KEY` | Supabase secret key (keep private) |
    | `MEMBERS_SYNC_SECRET` | any long random string you make up |
 
-4. Deploy. Then in Supabase, **Authentication > URL Configuration**, set **Site URL** to the Netlify address.
+4. Deploy. Then in Supabase, **Authentication > URL Configuration**, set **Site URL** to the Vercel address.
 
 ### 3. Make yourself President
 
