@@ -94,7 +94,7 @@ export default async function HomePage() {
               <div><div className="big">{status.single}</div><div className="pass-label">Single</div></div>
               <div><div className="big">{status.full}</div><div className="pass-label">Full day</div></div>
             </div>
-            <span className="pill" style={{ alignSelf: "flex-start" }}>Top-up page coming soon</span>
+            <Link href="/top-up" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }}>Top up</Link>
           </section>
         )}
 

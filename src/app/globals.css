@@ -131,6 +131,38 @@ a:not([class]) { color: var(--gold-text); }
   .chip:active, .opt:active:not(:disabled), .seg button:active, .icon-btn:active, a.menu-item:active { transform: scale(0.97); }
   .chip:not(.on):active, .opt:not(.on):active:not(:disabled), .seg button:not(.on):active, a.menu-item:active { background: var(--gold-tint); }
   button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  /* A button that looks like a text link, for small actions inside lists and tables. */
+  .link-btn { min-height: 32px; padding: 0 2px; border: 0; background: none; color: var(--gold-text); font: 600 13px var(--font-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .link-btn:hover { color: var(--ink); }
+  .link-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
+
+  /* Top up and approvals */
+  .stepper { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0; }
+  .stepper-controls { display: flex; align-items: center; gap: 10px; flex: none; }
+  .stepper-value { min-width: 28px; text-align: center; font: 700 20px var(--font-display); color: var(--ink); }
+  .total-row { padding: 12px 0 2px; border-top: 1px solid var(--line); }
+  .total { font: 700 28px var(--font-display); color: var(--gold-text); }
+  .qr { width: 220px; max-width: 100%; align-self: center; border-radius: 12px; background: #ffffff; padding: 8px; box-sizing: border-box; }
+  .steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+  .file-btn { position: relative; align-self: flex-start; cursor: pointer; }
+  .file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .file-btn:focus-within { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .receipt { display: block; max-width: 100%; max-height: 320px; width: auto; border-radius: 12px; border: 1px solid var(--line); object-fit: contain; align-self: flex-start; background: #ffffff; }
+  .amount { font: 700 28px var(--font-display); line-height: 1; color: var(--gold-text); }
+
+  /* Finance */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
+  .stat-value { font: 700 30px var(--font-display); line-height: 1.1; color: var(--ink); }
+  .table-wrap { overflow-x: auto; margin: 0 -20px; padding: 0 20px; }
+  .table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .table th { text-align: left; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; white-space: nowrap; }
+  .table td.num, .table th.num { text-align: right; }
+  .table td.soft { white-space: normal; min-width: 110px; }
+  .table tr:last-child td { border-bottom: 0; }
+  .filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
+  .filters .field { flex: 1 1 150px; }
 
   /* Loading skeleton */
   .loading { display: flex; flex-direction: column; gap: 16px; }
@@ -152,7 +184,7 @@ a:not([class]) { color: var(--gold-text); }
   .auth-card form { display: flex; flex-direction: column; gap: 14px; }
 
   /* Dialogs */
-  .modal-wrap { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
+  .modal-wrap { white-space: normal; position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
   .modal { width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; box-sizing: border-box; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
 
   /* Arrow shot */

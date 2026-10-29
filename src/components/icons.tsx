@@ -46,6 +46,15 @@ export const UsersIcon = (p: P) => (
 export const KeyIcon = (p: P) => (
   <svg {...base} {...p}><circle cx="8" cy="15" r="4" /><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2" /></svg>
 );
+export const PlusIcon = (p: P) => (
+  <svg {...base} strokeWidth={2} {...p}><path d="M12 5v14M5 12h14" /></svg>
+);
+export const MinusIcon = (p: P) => (
+  <svg {...base} strokeWidth={2} {...p}><path d="M5 12h14" /></svg>
+);
+export const ChartIcon = (p: P) => (
+  <svg {...base} {...p}><path d="M4 20V4M4 20h16" /><path d="M8 16v-4M12 16V8M16 16v-6" /></svg>
+);
 export const InfoIcon = (p: P) => (
   <svg {...base} {...p}><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
 );

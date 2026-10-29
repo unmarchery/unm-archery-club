@@ -4,8 +4,8 @@ Training-session booking for the University of Nottingham Malaysia Archery Club.
 Students sign up with their student ID and uni email, members book for free, and
 non-members book with single or full-day passes.
 
-This is the **base** of Phase 1: accounts, the member check, Home, and Sessions
-with booking and cancelling. Top-up, approvals, duty and attendance come next.
+Phase 1 so far: accounts, the member check, Home, Sessions with booking and cancelling,
+and top-ups with an approval queue and finance history. Duty and attendance come next.
 
 Built with Next.js 16, Supabase (database, login, email codes) and Netlify (hosting).
 All three have free plans that are enough for the club.
@@ -48,6 +48,8 @@ All three have free plans that are enough for the club.
    | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key |
    | `SUPABASE_SECRET_KEY` | Supabase secret key (keep private) |
    | `MEMBERS_SYNC_SECRET` | any long random string you make up |
+   | `GMAIL_USER` | the club Gmail address (optional, for top-up emails) |
+   | `GMAIL_APP_PASSWORD` | a Gmail app password for it (optional, keep private) |
 
 4. Deploy. Then in Supabase, **Authentication > URL Configuration**, set **Site URL** to the Netlify address.
 
@@ -93,7 +95,33 @@ waiting, tap the button again until none are left.
 Anyone who knows a member's first name and student ID can guess the starter password, so
 ask members to log in soon after you post the message.
 
-### Giving a non-member passes (until the top-up page is built)
+### Top-ups, approvals and finance
+
+Needs [`supabase/migrations/0005_topups.sql`](supabase/migrations/0005_topups.sql) run once. It also
+creates the private `receipts` storage bucket, which only the website's server can open.
+
+- **Top up** (non-members): choose single and full-day passes, then pay by DuitNow QR (with the
+  transaction reference and a receipt screenshot) or cash. Pictures are shrunk in the browser first.
+- **Exco > Approvals** (`approve_topups`): check the payment, then approve (passes are added straight
+  away) or reject with a reason the archer sees. Nobody approves their own top-up. Set the club's
+  DuitNow QR and the finance WhatsApp group link here.
+- **Exco > Finance** (`approve_topups` or `export_finance`): money received by date range, split by QR
+  and cash, and the passes sold but not used yet. `export_finance` can download it for Excel.
+- **Emails** (when `GMAIL_USER` and `GMAIL_APP_PASSWORD` are set): approvers get "new top-up waiting",
+  and the archer gets "passes added" or "not approved" with the reason. They go out after the page
+  responds, so a slow email never holds up a button.
+- **Deleting a receipt**: receipts are kept until the Treasurer and the President or VP both agree to
+  delete one. One of them taps **Delete…** next to the receipt (on Finance or Approvals) and gives a
+  reason; the other agrees within 14 days, or the request lapses. Only the picture goes; the top-up
+  stays in Finance. This uses each exco's **position**, set once in the SQL Editor:
+
+  ```sql
+  update profiles set position = 'Treasurer' where student_id = '20xxxxxx';
+  -- President, Vice President, Secretary, Treasurer, Events, Marketing, Equipment,
+  -- Treasurer Dept, Events Dept, Marketing Dept, Equipment Dept. One President, VP and Treasurer at a time.
+  ```
+
+### Giving someone passes by hand
 
 ```sql
 insert into pass_ledger (user_id, kind, delta, reason, note)
@@ -137,7 +165,7 @@ npm run lint
 | `supabase/migrations/` | Database tables, booking rules and security |
 | `supabase/tests/` | Database tests (run in PGlite) |
 | `src/app/(auth)/` | Sign up, email code, log in, password reset |
-| `src/app/(club)/` | Signed-in pages: Home, Sessions, and Exco > Members (member check requests) |
+| `src/app/(club)/` | Signed-in pages: Home, Sessions, Top up, and the Exco pages (Members, Accounts, Approvals, Finance) |
 | `src/app/api/members/sync/` | Receives the membership list from Google Sheets |
 | `src/proxy.ts` | Keeps the login session fresh and protects pages |
 | `scripts/members-sync.gs` | Google Apps Script for the membership form |

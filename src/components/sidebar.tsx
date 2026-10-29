@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
-import { CalendarIcon, CheckCircleIcon, ClipboardIcon, HomeIcon, KeyIcon, LogoutIcon, ThemeIcon, UsersIcon, WalletIcon } from "./icons";
+import { CalendarIcon, ChartIcon, CheckCircleIcon, ClipboardIcon, HomeIcon, KeyIcon, LogoutIcon, ThemeIcon, UsersIcon, WalletIcon } from "./icons";
 
 type Props = {
   name: string;
   membership: "member" | "pending" | "none";
+  position: string | null;
   isExco: boolean;
   memberRequests: number | null; // pending count for member managers, null for everyone else
+  topupRequests: number | null; // pending count for top-up approvers, null for everyone else
+  finance: boolean;
 };
 
 function initials(name: string) {
@@ -29,7 +32,7 @@ function toggleTheme() {
   document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax`;
 }
 
-export function Sidebar({ name, membership, isExco, memberRequests }: Props) {
+export function Sidebar({ name, membership, position, isExco, memberRequests, topupRequests, finance }: Props) {
   const path = usePathname();
   const item = (href: string) => `menu-item${path === href ? " on" : ""}`;
 
@@ -50,9 +53,9 @@ export function Sidebar({ name, membership, isExco, memberRequests }: Props) {
           <CalendarIcon />Sessions
         </Link>
         {membership !== "member" && (
-          <span className="menu-item soon" aria-disabled="true">
-            <WalletIcon />Top up<span className="soon-tag">Soon</span>
-          </span>
+          <Link href="/top-up" className={item("/top-up")} aria-current={path === "/top-up" ? "page" : undefined}>
+            <WalletIcon />Top up
+          </Link>
         )}
         {isExco && (
           <>
@@ -68,9 +71,17 @@ export function Sidebar({ name, membership, isExco, memberRequests }: Props) {
                 <KeyIcon />Accounts
               </Link>
             )}
-            <span className="menu-item soon" aria-disabled="true">
-              <CheckCircleIcon />Approvals<span className="soon-tag">Soon</span>
-            </span>
+            {topupRequests !== null && (
+              <Link href="/exco/approvals" className={item("/exco/approvals")} aria-current={path === "/exco/approvals" ? "page" : undefined}>
+                <CheckCircleIcon />Approvals
+                {topupRequests > 0 && <span className="badge">{topupRequests}</span>}
+              </Link>
+            )}
+            {finance && (
+              <Link href="/exco/finance" className={item("/exco/finance")} aria-current={path === "/exco/finance" ? "page" : undefined}>
+                <ChartIcon />Finance
+              </Link>
+            )}
             <span className="menu-item soon" aria-disabled="true">
               <ClipboardIcon />Duty<span className="soon-tag">Soon</span>
             </span>
@@ -83,7 +94,7 @@ export function Sidebar({ name, membership, isExco, memberRequests }: Props) {
           <div className="avatar" aria-hidden="true">{initials(name)}</div>
           <div>
             <div className="strong" style={{ fontSize: 14 }}>{name}</div>
-            <div className="muted small">{membership === "member" ? "Member" : "Non-member"}</div>
+            <div className="muted small">{position ?? (membership === "member" ? "Member" : "Non-member")}</div>
           </div>
         </div>
         <div className="side-actions">

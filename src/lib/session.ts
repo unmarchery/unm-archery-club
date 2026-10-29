@@ -24,7 +24,12 @@ export type Status = {
   perms: string[];
   request: { status: "pending" | "approved" | "rejected"; reason: string | null } | null;
   pending_member_requests: number;
+  pending_topups: number; // for approvers; missing before migration 0005
+  position: string | null; // exco position, e.g. "Treasurer"; missing before migration 0005
 };
+
+// The three officers who together decide whether a receipt is deleted.
+export const OFFICERS = ["President", "Vice President", "Treasurer"];
 
 export function can(status: Status, permission: string) {
   return status.perms.includes("owner") || status.perms.includes(permission);
@@ -52,6 +57,13 @@ export const getSession = cache(async () => {
   return {
     supabase,
     profile,
-    status: { ...s, perms: s.perms ?? [], request: s.request ?? null, pending_member_requests: s.pending_member_requests ?? 0 } as Status,
+    status: {
+      ...s,
+      perms: s.perms ?? [],
+      request: s.request ?? null,
+      pending_member_requests: s.pending_member_requests ?? 0,
+      pending_topups: s.pending_topups ?? 0,
+      position: s.position ?? null,
+    } as Status,
   };
 });

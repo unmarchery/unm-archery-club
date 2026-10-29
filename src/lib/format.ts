@@ -90,3 +90,11 @@ export function openingLabel(iso: string) {
   const p = parts(iso);
   return `${p.weekday} ${p.day} ${p.month} at ${clockLabel(iso)}`;
 }
+
+// "2 single + 1 full day"
+export function passesLabel(single: number, full: number) {
+  const parts = [];
+  if (single) parts.push(`${single} single`);
+  if (full) parts.push(`${full} full day`);
+  return parts.join(" + ");
+}
