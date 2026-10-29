@@ -430,3 +430,68 @@ test('payment settings: approvers set the QR and a WhatsApp link', async () => {
   assert.equal(s.payment_qr_path, 'club/qr-1.jpg')
   assert.equal(s.payment_whatsapp_link, 'https://chat.whatsapp.com/AbC123')
 })
+
+test('receipts are deleted only when the Treasurer and the President or VP agree', async () => {
+  const pres = await ownerId()
+  const vp = await signUp('20000090', 'vp90@nottingham.edu.my', 'Vice Person')
+  const tre = await signUp('20000091', 'tre91@nottingham.edu.my', 'Treasurer Person')
+  const sec = await signUp('20000092', 'sec92@nottingham.edu.my', 'Secretary Person')
+  for (const [id, pos] of [[pres, 'President'], [vp, 'Vice President'], [tre, 'Treasurer'], [sec, 'Secretary']]) {
+    await db.query('update profiles set position = $2 where id = $1', [id, pos])
+  }
+  await rejects(db.query(`update profiles set position = 'Treasurer' where id = $1`, [sec]), 'duplicate key')
+
+  const archer = (await one(`select id from profiles where student_id = '20000080'`)).id
+  const qr = (await one(`select id from topups where user_id = $1 and method = 'qr' and status = 'approved'`, [archer])).id
+  await rejects(asUser(sec, 'select request_receipt_deletion($1, $2)', [qr, 'Please remove']), 'NOT_ALLOWED')
+  await rejects(asUser(pres, 'select request_receipt_deletion($1, $2)', [qr, '  ']), 'REASON_REQUIRED')
+  const [{ request_receipt_deletion: req }] = await asUser(pres, 'select request_receipt_deletion($1, $2)', [qr, 'The archer asked us to remove it'])
+  await rejects(asUser(vp, 'select request_receipt_deletion($1, $2)', [qr, 'Again']), 'DELETE_PENDING')
+  await rejects(asUser(pres, 'select decide_receipt_deletion($1, true)', [req]), 'OWN_REQUEST')
+  await rejects(asUser(vp, 'select decide_receipt_deletion($1, true)', [req]), 'TREASURER_AND_PRESIDENT')
+  await rejects(asUser(sec, 'select decide_receipt_deletion($1, true)', [req]), 'NOT_ALLOWED')
+
+  const [{ receipt_deletions_open: forTre }] = await asUser(tre, 'select receipt_deletions_open()')
+  assert.equal(forTre.find((r) => r.id === req).can_agree, true)
+  assert.equal(forTre.find((r) => r.id === req).requested_by, 'Test Archer (President)')
+  const [{ receipt_deletions_open: forSec }] = await asUser(sec, 'select receipt_deletions_open()')
+  assert.equal(forSec.length, 0)
+
+  const [{ decide_receipt_deletion: path }] = await asUser(tre, 'select decide_receipt_deletion($1, true)', [req])
+  assert.equal(path, `${archer}/r1.jpg`)
+  const t = await one('select receipt_path, receipt_deleted_at from topups where id = $1', [qr])
+  assert.equal(t.receipt_path, null)
+  assert.ok(t.receipt_deleted_at)
+  const [{ finance_report: r }] = await asUser(pres, 'select finance_report(current_date - 30, current_date)')
+  const row = r.rows.find((x) => x.id === qr)
+  assert.equal(row.receipt_deleted, true)
+  assert.match(row.approved_by, /\(President\)$/)
+  await rejects(asUser(vp, 'select request_receipt_deletion($1, $2)', [qr, 'Again']), 'RECEIPT_NOT_FOUND')
+
+  // A request lapses after 14 days; then a new one can be made, and declined.
+  const guest = (await one(`select id from profiles where student_id = '20000081'`)).id
+  const [{ t: second }] = await asUser(guest, `select request_topup(1, 0, 'qr', 'ZZ7788', $1) as t`, [`${guest}/r2.jpg`])
+  await rejects(asUser(tre, 'select request_receipt_deletion($1, $2)', [second.id, 'Too early']), 'TOPUP_PENDING')
+  await asUser(pres, 'select decide_topup($1, false, $2)', [second.id, 'No payment found'])
+  const [{ request_receipt_deletion: old }] = await asUser(tre, 'select request_receipt_deletion($1, $2)', [second.id, 'Rejected anyway'])
+  await db.query(`update receipt_deletions set created_at = now() - interval '15 days' where id = $1`, [old])
+  await rejects(asUser(vp, 'select decide_receipt_deletion($1, true)', [old]), 'REQUEST_EXPIRED')
+  const [{ request_receipt_deletion: fresh }] = await asUser(tre, 'select request_receipt_deletion($1, $2)', [second.id, 'Rejected anyway'])
+  assert.equal((await one('select status from receipt_deletions where id = $1', [old])).status, 'expired')
+  await asUser(vp, 'select decide_receipt_deletion($1, false)', [fresh])
+  assert.equal((await one('select status from receipt_deletions where id = $1', [fresh])).status, 'declined')
+  assert.ok((await one('select receipt_path from topups where id = $1', [second.id])).receipt_path)
+})
+
+test('top-up alert emails go to approvers, and only the server can list them', async () => {
+  await rejects(asUser(await ownerId(), 'select * from topup_alert_emails(null)'), 'permission denied')
+  const ownerEmail = (await one(`select p.email from permissions x join profiles p on p.id = x.user_id where x.permission = 'owner'`)).email
+  await db.exec('set role service_role')
+  try {
+    const rows = (await db.query('select email from topup_alert_emails(null)')).rows.map((r) => r.email)
+    assert.ok(rows.includes(ownerEmail))
+    assert.ok(!rows.includes('top81@nottingham.edu.my'))
+  } finally {
+    await db.exec('reset role')
+  }
+})

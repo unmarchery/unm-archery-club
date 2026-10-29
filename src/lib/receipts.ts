@@ -43,5 +43,7 @@ export async function signedUrls(paths: (string | null | undefined)[], seconds =
   if (wanted.length === 0) return {} as Record<string, string>;
   const { data, error } = await createAdminClient().storage.from(BUCKET).createSignedUrls(wanted, seconds);
   if (error) console.error("Signing links failed:", error.message);
-  return Object.fromEntries((data ?? []).filter((d) => d.signedUrl && d.path).map((d) => [d.path as string, d.signedUrl]));
+  const links: Record<string, string> = {};
+  for (const d of data ?? []) if (d.path && d.signedUrl) links[d.path] = d.signedUrl;
+  return links;
 }

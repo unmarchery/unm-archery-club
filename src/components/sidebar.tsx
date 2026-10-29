@@ -8,6 +8,7 @@ import { CalendarIcon, ChartIcon, CheckCircleIcon, ClipboardIcon, HomeIcon, KeyI
 type Props = {
   name: string;
   membership: "member" | "pending" | "none";
+  position: string | null;
   isExco: boolean;
   memberRequests: number | null; // pending count for member managers, null for everyone else
   topupRequests: number | null; // pending count for top-up approvers, null for everyone else
@@ -31,7 +32,7 @@ function toggleTheme() {
   document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax`;
 }
 
-export function Sidebar({ name, membership, isExco, memberRequests, topupRequests, finance }: Props) {
+export function Sidebar({ name, membership, position, isExco, memberRequests, topupRequests, finance }: Props) {
   const path = usePathname();
   const item = (href: string) => `menu-item${path === href ? " on" : ""}`;
 
@@ -93,7 +94,7 @@ export function Sidebar({ name, membership, isExco, memberRequests, topupRequest
           <div className="avatar" aria-hidden="true">{initials(name)}</div>
           <div>
             <div className="strong" style={{ fontSize: 14 }}>{name}</div>
-            <div className="muted small">{membership === "member" ? "Member" : "Non-member"}</div>
+            <div className="muted small">{position ?? (membership === "member" ? "Member" : "Non-member")}</div>
           </div>
         </div>
         <div className="side-actions">

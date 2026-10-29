@@ -1,6 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { after } from "next/server";
+import { emailApprovers, siteFrom } from "@/lib/email";
 import { createClient } from "@/lib/supabase/server";
 import { messageFor, type ActionResult } from "@/lib/messages";
 import { removeFile, uploadFile, uploadProblem } from "@/lib/receipts";
@@ -32,11 +35,14 @@ export async function submitTopup(fd: FormData): Promise<TopupResult> {
     if (!receiptPath) return { ok: false, message: "The receipt couldn't be uploaded. Please try again." };
   }
 
+  const single = count(fd, "single");
+  const full = count(fd, "full");
+  const bankRef = method === "qr" ? String(fd.get("bank_ref") ?? "").slice(0, 60) : null;
   const { data: created, error } = await supabase.rpc("request_topup", {
-    p_single: count(fd, "single"),
-    p_full: count(fd, "full"),
+    p_single: single,
+    p_full: full,
     p_method: method,
-    p_bank_ref: method === "qr" ? String(fd.get("bank_ref") ?? "").slice(0, 60) : null,
+    p_bank_ref: bankRef,
     p_receipt_path: receiptPath,
   });
   if (error) {
@@ -45,7 +51,15 @@ export async function submitTopup(fd: FormData): Promise<TopupResult> {
   }
 
   revalidatePath("/", "layout");
-  const t = created as { number: number; amount: number };
+  const t = created as { number: number; amount: number; full_name: string; student_id: string };
+  const site = siteFrom(await headers());
+  after(() =>
+    emailApprovers(
+      { number: t.number, amount: t.amount, full_name: t.full_name, student_id: t.student_id, single, full, method, bankRef: bankRef?.replace(/\s/g, "").toUpperCase() ?? null },
+      uid,
+      site,
+    ),
+  );
   return { ok: true, number: t.number, amount: t.amount };
 }
 

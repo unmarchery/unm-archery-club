@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { clockLabel, passesLabel, shortDay } from "@/lib/format";
 import { signedUrls } from "@/lib/receipts";
-import { can, getSession } from "@/lib/session";
+import { can, getSession, OFFICERS } from "@/lib/session";
+import { AskToDelete, DeletionRequests, type DeletionRequest } from "../_receipts/controls";
 import { PaymentSettingsForm, TopupActions } from "./decide";
 
 type Pending = {
@@ -20,6 +21,7 @@ type Pending = {
 };
 
 type Decided = {
+  id: string;
   number: number;
   decided_at: string;
   status: "approved" | "rejected";
@@ -31,6 +33,9 @@ type Decided = {
   student_id: string;
   full_name: string;
   decided_by: string | null;
+  receipt_path: string | null;
+  receipt_deleted: boolean;
+  delete_requested: boolean;
 };
 
 type Queue = { pending: Pending[]; recent: Decided[] };
@@ -39,12 +44,18 @@ export default async function ApprovalsPage() {
   const { supabase, status } = await getSession();
   if (!can(status, "approve_topups")) notFound();
 
-  const [{ data }, { data: cfg }] = await Promise.all([
+  const officer = status.position && OFFICERS.includes(status.position) ? status.position : null;
+  const [{ data }, { data: cfg }, { data: open }] = await Promise.all([
     supabase.rpc("topups_for_review"),
     supabase.from("settings").select("*").single<{ payment_qr_path?: string | null; payment_whatsapp_link?: string | null }>(),
+    officer ? supabase.rpc("receipt_deletions_open") : Promise.resolve({ data: [] }),
   ]);
   const queue = (data ?? { pending: [], recent: [] }) as Queue;
-  const links = await signedUrls([...queue.pending.map((t) => t.receipt_path), cfg?.payment_qr_path]);
+  const links = await signedUrls([
+    ...queue.pending.map((t) => t.receipt_path),
+    ...queue.recent.map((t) => t.receipt_path),
+    cfg?.payment_qr_path,
+  ]);
 
   return (
     <>
@@ -55,6 +66,8 @@ export default async function ApprovalsPage() {
         </div>
         <span className="tag"><span className="dot" style={{ background: "var(--amber)" }} />{queue.pending.length} waiting</span>
       </div>
+
+      {officer && <DeletionRequests requests={(open ?? []) as DeletionRequest[]} position={officer} />}
 
       {queue.pending.length === 0 && (
         <div className="card"><p className="muted small" style={{ margin: 0 }}>No top-ups waiting.</p></div>
@@ -110,7 +123,7 @@ export default async function ApprovalsPage() {
           <div className="eyebrow">Decided in the last 30 days</div>
           {queue.recent.length === 0 && <p className="small muted" style={{ margin: 0 }}>Nothing yet.</p>}
           {queue.recent.map((t) => (
-            <div key={t.number} className="field" style={{ gap: 2, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
+            <div key={t.id} className="field" style={{ gap: 2, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
               <div className="row">
                 <span className="strong">#{t.number} {t.full_name} · RM{t.amount}</span>
                 <span className="tag">
@@ -122,6 +135,21 @@ export default async function ApprovalsPage() {
                 {passesLabel(t.single_qty, t.full_qty)} · {t.method === "qr" ? "QR" : "Cash"} · by {t.decided_by ?? "someone"}, {shortDay(t.decided_at)} {clockLabel(t.decided_at)}
               </div>
               {t.status === "rejected" && t.reason && <div className="small">Reason: {t.reason}</div>}
+              {t.method === "qr" && (
+                <div className="row small" style={{ justifyContent: "flex-start", flexWrap: "wrap", marginTop: 4 }}>
+                  {t.receipt_deleted ? (
+                    <span className="muted">Receipt deleted</span>
+                  ) : (
+                    <>
+                      {t.receipt_path && links[t.receipt_path] && (
+                        <a href={links[t.receipt_path]} target="_blank" rel="noreferrer">View receipt</a>
+                      )}
+                      {officer && !t.delete_requested && <AskToDelete topupId={t.id} number={t.number} position={officer} />}
+                      {t.delete_requested && <span className="muted">Delete asked</span>}
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </section>

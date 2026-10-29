@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { clockLabel, dayKey, passesLabel, requestTime, shortDay } from "@/lib/format";
-import { can, getSession } from "@/lib/session";
+import { signedUrls } from "@/lib/receipts";
+import { can, getSession, OFFICERS } from "@/lib/session";
+import { AskToDelete, DeletionRequests, type DeletionRequest } from "../_receipts/controls";
 
 type FinanceRow = {
+  id: string;
   number: number;
   created_at: string;
   decided_at: string;
@@ -15,6 +18,9 @@ type FinanceRow = {
   method: "qr" | "cash";
   bank_ref: string | null;
   approved_by: string | null;
+  receipt_path: string | null;
+  receipt_deleted: boolean;
+  delete_requested: boolean;
 };
 
 type Report = {
@@ -54,8 +60,13 @@ export default async function FinancePage({ searchParams }: PageProps<"/exco/fin
   const from = typeof q.from === "string" && DATE.test(q.from) ? q.from : quick[0].from;
   const to = typeof q.to === "string" && DATE.test(q.to) && q.to >= from ? q.to : today;
 
-  const { data } = await supabase.rpc("finance_report", { p_from: from, p_to: to });
+  const officer = status.position && OFFICERS.includes(status.position) ? status.position : null;
+  const [{ data }, { data: open }] = await Promise.all([
+    supabase.rpc("finance_report", { p_from: from, p_to: to }),
+    officer ? supabase.rpc("receipt_deletions_open") : Promise.resolve({ data: [] }),
+  ]);
   const r = (data ?? { rows: [], count: 0, total: 0, qr_total: 0, cash_total: 0, unused_single: 0, unused_full: 0, unused_value: 0 }) as Report;
+  const links = await signedUrls(r.rows.map((x) => x.receipt_path));
   const canExport = can(status, "export_finance");
 
   return (
@@ -71,6 +82,8 @@ export default async function FinancePage({ searchParams }: PageProps<"/exco/fin
           </a>
         )}
       </div>
+
+      {officer && <DeletionRequests requests={(open ?? []) as DeletionRequest[]} position={officer} />}
 
       <section className="card">
         <div className="chips">
@@ -133,6 +146,7 @@ export default async function FinancePage({ searchParams }: PageProps<"/exco/fin
                   <th>Method</th>
                   <th>Bank ref</th>
                   <th>Approved by</th>
+                  <th>Receipt</th>
                 </tr>
               </thead>
               <tbody>
@@ -141,11 +155,26 @@ export default async function FinancePage({ searchParams }: PageProps<"/exco/fin
                     <td>{shortDay(x.decided_at)}, {clockLabel(x.decided_at)}</td>
                     <td>{x.number}</td>
                     <td>{x.full_name}<div className="muted">{x.student_id}</div></td>
-                    <td>{passesLabel(x.single_qty, x.full_qty)}</td>
+                    <td className="soft">{passesLabel(x.single_qty, x.full_qty)}</td>
                     <td className="num strong">RM{x.amount}</td>
                     <td>{x.method === "qr" ? "QR" : "Cash"}</td>
                     <td>{x.bank_ref ?? "–"}</td>
-                    <td>{x.approved_by ?? "–"}</td>
+                    <td className="soft">{x.approved_by ?? "–"}</td>
+                    <td>
+                      {x.method === "cash" ? (
+                        "–"
+                      ) : x.receipt_deleted ? (
+                        <span className="muted">Deleted</span>
+                      ) : (
+                        <div className="row" style={{ justifyContent: "flex-start" }}>
+                          {x.receipt_path && links[x.receipt_path] && (
+                            <a href={links[x.receipt_path]} target="_blank" rel="noreferrer">View</a>
+                          )}
+                          {officer && !x.delete_requested && <AskToDelete topupId={x.id} number={x.number} position={officer} />}
+                          {x.delete_requested && <span className="muted">Delete asked</span>}
+                        </div>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

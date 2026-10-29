@@ -1,6 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { after } from "next/server";
+import { emailArcher, siteFrom } from "@/lib/email";
 import { createClient } from "@/lib/supabase/server";
 import { messageFor, type ActionResult } from "@/lib/messages";
 import { removeFile, uploadFile, uploadProblem } from "@/lib/receipts";
@@ -19,10 +22,12 @@ export async function decideTopup(topupId: string, approve: boolean, reason: str
   if (!supabase) return { ok: false, message: messageFor({ message: "NOT_SIGNED_IN" }) };
   if (!UUID.test(topupId)) return { ok: false, message: messageFor({ message: "TOPUP_NOT_FOUND" }) };
 
-  const { error } = await supabase.rpc("decide_topup", { p_topup: topupId, p_approve: approve, p_reason: reason.slice(0, 300) });
+  const { data, error } = await supabase.rpc("decide_topup", { p_topup: topupId, p_approve: approve, p_reason: reason.slice(0, 300) });
   if (error) return { ok: false, message: messageFor(error) };
 
   revalidatePath("/", "layout");
+  const site = siteFrom(await headers());
+  if (data) after(() => emailArcher(data as Parameters<typeof emailArcher>[0], site));
   return { ok: true };
 }
 

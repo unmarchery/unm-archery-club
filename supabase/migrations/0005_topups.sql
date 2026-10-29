@@ -1,8 +1,23 @@
--- UNM Archery Club: top-ups and finance.
+-- UNM Archery Club: top-ups, finance, exco positions and receipt deletion.
 -- Non-members choose how many single and full-day passes they want and pay by DuitNow QR
 -- (uploading the receipt) or cash. Nothing is credited until someone with approve_topups
 -- checks the payment and approves it, and every decision records who made it and when.
+-- Receipts are kept until the Treasurer and the President or VP both agree to delete one.
 -- Run once in the Supabase SQL editor, after 0004_server_grants.sql.
+
+-- Exco positions, from the committee list. A position says who someone is (and who must
+-- agree to delete a receipt); permissions still decide which pages they can open.
+alter table public.profiles add column position text check (position in (
+  'President', 'Vice President', 'Secretary', 'Treasurer', 'Events', 'Marketing', 'Equipment',
+  'Treasurer Dept', 'Events Dept', 'Marketing Dept', 'Equipment Dept'));
+create unique index profiles_one_officer on public.profiles (position)
+  where position in ('President', 'Vice President', 'Treasurer');
+
+-- "Lee Lit Hang (President)", for showing who approved or asked for something.
+create function public.name_with_position(p_user uuid) returns text
+language sql stable security definer set search_path = public as $$
+  select full_name || coalesce(' (' || position || ')', '') from profiles where id = p_user;
+$$;
 
 alter table public.settings
   add column payment_qr_path text,        -- the club's DuitNow QR, in the private receipts bucket
@@ -18,13 +33,15 @@ create table public.topups (
   method text not null check (method in ('qr', 'cash')),
   bank_ref text check (char_length(bank_ref) <= 40),   -- transaction reference from the banking app
   receipt_path text,                                   -- receipts bucket, under the archer's own folder
+  receipt_deleted_at timestamptz,                      -- set when the officers agree to delete it
   status text not null default 'pending' check (status in ('pending', 'approved', 'rejected', 'cancelled')),
   reason text check (char_length(reason) <= 300),      -- from the approver; required when rejecting
   decided_by uuid references public.profiles (id),
   decided_at timestamptz,
   created_at timestamptz not null default now(),
   check (single_qty + full_qty > 0),
-  check (method = 'cash' or (bank_ref is not null and receipt_path is not null))
+  check (method = 'cash' or bank_ref is not null),
+  check (method = 'cash' or receipt_path is not null or receipt_deleted_at is not null)
 );
 create index topups_user_idx on public.topups (user_id, created_at desc);
 create index topups_status_idx on public.topups (status, created_at);
@@ -92,7 +109,9 @@ begin
           case when p_method = 'qr' then ref end,
           case when p_method = 'qr' then p_receipt_path end)
   returning * into created;
-  return jsonb_build_object('id', created.id, 'number', created.number, 'amount', created.amount);
+  return (select jsonb_build_object('id', created.id, 'number', created.number, 'amount', created.amount,
+                                    'full_name', p.full_name, 'student_id', p.student_id)
+          from profiles p where p.id = uid);
 exception
   when unique_violation then raise exception 'BANK_REF_USED';
 end;
@@ -126,11 +145,13 @@ begin
     'recent', (
       select coalesce(jsonb_agg(r order by r.decided_at desc), '[]'::jsonb)
       from (
-        select t.number, t.decided_at, t.status, t.reason, t.amount, t.method,
-               t.single_qty, t.full_qty, p.student_id, p.full_name, d.full_name as decided_by
+        select t.id, t.number, t.decided_at, t.status, t.reason, t.amount, t.method,
+               t.single_qty, t.full_qty, p.student_id, p.full_name, name_with_position(t.decided_by) as decided_by,
+               t.receipt_path, t.receipt_deleted_at is not null as receipt_deleted,
+               exists (select 1 from receipt_deletions r where r.topup_id = t.id and r.status = 'pending'
+                       and r.created_at > now() - interval '14 days') as delete_requested
         from topups t
         join profiles p on p.id = t.user_id
-        left join profiles d on d.id = t.decided_by
         where t.status in ('approved', 'rejected') and t.decided_at > now() - interval '30 days'
         order by t.decided_at desc
         limit 30
@@ -141,8 +162,9 @@ $$;
 
 -- Approving credits the passes from the request itself, so nobody types a number in.
 -- Rejecting needs a reason, which the archer sees. Nobody decides their own top-up.
+-- Returns what the archer's email needs.
 create function public.decide_topup(p_topup uuid, p_approve boolean, p_reason text default null)
-returns void
+returns jsonb
 language plpgsql volatile security definer set search_path = public as $$
 declare
   t topups;
@@ -169,6 +191,10 @@ begin
       values (t.user_id, 'full', t.full_qty, 'topup', 'Top-up #' || t.number, auth.uid(), t.id);
     end if;
   end if;
+  return (select jsonb_build_object('email', p.email, 'full_name', p.full_name, 'number', t.number,
+                                    'amount', t.amount, 'single_qty', t.single_qty, 'full_qty', t.full_qty,
+                                    'approved', p_approve, 'reason', why)
+          from profiles p where p.id = t.user_id);
 end;
 $$;
 
@@ -187,11 +213,13 @@ begin
   end_at := (p_to + 1)::timestamp at time zone s.timezone;
   return (
     with rows as (
-      select t.number, t.created_at, t.decided_at, p.student_id, p.full_name,
-             t.single_qty, t.full_qty, t.amount, t.method, t.bank_ref, d.full_name as approved_by
+      select t.id, t.number, t.created_at, t.decided_at, p.student_id, p.full_name,
+             t.single_qty, t.full_qty, t.amount, t.method, t.bank_ref, name_with_position(t.decided_by) as approved_by,
+             t.receipt_path, t.receipt_deleted_at is not null as receipt_deleted,
+             exists (select 1 from receipt_deletions r where r.topup_id = t.id and r.status = 'pending'
+                     and r.created_at > now() - interval '14 days') as delete_requested
       from topups t
       join profiles p on p.id = t.user_id
-      left join profiles d on d.id = t.decided_by
       where t.status = 'approved' and t.decided_at >= start_at and t.decided_at < end_at
     ),
     owed as (
@@ -234,7 +262,116 @@ begin
 end;
 $$;
 
--- Same as 0002, plus how many top-ups are waiting (for approvers).
+-- Receipt deletion. Receipts show bank details, but they are the club's proof of payment,
+-- so one is deleted only when the Treasurer and the President or VP both agree: one of
+-- them asks (with a reason), the other agrees. A request lapses after 14 days.
+-- The top-up itself (amount, bank reference, who approved) always stays in Finance.
+create table public.receipt_deletions (
+  id uuid primary key default gen_random_uuid(),
+  topup_id uuid not null references public.topups (id) on delete cascade,
+  reason text not null check (char_length(reason) between 1 and 300),
+  requested_by uuid not null references public.profiles (id),
+  status text not null default 'pending' check (status in ('pending', 'done', 'declined', 'expired')),
+  decided_by uuid references public.profiles (id),
+  decided_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create unique index receipt_deletions_one_open on public.receipt_deletions (topup_id) where status = 'pending';
+alter table public.receipt_deletions enable row level security;
+revoke all on public.receipt_deletions from anon, authenticated;
+
+create function public.officer_position(p_user uuid) returns text
+language sql stable security definer set search_path = public as $$
+  select position from profiles where id = p_user and position in ('President', 'Vice President', 'Treasurer');
+$$;
+
+-- The Treasurer plus the President or the VP, two different people.
+create function public.officers_can_delete(p_asker uuid, p_agreer uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select p_asker <> p_agreer
+     and 'Treasurer' in (officer_position(p_asker), officer_position(p_agreer))
+     and (officer_position(p_asker) in ('President', 'Vice President')
+          or officer_position(p_agreer) in ('President', 'Vice President'));
+$$;
+
+create function public.request_receipt_deletion(p_topup uuid, p_reason text) returns uuid
+language plpgsql volatile security definer set search_path = public as $$
+declare
+  why text := nullif(left(trim(coalesce(p_reason, '')), 300), '');
+  t topups;
+  new_id uuid;
+begin
+  if officer_position(auth.uid()) is null then raise exception 'NOT_ALLOWED'; end if;
+  if why is null then raise exception 'REASON_REQUIRED'; end if;
+  select * into t from topups where id = p_topup;
+  if not found or t.receipt_path is null then raise exception 'RECEIPT_NOT_FOUND'; end if;
+  if t.status = 'pending' then raise exception 'TOPUP_PENDING'; end if;
+  update receipt_deletions set status = 'expired'
+  where topup_id = p_topup and status = 'pending' and created_at <= now() - interval '14 days';
+  if exists (select 1 from receipt_deletions where topup_id = p_topup and status = 'pending') then
+    raise exception 'DELETE_PENDING';
+  end if;
+  insert into receipt_deletions (topup_id, reason, requested_by) values (p_topup, why, auth.uid())
+  returning id into new_id;
+  return new_id;
+end;
+$$;
+
+-- Agreeing deletes the receipt from the top-up and returns its storage path, so the
+-- server can remove the file. Declining just closes the request.
+create function public.decide_receipt_deletion(p_request uuid, p_agree boolean) returns text
+language plpgsql volatile security definer set search_path = public as $$
+declare
+  r receipt_deletions;
+  path text;
+begin
+  if officer_position(auth.uid()) is null then raise exception 'NOT_ALLOWED'; end if;
+  select * into r from receipt_deletions where id = p_request for update;
+  if not found or r.status <> 'pending' then raise exception 'REQUEST_NOT_FOUND'; end if;
+  if r.created_at <= now() - interval '14 days' then raise exception 'REQUEST_EXPIRED'; end if;
+  if r.requested_by = auth.uid() then raise exception 'OWN_REQUEST'; end if;
+
+  if not p_agree then
+    update receipt_deletions set status = 'declined', decided_by = auth.uid(), decided_at = now() where id = p_request;
+    return null;
+  end if;
+  if not officers_can_delete(r.requested_by, auth.uid()) then raise exception 'TREASURER_AND_PRESIDENT'; end if;
+
+  select receipt_path into path from topups where id = r.topup_id for update;
+  update topups set receipt_path = null, receipt_deleted_at = now() where id = r.topup_id;
+  update receipt_deletions set status = 'done', decided_by = auth.uid(), decided_at = now() where id = p_request;
+  return path;
+end;
+$$;
+
+-- Open requests, for the President, VP and Treasurer.
+create function public.receipt_deletions_open() returns jsonb
+language sql stable security definer set search_path = public as $$
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'id', r.id, 'topup_id', t.id, 'number', t.number, 'amount', t.amount, 'full_name', p.full_name,
+    'reason', r.reason, 'requested_by', name_with_position(r.requested_by), 'created_at', r.created_at,
+    'expires_at', r.created_at + interval '14 days',
+    'mine', r.requested_by = auth.uid(),
+    'can_agree', officers_can_delete(r.requested_by, auth.uid())
+  ) order by r.created_at), '[]'::jsonb)
+  from receipt_deletions r
+  join topups t on t.id = r.topup_id
+  join profiles p on p.id = t.user_id
+  where officer_position(auth.uid()) is not null
+    and r.status = 'pending' and r.created_at > now() - interval '14 days';
+$$;
+
+-- Who gets the "new top-up waiting" email. Only the website's server can call this.
+create function public.topup_alert_emails(p_exclude uuid) returns table (email text, full_name text)
+language sql stable security definer set search_path = public as $$
+  select distinct p.email, p.full_name
+  from permissions x join profiles p on p.id = x.user_id
+  where x.permission in ('owner', 'approve_topups')
+    and (x.expires_at is null or x.expires_at > now())
+    and p.id is distinct from p_exclude;
+$$;
+
+-- Same as 0002, plus how many top-ups are waiting (for approvers) and the exco position.
 create or replace function public.my_status() returns jsonb
 language sql stable security definer set search_path = public as $$
   select jsonb_build_object(
@@ -251,21 +388,28 @@ language sql stable security definer set search_path = public as $$
     'pending_member_requests', case when has_perm('manage_members')
                                     then (select count(*) from member_requests where status = 'pending') else 0 end,
     'pending_topups', case when has_perm('approve_topups')
-                           then (select count(*) from topups where status = 'pending') else 0 end
+                           then (select count(*) from topups where status = 'pending') else 0 end,
+    'position', p.position
   )
   from profiles p where p.id = auth.uid();
 $$;
 
 revoke execute on function
-  public.normalize_bank_ref(text),
+  public.normalize_bank_ref(text), public.name_with_position(uuid),
   public.request_topup(int, int, text, text, text), public.cancel_topup(uuid),
   public.topups_for_review(), public.decide_topup(uuid, boolean, text),
-  public.finance_report(date, date), public.save_payment_settings(text, text)
+  public.finance_report(date, date), public.save_payment_settings(text, text),
+  public.officer_position(uuid), public.officers_can_delete(uuid, uuid),
+  public.request_receipt_deletion(uuid, text), public.decide_receipt_deletion(uuid, boolean),
+  public.receipt_deletions_open(), public.topup_alert_emails(uuid)
   from public, anon;
 grant execute on function
   public.normalize_bank_ref(text),
   public.request_topup(int, int, text, text, text), public.cancel_topup(uuid),
   public.topups_for_review(), public.decide_topup(uuid, boolean, text),
   public.finance_report(date, date), public.save_payment_settings(text, text),
-  public.my_status()
+  public.request_receipt_deletion(uuid, text), public.decide_receipt_deletion(uuid, boolean),
+  public.receipt_deletions_open(), public.my_status()
   to authenticated;
+revoke execute on function public.topup_alert_emails(uuid) from authenticated;
+grant execute on function public.topup_alert_emails(uuid) to service_role;

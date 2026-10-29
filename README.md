@@ -48,6 +48,8 @@ All three have free plans that are enough for the club.
    | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key |
    | `SUPABASE_SECRET_KEY` | Supabase secret key (keep private) |
    | `MEMBERS_SYNC_SECRET` | any long random string you make up |
+   | `GMAIL_USER` | the club Gmail address (optional, for top-up emails) |
+   | `GMAIL_APP_PASSWORD` | a Gmail app password for it (optional, keep private) |
 
 4. Deploy. Then in Supabase, **Authentication > URL Configuration**, set **Site URL** to the Netlify address.
 
@@ -105,6 +107,19 @@ creates the private `receipts` storage bucket, which only the website's server c
   DuitNow QR and the finance WhatsApp group link here.
 - **Exco > Finance** (`approve_topups` or `export_finance`): money received by date range, split by QR
   and cash, and the passes sold but not used yet. `export_finance` can download it for Excel.
+- **Emails** (when `GMAIL_USER` and `GMAIL_APP_PASSWORD` are set): approvers get "new top-up waiting",
+  and the archer gets "passes added" or "not approved" with the reason. They go out after the page
+  responds, so a slow email never holds up a button.
+- **Deleting a receipt**: receipts are kept until the Treasurer and the President or VP both agree to
+  delete one. One of them taps **Delete…** next to the receipt (on Finance or Approvals) and gives a
+  reason; the other agrees within 14 days, or the request lapses. Only the picture goes; the top-up
+  stays in Finance. This uses each exco's **position**, set once in the SQL Editor:
+
+  ```sql
+  update profiles set position = 'Treasurer' where student_id = '20xxxxxx';
+  -- President, Vice President, Secretary, Treasurer, Events, Marketing, Equipment,
+  -- Treasurer Dept, Events Dept, Marketing Dept, Equipment Dept. One President, VP and Treasurer at a time.
+  ```
 
 ### Giving someone passes by hand
 

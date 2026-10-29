@@ -31,6 +31,11 @@ const MESSAGES: Record<string, string> = {
   REASON_REQUIRED: "Write a reason, so the archer knows what to fix.",
   INVALID_LINK: "Paste a WhatsApp group invite link (it starts with https://chat.whatsapp.com/).",
   INVALID_PATH: "That picture couldn't be saved. Please try again.",
+  RECEIPT_NOT_FOUND: "That receipt has already been deleted.",
+  TOPUP_PENDING: "Approve or reject this top-up first.",
+  DELETE_PENDING: "Someone has already asked to delete this receipt. Agree to that request instead.",
+  REQUEST_EXPIRED: "This request is more than 14 days old. Ask again if the receipt should still go.",
+  TREASURER_AND_PRESIDENT: "The Treasurer and the President or VP must both agree to delete a receipt.",
 };
 
 export type ActionResult = { ok: true; refunded?: boolean } | { ok: false; message: string };
