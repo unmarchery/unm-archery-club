@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
-import { CalendarIcon, ChartIcon, CheckCircleIcon, ClipboardIcon, HomeIcon, KeyIcon, LogoutIcon, ThemeIcon, UsersIcon, WalletIcon } from "./icons";
+import { CalendarIcon, ChartIcon, CheckCircleIcon, ClipboardIcon, HomeIcon, KeyIcon, LogoutIcon, ShieldIcon, StarIcon, ThemeIcon, UsersIcon, WalletIcon } from "./icons";
 
 type Props = {
   name: string;
@@ -57,9 +57,15 @@ export function Sidebar({ name, membership, position, isExco, memberRequests, to
             <WalletIcon />Top up
           </Link>
         )}
+        <Link href="/exco" className={item("/exco")} aria-current={path === "/exco" ? "page" : undefined}>
+          <StarIcon />Our exco
+        </Link>
         {isExco && (
           <>
             <div className="menu-label">Exco</div>
+            <Link href="/exco/people" className={item("/exco/people")} aria-current={path === "/exco/people" ? "page" : undefined}>
+              <ShieldIcon />People
+            </Link>
             {memberRequests !== null && (
               <Link href="/exco/members" className={item("/exco/members")} aria-current={path === "/exco/members" ? "page" : undefined}>
                 <UsersIcon />Members

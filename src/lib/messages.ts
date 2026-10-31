@@ -35,6 +35,15 @@ const MESSAGES: Record<string, string> = {
   TOPUP_PENDING: "Approve or reject this top-up first.",
   DELETE_PENDING: "Someone has already asked to delete this receipt. Agree to that request instead.",
   REQUEST_EXPIRED: "This request is more than 14 days old. Ask again if the receipt should still go.",
+  INVALID_PHONE: "Enter a phone number with WhatsApp, e.g. 012-345 6789.",
+  OWNER_LOCKED: "President access can't be changed here.",
+  CANT_GIVE_MORE: "You can only switch on access you have yourself.",
+  DATE_IN_PAST: "Pick an end date from today onwards.",
+  OFFICER_POSITION: "Only the President can change the President, VP and Treasurer positions.",
+  POSITION_TAKEN: "Someone already has that position. Clear theirs first.",
+  INVALID_POSITION: "Choose a position from the list.",
+  NOTE_EMPTY: "Write something first.",
+  STUDENT_NOT_FOUND: "No account uses that student ID yet. They need to sign up (or get a starter account) first.",
   TREASURER_AND_PRESIDENT: "The Treasurer and the President or VP must both agree to delete a receipt.",
 };
 
