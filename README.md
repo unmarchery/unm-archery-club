@@ -121,6 +121,18 @@ creates the private `receipts` storage bucket, which only the website's server c
   -- Treasurer Dept, Events Dept, Marketing Dept, Equipment Dept. One President, VP and Treasurer at a time.
   ```
 
+### Exco and People pages
+
+Needs [`supabase/migrations/0006_people.sql`](supabase/migrations/0006_people.sql) run once, after 0005.
+
+- **Our exco** (everyone): each exco's name, position and what they handle. A WhatsApp button shows only
+  for exco who type their number on their own card and switch it on.
+- **Exco > People** (anyone with a position or access): the President and the VP switch each exco's access
+  on and off, optionally until a date, instead of using the SQL editor. The VP can only switch what they
+  hold, and nobody changes President access here. People with `change_positions` set positions and what
+  each exco handles (President, VP and Treasurer positions only by the President). People with
+  `write_notes` add notes about exco. Every change is logged at the bottom of the page.
+
 ### Giving someone passes by hand
 
 ```sql
@@ -165,7 +177,7 @@ npm run lint
 | `supabase/migrations/` | Database tables, booking rules and security |
 | `supabase/tests/` | Database tests (run in PGlite) |
 | `src/app/(auth)/` | Sign up, email code, log in, password reset |
-| `src/app/(club)/` | Signed-in pages: Home, Sessions, Top up, and the Exco pages (Members, Accounts, Approvals, Finance) |
+| `src/app/(club)/` | Signed-in pages: Home, Sessions, Top up, Our exco, and the Exco pages (People, Members, Accounts, Approvals, Finance) |
 | `src/app/api/members/sync/` | Receives the membership list from Google Sheets |
 | `src/proxy.ts` | Keeps the login session fresh and protects pages |
 | `scripts/members-sync.gs` | Google Apps Script for the membership form |

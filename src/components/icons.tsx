@@ -55,6 +55,15 @@ export const MinusIcon = (p: P) => (
 export const ChartIcon = (p: P) => (
   <svg {...base} {...p}><path d="M4 20V4M4 20h16" /><path d="M8 16v-4M12 16V8M16 16v-6" /></svg>
 );
+export const StarIcon = (p: P) => (
+  <svg {...base} {...p}><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" /></svg>
+);
+export const ShieldIcon = (p: P) => (
+  <svg {...base} {...p}><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z" /><path d="M9 12l2 2 4-4" /></svg>
+);
+export const ChatIcon = (p: P) => (
+  <svg {...base} {...p}><path d="M4 20l1.5-4A8 8 0 1 1 9 19.5z" /><path d="M9 10h6M9 13h4" /></svg>
+);
 export const InfoIcon = (p: P) => (
   <svg {...base} {...p}><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
 );

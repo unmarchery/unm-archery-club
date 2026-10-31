@@ -495,3 +495,83 @@ test('top-up alert emails go to approvers, and only the server can list them', a
     await db.exec('reset role')
   }
 })
+
+test('exco page shows a WhatsApp number only when its owner switches it on', async () => {
+  const sec = (await one(`select id from profiles where student_id = '20000092'`)).id
+  const archer = (await one(`select id from profiles where student_id = '20000081'`)).id
+  await rejects(asUser(archer, `select save_my_card('0123456789', true)`), 'NOT_ALLOWED')
+  await rejects(asUser(sec, `select save_my_card(null, true)`), 'INVALID_PHONE')
+  await rejects(asUser(sec, `select save_my_card('12ab', false)`), 'INVALID_PHONE')
+
+  await asUser(sec, `select save_my_card('012-345 6789', false)`)
+  assert.equal((await one('select whatsapp from profiles where id = $1', [sec])).whatsapp, '60123456789')
+  let [{ exco_directory: list }] = await asUser(archer, 'select exco_directory()')
+  const card = () => list.find((p) => p.id === sec)
+  assert.equal(card().position, 'Secretary')
+  assert.equal(card().whatsapp, null)
+  await asUser(sec, `select save_my_card('0123456789', true)`)
+  ;[{ exco_directory: list }] = await asUser(archer, 'select exco_directory()')
+  assert.equal(card().whatsapp, '60123456789')
+  assert.ok(!list.some((p) => p.id === archer))
+  assert.equal(list[0].position, 'President')
+})
+
+test('the President and VP switch access from the website, within limits, and it is logged', async () => {
+  const pres = await ownerId()
+  const vp = (await one(`select id from profiles where student_id = '20000090'`)).id
+  const tre = (await one(`select id from profiles where student_id = '20000091'`)).id
+  const sec = (await one(`select id from profiles where student_id = '20000092'`)).id
+  const archer = (await one(`select id from profiles where student_id = '20000081'`)).id
+
+  await rejects(asUser(sec, `select set_permission($1, 'approve_topups', true)`, [archer]), 'NOT_ALLOWED')
+  await rejects(asUser(pres, `select set_permission($1, 'owner', true)`, [vp]), 'OWNER_LOCKED')
+  await rejects(asUser(pres, `select set_permission($1, 'approve_topups', true, current_date - 1)`, [tre]), 'DATE_IN_PAST')
+  await asUser(pres, `select set_permission($1, 'approve_topups', true, current_date + 30)`, [tre])
+  await asUser(pres, `select set_permission($1, 'manage_members', true)`, [vp])
+  assert.ok((await one(`select expires_at from permissions where user_id = $1 and permission = 'approve_topups'`, [tre])).expires_at)
+
+  // The VP can switch only what they hold.
+  await asUser(vp, `select set_permission($1, 'manage_members', true)`, [sec])
+  await rejects(asUser(vp, `select set_permission($1, 'export_finance', true)`, [sec]), 'CANT_GIVE_MORE')
+  await rejects(asUser(vp, 'select remove_from_exco($1)', [pres]), 'OWNER_LOCKED')
+  await rejects(asUser(vp, 'select remove_from_exco($1)', [tre]), 'OFFICER_POSITION')
+
+  // Positions: officers only by the President; others by change_positions.
+  await asUser(pres, `select set_permission($1, 'change_positions', true)`, [vp])
+  await rejects(asUser(vp, `select set_position('20000081', 'Treasurer', null)`), 'OFFICER_POSITION')
+  await asUser(vp, `select set_position('20000081', 'Events Dept', 'Helps with competitions')`)
+  assert.equal((await one('select position, handles from profiles where id = $1', [archer])).handles, 'Helps with competitions')
+  await rejects(asUser(pres, `select set_position('20000081', 'Treasurer', null)`), 'POSITION_TAKEN')
+  await rejects(asUser(pres, `select set_position('20000081', 'Captain', null)`), 'INVALID_POSITION')
+  await rejects(asUser(pres, `select set_position('29999999', 'Events', null)`), 'STUDENT_NOT_FOUND')
+
+  const [{ people_overview: view }] = await asUser(vp, 'select people_overview()')
+  assert.equal(view.can_access, true)
+  assert.ok(view.people.some((p) => p.id === archer && p.position === 'Events Dept'))
+  assert.ok(view.log.some((l) => l.action.startsWith('gave Approve top-ups until')))
+  const [{ people_overview: forArcher }] = await asUser(archer, 'select people_overview()')
+  assert.equal(forArcher.can_access, false)
+  assert.deepEqual(forArcher.log, [])
+  const outsider = (await one(`select id from profiles where student_id = '20000082'`)).id
+  assert.equal((await asUser(outsider, 'select people_overview() as v'))[0].v, null)
+
+  await asUser(vp, 'select remove_from_exco($1)', [archer])
+  assert.equal((await one('select position from profiles where id = $1', [archer])).position, null)
+  await asUser(pres, `select set_permission($1, 'change_positions', false)`, [vp])
+})
+
+test('notes need the Write notes switch; writers delete their own', async () => {
+  const pres = await ownerId()
+  const vp = (await one(`select id from profiles where student_id = '20000090'`)).id
+  const sec = (await one(`select id from profiles where student_id = '20000092'`)).id
+  await rejects(asUser(sec, `select add_exco_note($1, 'Handles booking issues')`, [vp]), 'NOT_ALLOWED')
+  await asUser(pres, `select set_permission($1, 'write_notes', true)`, [sec])
+  await rejects(asUser(sec, `select add_exco_note($1, '   ')`, [vp]), 'NOTE_EMPTY')
+  await asUser(sec, `select add_exco_note($1, 'Handles booking issues')`, [vp])
+  const note = (await one('select id from exco_notes where about = $1', [vp])).id
+  const [{ people_overview: v }] = await asUser(vp, 'select people_overview()')
+  assert.equal(v.people.find((p) => p.id === vp).notes[0].body, 'Handles booking issues')
+  await rejects(asUser(vp, 'select delete_exco_note($1)', [note]), 'NOT_ALLOWED')
+  await asUser(sec, 'select delete_exco_note($1)', [note])
+  assert.equal((await one('select count(*)::int as n from exco_notes')).n, 0)
+})
