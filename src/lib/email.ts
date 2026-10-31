@@ -91,3 +91,33 @@ export function siteFrom(h: Headers) {
   const host = h.get("x-forwarded-host") ?? h.get("host");
   return host ? `https://${host}` : "";
 }
+
+type NoShow = { email: string; full_name: string; noshows: number; warned: boolean; banned_until: string | null; ban_after: number };
+
+const ordinal = (k: number) => (k % 10 === 1 && k !== 11 ? `${k}st` : k % 10 === 2 && k !== 12 ? `${k}nd` : k % 10 === 3 && k !== 13 ? `${k}rd` : `${k}th`);
+
+// The 2nd no-show is a warning; the one that brings a ban says until when.
+export async function emailNoShow(n: NoShow, site: string) {
+  const first = oneLine(n.full_name).split(" ")[0] || "there";
+  const until = n.banned_until
+    ? new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kuala_Lumpur", weekday: "long", day: "numeric", month: "long" }).format(new Date(n.banned_until))
+    : "";
+  await send(
+    n.banned_until
+      ? {
+          to: n.email,
+          subject: "You're paused from booking",
+          text:
+            `Hi ${first},\n\nYou were marked as a no-show ${n.noshows} times, so you can't book sessions until ${until}. ` +
+            `Your bookings in that time were cancelled, and any passes for them were returned.\n\n` +
+            `If this is a mistake, contact the exco: ${site}/exco\n`,
+        }
+      : {
+          to: n.email,
+          subject: "No-show warning",
+          text:
+            `Hi ${first},\n\nYou were marked as a no-show for a session you booked. This is your ${ordinal(n.noshows)} no-show; ` +
+            `at ${n.ban_after} you'll be paused from booking for a while.\n\nIf you can't come, please cancel in time so someone else can take the spot: ${site}/sessions\n`,
+        },
+  );
+}

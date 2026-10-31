@@ -44,6 +44,12 @@ const MESSAGES: Record<string, string> = {
   INVALID_POSITION: "Choose a position from the list.",
   NOTE_EMPTY: "Write something first.",
   STUDENT_NOT_FOUND: "No account uses that student ID yet. They need to sign up (or get a starter account) first.",
+  DAY_PASSED: "That day has already passed.",
+  NOT_TRAINING_DAY: "There's no training on that day.",
+  ATTENDANCE_LOCKED: "Attendance for this day is locked. Ask the President or VP to change it.",
+  NAME_REQUIRED: "Enter a student ID or a name.",
+  WALKIN_NO_PASS: "This non-member has no single pass. They need to top up (or pay cash to the treasurer) first.",
+  WALKIN_BANNED: "This archer is paused from booking because of no-shows.",
   TREASURER_AND_PRESIDENT: "The Treasurer and the President or VP must both agree to delete a receipt.",
 };
 

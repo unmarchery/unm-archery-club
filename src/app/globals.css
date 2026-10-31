@@ -151,6 +151,15 @@ a:not([class]) { color: var(--gold-text); }
   .receipt { display: block; max-width: 100%; max-height: 320px; width: auto; border-radius: 12px; border: 1px solid var(--line); object-fit: contain; align-self: flex-start; background: #ffffff; }
   .amount { font: 700 28px var(--font-display); line-height: 1; color: var(--gold-text); }
 
+  /* Duty and attendance */
+  .attend-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 0; border-top: 1px solid var(--line); }
+  .seg button.on.present { background: var(--gold); color: var(--on-gold); }
+  .seg button.on.noshow { background: var(--red-strong); color: #ffffff; }
+  .seg button:disabled { cursor: not-allowed; opacity: 0.7; }
+  .pill-x { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin: -4px -6px -4px 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; }
+  .pill-x svg { width: 12px; height: 12px; }
+  .pill-x:hover { background: var(--surface); color: var(--ink); }
+
   /* People */
   .switches { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
   .switch { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }

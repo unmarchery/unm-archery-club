@@ -88,9 +88,9 @@ export function Sidebar({ name, membership, position, isExco, memberRequests, to
                 <ChartIcon />Finance
               </Link>
             )}
-            <span className="menu-item soon" aria-disabled="true">
-              <ClipboardIcon />Duty<span className="soon-tag">Soon</span>
-            </span>
+            <Link href="/exco/duty" className={`menu-item${path.startsWith("/exco/duty") ? " on" : ""}`} aria-current={path.startsWith("/exco/duty") ? "page" : undefined}>
+              <ClipboardIcon />Duty
+            </Link>
           </>
         )}
       </nav>

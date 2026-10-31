@@ -575,3 +575,111 @@ test('notes need the Write notes switch; writers delete their own', async () => 
   await asUser(sec, 'select delete_exco_note($1)', [note])
   assert.equal((await one('select count(*)::int as n from exco_notes')).n, 0)
 })
+
+// A slot on a day relative to today in Malaysia (0 = today, -1 = yesterday), at an hour.
+async function slotOn(dayOffset, hour) {
+  return (await one(
+    `insert into slots (starts_at, ends_at)
+     values (((club_today() + $1::int) + make_time($2, 0, 0)) at time zone 'Asia/Kuala_Lumpur',
+             ((club_today() + $1::int) + make_time($2 + 1, 0, 0)) at time zone 'Asia/Kuala_Lumpur')
+     returning id, (starts_at at time zone 'Asia/Kuala_Lumpur')::date as day`,
+    [dayOffset, hour],
+  ))
+}
+
+test('the equipment team signs up for duty; assign_duty can add or remove anyone', async () => {
+  const pres = await ownerId()
+  const sec = (await one(`select id from profiles where student_id = '20000092'`)).id
+  const eq = await signUp('20000093', 'eq93@nottingham.edu.my', 'Equipment Person')
+  await db.query(`update profiles set position = 'Equipment Dept' where id = $1`, [eq])
+  const { day } = await slotOn(2, 7)
+
+  await rejects(asUser(sec, 'select set_my_duty($1, true)', [day]), 'NOT_ALLOWED')
+  await rejects(asUser(eq, 'select set_my_duty(club_today() + 9, true)'), 'NOT_TRAINING_DAY')
+  await asUser(eq, 'select set_my_duty($1, true)', [day])
+  await asUser(eq, 'select set_my_duty($1, true)', [day]) // twice is fine
+  const [{ duty_roster: r }] = await asUser(eq, 'select duty_roster()')
+  const entry = r.days.find((d) => d.day === day.toISOString().slice(0, 10))
+  assert.equal(entry.people.length, 1)
+  assert.equal(entry.people[0].me, true)
+  assert.equal(r.can_sign, true)
+  assert.equal(r.min_people, 2)
+
+  await rejects(asUser(sec, 'select set_duty($1, $2, true)', [day, sec]), 'NOT_ALLOWED')
+  const outsider = (await one(`select id from profiles where student_id = '20000082'`)).id
+  await rejects(asUser(pres, 'select set_duty($1, $2, true)', [day, outsider]), 'STUDENT_NOT_FOUND')
+  await asUser(pres, 'select set_duty($1, $2, true)', [day, sec])
+  await asUser(pres, 'select set_duty($1, $2, false)', [day, eq])
+  assert.deepEqual((await db.query('select user_id from duty where day = $1', [day])).rows.map((x) => x.user_id), [sec])
+})
+
+test('attendance: ticks within 3 days, 2nd no-show warns, 3rd bans and frees future bookings', async () => {
+  const pres = await ownerId()
+  const sec = (await one(`select id from profiles where student_id = '20000092'`)).id
+  const archer = await signUp('20000095', 'nos95@nottingham.edu.my', 'No Show Archer')
+  await db.query(`insert into pass_ledger (user_id, kind, delta, reason) values ($1, 'single', 5, 'adjust')`, [archer])
+  const book = async (slot, kind = 'single') => (await one(
+    `insert into bookings (slot_id, user_id, pass_kind, is_member) values ($1, $2, $3, false) returning id`, [slot, archer, kind])).id
+
+  const a = await slotOn(-1, 7), b = await slotOn(-1, 8), c = await slotOn(0, 9), old = await slotOn(-5, 7)
+  const future = await slotOn(3, 9)
+  const [ba, bb, bc, bold, bfuture] = [await book(a.id), await book(b.id), await book(c.id), await book(old.id), await book(future.id)]
+  await db.query(`insert into pass_ledger (user_id, kind, delta, reason, booking_id) values ($1, 'single', -1, 'booking', $2)`, [archer, bfuture])
+
+  await rejects(asUser(sec, `select mark_attendance($1, 'present')`, [ba]), 'ATTENDANCE_LOCKED')
+  assert.equal((await asUser(sec, 'select attendance_day(club_today()) as v'))[0].v, null)
+  await db.query(`insert into permissions (user_id, permission) values ($1, 'take_attendance')`, [sec])
+
+  const [{ attendance_day: sheet }] = await asUser(sec, 'select attendance_day(club_today() - 1)')
+  assert.equal(sheet.open, true)
+  assert.ok(sheet.slots.some((s) => s.bookings.some((x) => x.id === ba)))
+
+  await asUser(sec, `select mark_attendance($1, 'present')`, [ba])
+  await asUser(sec, `select mark_attendance($1, 'booked')`, [ba]) // clearing a tick is not a no-show
+  let [{ mark_attendance: m }] = await asUser(sec, `select mark_attendance($1, 'no_show')`, [ba])
+  assert.equal(m.noshows, 1)
+  assert.equal(m.warned, false)
+  ;[{ mark_attendance: m }] = await asUser(sec, `select mark_attendance($1, 'no_show')`, [bb])
+  assert.equal(m.warned, true)
+
+  await rejects(asUser(sec, `select mark_attendance($1, 'no_show')`, [bold]), 'ATTENDANCE_LOCKED')
+  await rejects(asUser(sec, `select mark_attendance($1, 'present')`, [bfuture]), 'ATTENDANCE_LOCKED')
+
+  const before = (await one(`select pass_balance($1, 'single') as n`, [archer])).n
+  ;[{ mark_attendance: m }] = await asUser(sec, `select mark_attendance($1, 'no_show')`, [bc])
+  assert.ok(m.banned_until)
+  assert.equal((await one('select status from bookings where id = $1', [bfuture])).status, 'cancelled')
+  assert.equal((await one(`select pass_balance($1, 'single') as n`, [archer])).n, before + 1)
+  assert.equal((await one('select noshow_count($1) as n', [archer])).n, 0) // count starts again after a ban
+  await rejects(asUser(archer, 'select book_slot($1)', [future.id]), 'BANNED')
+
+  // The President fixes old days and lifts bans.
+  await asUser(pres, `select mark_attendance($1, 'present')`, [bold])
+  await rejects(asUser(sec, 'select lift_ban($1)', [archer]), 'NOT_ALLOWED')
+  await asUser(pres, 'select lift_ban($1)', [archer])
+  assert.equal((await one('select banned_until from profiles where id = $1', [archer])).banned_until, null)
+})
+
+test('walk-ins: by name, or by student ID using a pass; undo returns it', async () => {
+  const sec = (await one(`select id from profiles where student_id = '20000092'`)).id
+  const guest = await signUp('20000096', 'walk96@nottingham.edu.my', 'Walk In Archer')
+  const s = await slotOn(0, 10)
+  await rejects(asUser(sec, `select add_walkin($1, null, '  ')`, [s.id]), 'NAME_REQUIRED')
+  await asUser(sec, `select add_walkin($1, null, 'Visitor from UM')`, [s.id])
+  await rejects(asUser(sec, `select add_walkin($1, '20000096', null)`, [s.id]), 'WALKIN_NO_PASS')
+  await db.query(`insert into pass_ledger (user_id, kind, delta, reason) values ($1, 'single', 1, 'adjust')`, [guest])
+  await asUser(sec, `select add_walkin($1, '20000096', null)`, [s.id])
+  await rejects(asUser(sec, `select add_walkin($1, '20000096', null)`, [s.id]), 'ALREADY_BOOKED')
+  const walk = await one('select id, status, walk_in from bookings where slot_id = $1 and user_id = $2', [s.id, guest])
+  assert.equal(walk.status, 'present')
+  assert.equal((await one(`select pass_balance($1, 'single') as n`, [guest])).n, 0)
+  await rejects(asUser(sec, `select mark_attendance($1, 'no_show')`, [walk.id]), 'NOT_ALLOWED')
+
+  const [{ attendance_day: sheet }] = await asUser(sec, 'select attendance_day(club_today())')
+  const slot = sheet.slots.find((x) => x.id === s.id)
+  assert.equal(slot.walkins[0].full_name, 'Visitor from UM')
+  await asUser(sec, 'select remove_walkin($1)', [walk.id])
+  await asUser(sec, 'select remove_walkin($1)', [slot.walkins[0].id])
+  assert.equal((await one(`select pass_balance($1, 'single') as n`, [guest])).n, 1)
+  assert.equal((await one('select count(*)::int as n from walkins where slot_id = $1', [s.id])).n, 0)
+})

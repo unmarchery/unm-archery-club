@@ -4,8 +4,8 @@ Training-session booking for the University of Nottingham Malaysia Archery Club.
 Students sign up with their student ID and uni email, members book for free, and
 non-members book with single or full-day passes.
 
-Phase 1 so far: accounts, the member check, Home, Sessions with booking and cancelling,
-and top-ups with an approval queue and finance history. Duty and attendance come next.
+Phase 1: accounts, the member check, Home, Sessions with booking and cancelling, top-ups with an
+approval queue and finance history, the exco pages, and duty with attendance.
 
 Built with Next.js 16, Supabase (database, login, email codes) and Netlify (hosting).
 All three have free plans that are enough for the club.
@@ -132,6 +132,22 @@ Needs [`supabase/migrations/0006_people.sql`](supabase/migrations/0006_people.sq
   hold, and nobody changes President access here. People with `change_positions` set positions and what
   each exco handles (President, VP and Treasurer positions only by the President). People with
   `write_notes` add notes about exco. Every change is logged at the bottom of the page.
+
+### Duty and attendance
+
+Needs [`supabase/migrations/0007_duty.sql`](supabase/migrations/0007_duty.sql) run once, after 0006.
+
+- **Exco > Duty**: Equipment and Equipment Dept tick the training days they'll be on duty (two weeks
+  ahead). A day with fewer than `duty_min_people` (2) shows a warning. Anyone with `assign_duty` can put
+  someone on or take them off.
+- **Attendance sheet** (`take_attendance`): each slot's bookings with an equipment set-up list and
+  Present / No-show buttons. It can be changed for `attendance_days` (3) after the session; after that
+  only the President or VP. Unticked never counts as a no-show.
+- **Walk-ins**: by student ID (a non-member uses one single pass) or a name only.
+- **No-shows**: the 2nd brings a warning email, the 3rd a `ban_days` (14) ban with an email; bookings in
+  the ban are cancelled and their passes returned, and the count starts again. Set
+  `settings.noshow_count_from` to the first day of a semester to stop older no-shows counting. The
+  President or VP can lift a ban from the sheet.
 
 ### Giving someone passes by hand
 
