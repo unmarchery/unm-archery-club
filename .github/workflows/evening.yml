@@ -1,0 +1,25 @@
+# Every evening at 8pm Malaysia time: queue tomorrow's reminder emails and send anything
+# left in the email queue. Needs two repository secrets (Settings > Secrets and variables >
+# Actions): SITE_URL (e.g. https://unmarchery.netlify.app) and CRON_SECRET (the same value
+# as in Netlify).
+name: Evening reminders
+
+on:
+  schedule:
+    - cron: "0 12 * * *" # 12:00 UTC = 8pm in Malaysia
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call the website
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 60 -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" "$SITE_URL/api/cron"

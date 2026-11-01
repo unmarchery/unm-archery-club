@@ -1,6 +1,7 @@
 import "server-only";
 import nodemailer from "nodemailer";
-import { passesLabel } from "./format";
+import { googleCalendarUrl } from "./calendar";
+import { longDay, passesLabel, shortTimeRange } from "./format";
 import { createAdminClient } from "./supabase/admin";
 
 // Top-up emails go out through the club Gmail (an app password, like the Supabase login
@@ -14,12 +15,14 @@ const pass = process.env.GMAIL_APP_PASSWORD;
 const oneLine = (text: string) => text.replace(/[\r\n\t]+/g, " ").trim();
 
 async function send(message: { to?: string; bcc?: string[]; subject: string; text: string }) {
-  if (!user || !pass) return;
+  if (!user || !pass) return false;
   try {
     const transport = nodemailer.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user, pass } });
     await transport.sendMail({ from: { name: "UNM Archery Club", address: user }, ...message });
+    return true;
   } catch (e) {
     console.error("Email failed:", (e as Error).message);
+    return false;
   }
 }
 
@@ -120,4 +123,57 @@ export async function emailNoShow(n: NoShow, site: string) {
             `at ${n.ban_after} you'll be paused from booking for a while.\n\nIf you can't come, please cancel in time so someone else can take the spot: ${site}/sessions\n`,
         },
   );
+}
+
+type Queued = { id: string; kind: "session_cancelled" | "waitlist_booked" | "reminder"; payload: Record<string, unknown>; email: string; full_name: string };
+type Times = { starts_at: string; ends_at: string };
+
+function queuedMessage(q: Queued, site: string) {
+  const first = oneLine(q.full_name).split(" ")[0] || "there";
+  if (q.kind === "reminder") {
+    const slots = (q.payload.slots ?? []) as Times[];
+    const when = `${longDay(slots[0].starts_at)}, ${shortTimeRange(slots[0].starts_at, slots[slots.length - 1].ends_at)}`;
+    return {
+      subject: `Training tomorrow: ${when}`,
+      text:
+        `Hi ${first},\n\nA reminder that you're booked for training tomorrow, ${when}.\n\n` +
+        `Add it to your calendar: ${googleCalendarUrl(slots[0].starts_at, slots[slots.length - 1].ends_at)}\n\n` +
+        `Can't come? Please cancel so someone else can take the spot: ${site}/bookings\n`,
+    };
+  }
+  const p = q.payload as Times & { reason?: string; refund?: boolean; pass?: boolean };
+  const when = `${longDay(p.starts_at)}, ${shortTimeRange(p.starts_at, p.ends_at)}`;
+  if (q.kind === "session_cancelled") {
+    return {
+      subject: `Training cancelled: ${when}`,
+      text:
+        `Hi ${first},\n\nYour training session on ${when} was cancelled${p.reason ? `: ${p.reason}` : ""}.\n` +
+        `${p.refund ? "Your pass for it is back in your account.\n" : ""}\nBook another session: ${site}/sessions\n`,
+    };
+  }
+  return {
+    subject: `You're in: ${when}`,
+    text:
+      `Hi ${first},\n\nA spot opened up, so you were booked from the waitlist for ${when}.` +
+      `${p.pass ? " One single pass was used." : ""}\n\nAdd it to your calendar: ${googleCalendarUrl(p.starts_at, p.ends_at)}\n\n` +
+      `Can't come any more? Please cancel so the next person gets it: ${site}/bookings\n`,
+  };
+}
+
+// Sends what the database queued (cancelled sessions, waitlist spots, reminders) and marks
+// each one sent. Without the Gmail settings nothing is sent and the queue just waits.
+export async function flushOutbox(site: string) {
+  if (!user || !pass) return 0;
+  const admin = createAdminClient();
+  const { data, error } = await admin.rpc("outbox_pending", { p_limit: 100 });
+  if (error) {
+    console.error("Email queue failed:", error.message);
+    return 0;
+  }
+  const sent: string[] = [];
+  for (const q of (data ?? []) as Queued[]) {
+    if (await send({ to: q.email, ...queuedMessage(q, site) })) sent.push(q.id);
+  }
+  if (sent.length) await admin.rpc("outbox_done", { p_ids: sent });
+  return sent.length;
 }

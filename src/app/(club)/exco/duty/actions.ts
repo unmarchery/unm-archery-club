@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { after } from "next/server";
 import { emailNoShow, siteFrom } from "@/lib/email";
+import { flushSoon } from "@/lib/flush";
 import { messageFor, type ActionResult } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
 
@@ -24,6 +25,7 @@ async function call(fn: string, args: Record<string, unknown>): Promise<ActionRe
   const { error } = await supabase.rpc(fn, args);
   if (error) return { ok: false, message: messageFor(error) };
   revalidatePath("/", "layout");
+  await flushSoon(); // bans and removed walk-ins free spots for the waitlist
   return { ok: true };
 }
 
@@ -50,6 +52,7 @@ export async function markAttendance(bookingId: string, status: "present" | "no_
     const site = siteFrom(await headers());
     after(() => emailNoShow(outcome, site));
   }
+  await flushSoon();
   return { ok: true };
 }
 

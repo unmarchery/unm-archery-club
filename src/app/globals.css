@@ -45,6 +45,9 @@ a:not([class]) { color: var(--gold-text); }
   .soon-tag { margin-left: auto; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
   .side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
   .me { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); }
+  a.me { text-decoration: none; color: inherit; }
+  a.me:hover { border-color: var(--gold); background: var(--surface2); }
+  .menu-item.mobile-only { display: none; }
   .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--gold); color: var(--on-gold); font: 700 13px var(--font-display); display: flex; align-items: center; justify-content: center; flex: none; }
   .side-actions { display: flex; gap: 8px; }
   .main { flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 40px 44px 64px; }
@@ -135,6 +138,7 @@ a:not([class]) { color: var(--gold-text); }
   /* A button that looks like a text link, for small actions inside lists and tables. */
   .link-btn { min-height: 32px; padding: 0 2px; border: 0; background: none; color: var(--gold-text); font: 600 13px var(--font-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .link-btn:hover { color: var(--ink); }
+  .inline-icon { width: 16px; height: 16px; flex: none; }
   .link-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
 
   /* Top up and approvals */
@@ -245,6 +249,7 @@ a:not([class]) { color: var(--gold-text); }
   .brand img { width: 44px; }
   .menu { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; gap: 6px; margin: 0 -16px; padding: 0 16px 12px; }
   .menu-label, .side-foot .me { display: none; }
+  .menu-item.mobile-only { display: flex; }
   .menu-item { width: auto; flex: none; padding: 0 14px; gap: 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; }
   .menu-item.on { border-color: var(--gold); }
   .menu-item svg { width: 18px; height: 18px; }

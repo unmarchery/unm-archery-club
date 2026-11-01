@@ -1,9 +1,11 @@
-import { LockIcon } from "@/components/icons";
+import { CalendarIcon, LockIcon } from "@/components/icons";
+import { googleCalendarUrl } from "@/lib/calendar";
 import { clockLabel, dayKey, longDay, openingLabel, requestTime, shortDay, shortTimeRange, weekLabel } from "@/lib/format";
 import type { ClubBows, Gear } from "@/lib/gear";
 import { getSession } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { BookButton, CancelButton } from "./booking";
+import { WaitlistButton } from "./waitlist";
 
 type Row = {
   slot_id: string;
@@ -18,6 +20,8 @@ type Row = {
   my_booking_id: string | null;
   my_pass_kind: "member" | "single" | "full" | null;
   my_group: string | null;
+  waiting?: number; // missing before migration 0008
+  my_waitlist?: number;
 };
 
 type State = "cancelled" | "booked" | "full" | "nmfull" | "almost" | "open";
@@ -195,11 +199,19 @@ export default async function SessionsPage() {
                       />
                     )}
                     {state === "booked" && r.my_booking_id && (
-                      <CancelButton bookingId={r.my_booking_id} fullDay={r.my_pass_kind === "full"} note={cancelNote} />
+                      <>
+                        <CancelButton bookingId={r.my_booking_id} fullDay={r.my_pass_kind === "full"} note={cancelNote} />
+                        <a className="link-btn" style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 6 }} href={googleCalendarUrl(r.starts_at, r.ends_at)} target="_blank" rel="noreferrer">
+                          <CalendarIcon className="inline-icon" />Add to Google Calendar
+                        </a>
+                      </>
                     )}
-                    {(state === "full" || state === "nmfull") && (
-                      <button type="button" className="btn btn-ghost" disabled>Full</button>
-                    )}
+                    {(state === "full" || state === "nmfull") &&
+                      (r.waiting !== undefined && Date.parse(r.starts_at) - now > 3_600_000 ? (
+                        <WaitlistButton slotId={r.slot_id} position={r.my_waitlist ?? 0} waiting={r.waiting} member={member} gear={gear} />
+                      ) : (
+                        <button type="button" className="btn btn-ghost" disabled>Full</button>
+                      ))}
                   </div>
                 );
               })}

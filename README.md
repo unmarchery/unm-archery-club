@@ -48,6 +48,7 @@ All three have free plans that are enough for the club.
    | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key |
    | `SUPABASE_SECRET_KEY` | Supabase secret key (keep private) |
    | `MEMBERS_SYNC_SECRET` | any long random string you make up |
+   | `CRON_SECRET` | another long random string (16+ characters), for the evening job and backups |
    | `GMAIL_USER` | the club Gmail address (optional, for top-up emails) |
    | `GMAIL_APP_PASSWORD` | a Gmail app password for it (optional, keep private) |
 
@@ -149,6 +150,30 @@ Needs [`supabase/migrations/0007_duty.sql`](supabase/migrations/0007_duty.sql) r
   `settings.noshow_count_from` to the first day of a semester to stop older no-shows counting. The
   President or VP can lift a ban from the sheet.
 
+### Waitlist, cancelling sessions, settings, reminders and backups
+
+Needs [`supabase/migrations/0008_phase1_finish.sql`](supabase/migrations/0008_phase1_finish.sql) run once, after 0007.
+
+- **Waitlist**: a full slot (or full non-member spots) shows **Join the waitlist**. When a spot opens,
+  the first in line who can take it is booked automatically and emailed (a non-member uses one single
+  pass; someone without one is skipped). It stops 1 hour before the slot.
+- **Exco > Manage sessions**: on the day, whoever is on duty, the President or the VP cancels a slot or
+  the rest of the day (rain, lightning); `manage_sessions` can also cancel ahead and close dates (exams,
+  holidays). Bookings not yet marked present are cancelled and emailed. A single pass comes back; a
+  full-day pass comes back whole if the club cancels the whole day, otherwise one single pass per
+  cancelled slot.
+- **Exco > Settings** (`edit_settings`): every club rule; each change is logged on the People page.
+- **My bookings** and **Profile**: upcoming and past sessions with attendance, waitlist places, pass
+  history; phone and default equipment. **Add to Google Calendar** links on Home, Sessions and My bookings.
+- **Evening reminders**: [`.github/workflows/evening.yml`](.github/workflows/evening.yml) runs at 8pm
+  Malaysia time and calls `/api/cron`, which emails everyone booked for tomorrow and sends anything left in
+  the email queue. Add two repository secrets on GitHub (**Settings > Secrets and variables > Actions**):
+  `SITE_URL` and `CRON_SECRET` (the same value as in Netlify). GitHub pauses scheduled jobs in a repository
+  with no activity for 60 days; re-enable it under **Actions** if that happens.
+- **Weekly backup**: follow the steps at the top of [`scripts/backup.gs`](scripts/backup.gs). It saves the
+  club's data to Google Drive every Sunday and keeps 12 weeks. Login passwords are not in it (Supabase
+  keeps those); after a restore, people use **Forgot password**.
+
 ### Giving someone passes by hand
 
 ```sql
@@ -193,7 +218,7 @@ npm run lint
 | `supabase/migrations/` | Database tables, booking rules and security |
 | `supabase/tests/` | Database tests (run in PGlite) |
 | `src/app/(auth)/` | Sign up, email code, log in, password reset |
-| `src/app/(club)/` | Signed-in pages: Home, Sessions, Top up, Our exco, and the Exco pages (People, Members, Accounts, Approvals, Finance) |
+| `src/app/(club)/` | Signed-in pages: Home, Sessions, Top up, My bookings, Profile, Our exco, and the Exco pages (People, Members, Accounts, Approvals, Finance, Manage sessions, Duty, Settings) |
 | `src/app/api/members/sync/` | Receives the membership list from Google Sheets |
 | `src/proxy.ts` | Keeps the login session fresh and protects pages |
 | `scripts/members-sync.gs` | Google Apps Script for the membership form |

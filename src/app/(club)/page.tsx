@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowIcon, InfoIcon, TargetRings } from "@/components/icons";
+import { ArrowIcon, CalendarIcon, InfoIcon, TargetRings } from "@/components/icons";
+import { googleCalendarUrl } from "@/lib/calendar";
 import { clockLabel, longDay, requestTime, timeRange } from "@/lib/format";
 import { gearTags, type Gear } from "@/lib/gear";
 import { getSession } from "@/lib/session";
@@ -33,7 +34,7 @@ export default async function HomePage() {
   const refundMs = (cfg?.nonmember_refund_hours ?? 2) * 3_600_000;
   const firstName = profile.full_name.split(/\s+/)[0] || profile.full_name;
 
-  let nextView: { day: string; time: string; note: string } | null = null;
+  let nextView: { day: string; time: string; note: string; calendar: string } | null = null;
   if (next) {
     const start = next.slots.starts_at;
     const cancelBy = clockLabel(new Date(Date.parse(start) - refundMs).toISOString());
@@ -43,12 +44,14 @@ export default async function HomePage() {
         day: longDay(start),
         time: `${timeRange(start, group[group.length - 1].slots.ends_at)}, full day`,
         note: `Free cancellation for the whole day until ${cancelBy}.`,
+        calendar: googleCalendarUrl(start, group[group.length - 1].slots.ends_at),
       };
     } else {
       nextView = {
         day: longDay(start),
         time: timeRange(start, next.slots.ends_at),
         note: next.pass_kind === "member" ? `You can cancel any time before ${clockLabel(start)}.` : `Free cancellation until ${cancelBy}.`,
+        calendar: googleCalendarUrl(start, next.slots.ends_at),
       };
     }
   }
@@ -114,6 +117,9 @@ export default async function HomePage() {
               ))}
             </div>
             <div className="muted small">{nextView.note}</div>
+            <a className="link-btn" style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 6 }} href={nextView.calendar} target="_blank" rel="noreferrer">
+              <CalendarIcon className="inline-icon" />Add to Google Calendar
+            </a>
           </section>
         ) : (
           <section className="card">

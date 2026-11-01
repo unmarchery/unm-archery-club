@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
-import { CalendarIcon, ChartIcon, CheckCircleIcon, ClipboardIcon, HomeIcon, KeyIcon, LogoutIcon, ShieldIcon, StarIcon, ThemeIcon, UsersIcon, WalletIcon } from "./icons";
+import { CalendarIcon, ChartIcon, CheckCircleIcon, ClipboardIcon, GearIcon, HomeIcon, KeyIcon, LogoutIcon, ShieldIcon, StarIcon, ThemeIcon, TicketIcon, UsersIcon, WalletIcon } from "./icons";
 
 type Props = {
   name: string;
@@ -13,6 +13,7 @@ type Props = {
   memberRequests: number | null; // pending count for member managers, null for everyone else
   topupRequests: number | null; // pending count for top-up approvers, null for everyone else
   finance: boolean;
+  settings: boolean;
 };
 
 function initials(name: string) {
@@ -32,7 +33,7 @@ function toggleTheme() {
   document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax`;
 }
 
-export function Sidebar({ name, membership, position, isExco, memberRequests, topupRequests, finance }: Props) {
+export function Sidebar({ name, membership, position, isExco, memberRequests, topupRequests, finance, settings }: Props) {
   const path = usePathname();
   const item = (href: string) => `menu-item${path === href ? " on" : ""}`;
 
@@ -57,8 +58,14 @@ export function Sidebar({ name, membership, position, isExco, memberRequests, to
             <WalletIcon />Top up
           </Link>
         )}
+        <Link href="/bookings" className={item("/bookings")} aria-current={path === "/bookings" ? "page" : undefined}>
+          <TicketIcon />My bookings
+        </Link>
         <Link href="/exco" className={item("/exco")} aria-current={path === "/exco" ? "page" : undefined}>
           <StarIcon />Our exco
+        </Link>
+        <Link href="/profile" className={`${item("/profile")} mobile-only`} aria-current={path === "/profile" ? "page" : undefined}>
+          <UsersIcon />Profile
         </Link>
         {isExco && (
           <>
@@ -88,21 +95,29 @@ export function Sidebar({ name, membership, position, isExco, memberRequests, to
                 <ChartIcon />Finance
               </Link>
             )}
+            <Link href="/exco/sessions" className={item("/exco/sessions")} aria-current={path === "/exco/sessions" ? "page" : undefined}>
+              <CalendarIcon />Manage sessions
+            </Link>
             <Link href="/exco/duty" className={`menu-item${path.startsWith("/exco/duty") ? " on" : ""}`} aria-current={path.startsWith("/exco/duty") ? "page" : undefined}>
               <ClipboardIcon />Duty
             </Link>
+            {settings && (
+              <Link href="/exco/settings" className={item("/exco/settings")} aria-current={path === "/exco/settings" ? "page" : undefined}>
+                <GearIcon />Settings
+              </Link>
+            )}
           </>
         )}
       </nav>
 
       <div className="side-foot">
-        <div className="me">
+        <Link href="/profile" className="me" aria-label="Your profile">
           <div className="avatar" aria-hidden="true">{initials(name)}</div>
           <div>
             <div className="strong" style={{ fontSize: 14 }}>{name}</div>
             <div className="muted small">{position ?? (membership === "member" ? "Member" : "Non-member")}</div>
           </div>
-        </div>
+        </Link>
         <div className="side-actions">
           <button type="button" className="icon-btn" onClick={toggleTheme} aria-label="Switch between light and dark">
             <ThemeIcon />

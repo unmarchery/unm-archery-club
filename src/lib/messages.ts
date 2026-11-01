@@ -50,6 +50,9 @@ const MESSAGES: Record<string, string> = {
   NAME_REQUIRED: "Enter a student ID or a name.",
   WALKIN_NO_PASS: "This non-member has no single pass. They need to top up (or pay cash to the treasurer) first.",
   WALKIN_BANNED: "This archer is paused from booking because of no-shows.",
+  WAITLIST_CLOSED: "The waitlist closes 1 hour before the session.",
+  SLOT_NOT_FULL: "There's still space. Book it instead.",
+  INVALID_SETTING: "One of the values isn't valid. Check the times and numbers.",
   TREASURER_AND_PRESIDENT: "The Treasurer and the President or VP must both agree to delete a receipt.",
 };
 

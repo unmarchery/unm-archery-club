@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { flushSoon } from "@/lib/flush";
 import { messageFor, type ActionResult } from "@/lib/messages";
 import { BOW_TYPES, type Gear } from "@/lib/gear";
 
@@ -53,5 +54,27 @@ export async function cancelBooking(bookingId: string, wholeDay: boolean): Promi
   if (error) return { ok: false, message: messageFor(error) };
 
   revalidatePath("/", "layout");
+  await flushSoon(); // the freed spot may have gone to someone on the waitlist
   return { ok: true, refunded: Boolean((data as { refunded?: boolean } | null)?.refunded) };
+}
+
+export async function joinWaitlist(slotId: string, gear: Gear): Promise<ActionResult & { position?: number }> {
+  const supabase = await signedInClient();
+  if (!supabase) return { ok: false, message: messageFor({ message: "NOT_SIGNED_IN" }) };
+  if (!UUID.test(slotId)) return { ok: false, message: messageFor({ message: "SLOT_NOT_FOUND" }) };
+  const clean = cleanGear(gear);
+  const { data, error } = await supabase.rpc("join_waitlist", { p_slot: slotId, p_equipment: clean ?? {} });
+  if (error) return { ok: false, message: messageFor(error) };
+  revalidatePath("/", "layout");
+  return { ok: true, position: Number(data) };
+}
+
+export async function leaveWaitlist(slotId: string): Promise<ActionResult> {
+  const supabase = await signedInClient();
+  if (!supabase) return { ok: false, message: messageFor({ message: "NOT_SIGNED_IN" }) };
+  if (!UUID.test(slotId)) return { ok: false, message: messageFor({ message: "SLOT_NOT_FOUND" }) };
+  const { error } = await supabase.rpc("leave_waitlist", { p_slot: slotId });
+  if (error) return { ok: false, message: messageFor(error) };
+  revalidatePath("/", "layout");
+  return { ok: true };
 }
