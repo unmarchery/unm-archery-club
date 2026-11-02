@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { clockLabel, shortDay } from "@/lib/format";
+import { isJuco } from "@/lib/people";
 import { getSession } from "@/lib/session";
 import { AddPerson, PersonCard, type Person, type Powers } from "./people";
 
@@ -22,23 +23,29 @@ export default async function PeoplePage() {
     <>
       <div className="page-head">
         <div>
-          <h1 className="h1">People</h1>
+          <h1 className="h1">Exco & JUCO</h1>
           <p className="sub">
             {o.can_access
               ? "Switch each exco's access on or off. It takes effect straight away, and every change is logged below."
               : "Who's on the exco and what they can open."}
           </p>
         </div>
-        <span className="tag">{o.people.length} on the exco</span>
+        <span className="tag">{o.people.filter((p) => !isJuco(p.position)).length} exco · {o.people.filter((p) => isJuco(p.position)).length} JUCO</span>
       </div>
 
       {o.can_positions && <AddPerson powers={o} />}
 
-      <div className="field" style={{ gap: 10 }}>
-        {o.people.map((p) => (
-          <PersonCard key={p.id} person={p} powers={o} />
-        ))}
-      </div>
+      {[
+        { title: "Exco", people: o.people.filter((p) => !isJuco(p.position)) },
+        { title: "JUCO (junior committee)", people: o.people.filter((p) => isJuco(p.position)) },
+      ].map((g) => g.people.length > 0 && (
+        <div key={g.title} className="field" style={{ gap: 10 }}>
+          <div className="eyebrow">{g.title}</div>
+          {g.people.map((p) => (
+            <PersonCard key={p.id} person={p} powers={o} />
+          ))}
+        </div>
+      ))}
 
       {o.can_access && (
         <section className="card">

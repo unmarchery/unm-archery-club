@@ -62,7 +62,7 @@ export function Sidebar({ name, membership, position, isExco, memberRequests, to
           <TicketIcon />My bookings
         </Link>
         <Link href="/exco" className={item("/exco")} aria-current={path === "/exco" ? "page" : undefined}>
-          <StarIcon />Our exco
+          <StarIcon />Our committee
         </Link>
         <Link href="/profile" className={`${item("/profile")} mobile-only`} aria-current={path === "/profile" ? "page" : undefined}>
           <UsersIcon />Profile
@@ -71,7 +71,7 @@ export function Sidebar({ name, membership, position, isExco, memberRequests, to
           <>
             <div className="menu-label">Exco</div>
             <Link href="/exco/people" className={item("/exco/people")} aria-current={path === "/exco/people" ? "page" : undefined}>
-              <ShieldIcon />People
+              <ShieldIcon />Exco & JUCO
             </Link>
             {memberRequests !== null && (
               <Link href="/exco/members" className={item("/exco/members")} aria-current={path === "/exco/members" ? "page" : undefined}>

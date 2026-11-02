@@ -18,3 +18,8 @@ export const SWITCHES: { key: string; label: string; hint: string }[] = [
   { key: "assign_duty", label: "Duty roster", hint: "Coming soon" },
   { key: "take_attendance", label: "Attendance", hint: "Coming soon" },
 ];
+
+// Any "… Dept" position is junior committee (JUCO); the rest of the positions are exco.
+export function isJuco(position: string | null | undefined) {
+  return Boolean(position && /\bDept\.?$/i.test(position.trim()));
+}
