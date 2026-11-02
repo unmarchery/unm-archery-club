@@ -177,3 +177,46 @@ export async function flushOutbox(site: string) {
   if (sent.length) await admin.rpc("outbox_done", { p_ids: sent });
   return sent.length;
 }
+
+type NewOrder = { number: number; total_sen: number; full_name: string; student_id: string; method: "qr" | "cash"; bankRef: string | null };
+const ringgit = (sen: number) => (sen % 100 === 0 ? `RM${sen / 100}` : `RM${(sen / 100).toFixed(2)}`);
+
+// "New shop order waiting" to everyone who runs the shop, except the buyer.
+export async function emailShopManagers(o: NewOrder, buyerId: string, site: string) {
+  if (!user || !pass) return;
+  const { data, error } = await createAdminClient().rpc("shop_alert_emails", { p_exclude: buyerId });
+  if (error) return console.error("Shop manager list failed:", error.message);
+  const to = ((data ?? []) as { email: string }[]).map((r) => r.email);
+  if (to.length === 0) return;
+  await send({
+    to: user,
+    bcc: to,
+    subject: `New shop order #${o.number}: ${ringgit(o.total_sen)} from ${oneLine(o.full_name)}`,
+    text:
+      `${o.full_name} (${o.student_id}) placed a shop order of ${ringgit(o.total_sen)}, paid by ` +
+      `${o.method === "qr" ? `DuitNow QR, bank reference ${o.bankRef}` : "cash"}.\n\nCheck it: ${site}/exco/shop\n`,
+  });
+}
+
+type OrderDecision = { email: string; full_name: string; number: number; total_sen: number; approved: boolean; reason: string | null; pickup_link: string | null };
+
+// "Order confirmed" (with the pick-up group) or "not approved" to the buyer.
+export async function emailOrderDecision(d: OrderDecision, site: string) {
+  const first = oneLine(d.full_name).split(" ")[0] || "there";
+  await send(
+    d.approved
+      ? {
+          to: d.email,
+          subject: `Your shop order #${d.number} is confirmed`,
+          text:
+            `Hi ${first},\n\nYour payment of ${ringgit(d.total_sen)} for order #${d.number} was checked.\n\n` +
+            (d.pickup_link ? `Join the pick-up group to arrange when and where to collect it: ${d.pickup_link}\n\n` : "We'll tell you when and where to collect it.\n\n") +
+            `Your orders: ${site}/shop\n`,
+        }
+      : {
+          to: d.email,
+          subject: `Your shop order #${d.number} wasn't approved`,
+          text: `Hi ${first},\n\nYour order #${d.number} (${ringgit(d.total_sen)}) wasn't approved.\nReason: ${d.reason ?? "none given"}\n\nYou can order again here: ${site}/shop\n`,
+        },
+  );
+}

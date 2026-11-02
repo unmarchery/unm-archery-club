@@ -23,9 +23,10 @@ export function uploadProblem(file: FormDataEntryValue | null, allowPdf = true) 
   return null;
 }
 
-export async function uploadFile(folder: string, file: File) {
+// Product photos go to the public "shop" bucket instead.
+export async function uploadFile(folder: string, file: File, bucket: "receipts" | "shop" = BUCKET) {
   const path = `${folder}/${Date.now()}-${crypto.randomUUID()}.${EXTENSIONS[file.type]}`;
-  const { error } = await createAdminClient().storage.from(BUCKET).upload(path, file, { contentType: file.type });
+  const { error } = await createAdminClient().storage.from(bucket).upload(path, file, { contentType: file.type });
   if (error) {
     console.error("Upload failed:", error.message);
     return null;
@@ -33,8 +34,8 @@ export async function uploadFile(folder: string, file: File) {
   return path;
 }
 
-export async function removeFile(path: string) {
-  await createAdminClient().storage.from(BUCKET).remove([path]);
+export async function removeFile(path: string, bucket: "receipts" | "shop" = BUCKET) {
+  await createAdminClient().storage.from(bucket).remove([path]);
 }
 
 // Short-lived links for showing private files on a page, keyed by path.

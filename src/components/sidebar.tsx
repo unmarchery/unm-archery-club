@@ -14,6 +14,7 @@ type Props = {
   topupRequests: number | null; // pending count for top-up approvers, null for everyone else
   finance: boolean;
   settings: boolean;
+  shop: boolean;
 };
 
 function initials(name: string) {
@@ -33,7 +34,7 @@ function toggleTheme() {
   document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax`;
 }
 
-export function Sidebar({ name, membership, position, isExco, memberRequests, topupRequests, finance, settings }: Props) {
+export function Sidebar({ name, membership, position, isExco, memberRequests, topupRequests, finance, settings, shop }: Props) {
   const path = usePathname();
   const item = (href: string) => `menu-item${path === href ? " on" : ""}`;
 
@@ -53,11 +54,9 @@ export function Sidebar({ name, membership, position, isExco, memberRequests, to
         <Link href="/sessions" className={item("/sessions")} aria-current={path === "/sessions" ? "page" : undefined}>
           <CalendarIcon />Sessions
         </Link>
-        {membership !== "member" && (
-          <Link href="/top-up" className={item("/top-up")} aria-current={path === "/top-up" ? "page" : undefined}>
-            <WalletIcon />Top up
-          </Link>
-        )}
+        <Link href="/shop" className={item("/shop")} aria-current={path === "/shop" ? "page" : undefined}>
+          <WalletIcon />Shop
+        </Link>
         <Link href="/bookings" className={item("/bookings")} aria-current={path === "/bookings" ? "page" : undefined}>
           <TicketIcon />My bookings
         </Link>
@@ -101,6 +100,11 @@ export function Sidebar({ name, membership, position, isExco, memberRequests, to
             <Link href="/exco/duty" className={`menu-item${path.startsWith("/exco/duty") ? " on" : ""}`} aria-current={path.startsWith("/exco/duty") ? "page" : undefined}>
               <ClipboardIcon />Duty
             </Link>
+            {shop && (
+              <Link href="/exco/shop" className={item("/exco/shop")} aria-current={path === "/exco/shop" ? "page" : undefined}>
+                <WalletIcon />Shop orders
+              </Link>
+            )}
             {settings && (
               <Link href="/exco/settings" className={item("/exco/settings")} aria-current={path === "/exco/settings" ? "page" : undefined}>
                 <GearIcon />Settings

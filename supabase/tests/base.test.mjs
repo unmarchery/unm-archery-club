@@ -820,3 +820,84 @@ test('security: every table has Row Level Security, and signed-out visitors can 
     await rejects(asUser(archer, `select count(*) from ${table}`), 'permission denied')
   }
 })
+
+test('shop: managers add items with options; checkout holds stock and prices members right', async () => {
+  const pres = await ownerId()
+  const sec = (await one(`select id from profiles where student_id = '20000092'`)).id
+  const member = (await one(`select id from profiles where student_id = '20000101'`)).id
+  const guest = await signUp('20000110', 'shop110@nottingham.edu.my', 'Shop Guest')
+  const merch = (await one(`select id from shop_sections where name = 'Merch'`)).id
+  const shirt = { section_id: merch, name: 'Club T-shirt', description: 'Black, gold logo', price_sen: 3500, member_price_sen: 3000,
+    mode: 'stock', images: ['p/shirt.jpg'], options: [{ label: 'M / Black', stock: 2 }, { label: 'L / Black', stock: 0 }] }
+
+  await rejects(asUser(sec, 'select save_product($1)', [shirt]), 'NOT_ALLOWED')
+  await rejects(asUser(pres, 'select save_product($1)', [{ ...shirt, options: [] }]), 'OPTIONS_REQUIRED')
+  const [{ save_product: pid }] = await asUser(pres, 'select save_product($1)', [shirt])
+  const [m, l] = (await db.query('select id, stock from product_options where product_id = $1 order by sort', [pid])).rows
+
+  const [{ shop_catalog: cat }] = await asUser(member, 'select shop_catalog()')
+  const item = cat.sections.find((s) => s.name === 'Merch').products.find((p) => p.id === pid)
+  assert.equal(item.your_price_sen, 3000)
+  assert.equal(cat.sections[0].kind, 'passes')
+
+  await rejects(asUser(guest, `select place_order($1, 'cash')`, [JSON.stringify([{ option_id: l.id, qty: 1 }])]), 'OUT_OF_STOCK')
+  await rejects(asUser(guest, `select place_order($1, 'cash')`, [JSON.stringify([{ option_id: m.id, qty: 3 }])]), 'OUT_OF_STOCK')
+  await rejects(asUser(guest, `select place_order('[]', 'cash')`), 'CART_EMPTY')
+  const [{ place_order: o1 }] = await asUser(guest, `select place_order($1, 'qr', 'mb 5566', $2)`, [JSON.stringify([{ option_id: m.id, qty: 1 }]), `${guest}/o1.jpg`])
+  assert.equal(o1.total_sen, 3500) // non-member price
+  const [{ place_order: o2 }] = await asUser(member, `select place_order($1, 'cash')`, [JSON.stringify([{ option_id: m.id, qty: 1 }])])
+  assert.equal(o2.total_sen, 3000) // member price
+  assert.equal((await one('select stock from product_options where id = $1', [m.id])).stock, 0)
+  await rejects(asUser(member, `select place_order($1, 'qr', 'MB5566', $2)`, [JSON.stringify([{ option_id: m.id, qty: 1 }]), `${member}/x.jpg`]), 'BANK_REF_USED')
+
+  // Rejecting or cancelling puts the stock back; approving and collecting are logged.
+  await rejects(asUser(sec, 'select decide_order($1, true)', [o1.id]), 'NOT_ALLOWED')
+  await rejects(asUser(pres, 'select decide_order($1, false)', [o1.id]), 'REASON_REQUIRED')
+  await asUser(pres, `select decide_order($1, false, 'No payment found')`, [o1.id])
+  assert.equal((await one('select stock from product_options where id = $1', [m.id])).stock, 1)
+  await asUser(member, 'select cancel_order($1)', [o2.id])
+  assert.equal((await one('select stock from product_options where id = $1', [m.id])).stock, 2)
+
+  const [{ place_order: o3 }] = await asUser(guest, `select place_order($1, 'cash')`, [JSON.stringify([{ option_id: m.id, qty: 2 }])])
+  const [{ decide_order: d }] = await asUser(pres, 'select decide_order($1, true)', [o3.id])
+  assert.equal(d.approved, true)
+  assert.equal(d.email, 'shop110@nottingham.edu.my')
+  await asUser(pres, 'select mark_collected($1, true)', [o3.id])
+  assert.ok((await one('select collected_at from shop_orders where id = $1', [o3.id])).collected_at)
+  assert.equal((await asUser(guest, 'select count(*)::int as n from shop_orders'))[0].n, 2)
+  assert.equal((await asUser(member, 'select count(*)::int as n from shop_order_items where order_id = $1', [o3.id]))[0].n, 0)
+
+  const [{ shop_finance: f }] = await asUser(pres, 'select shop_finance(current_date - 1, current_date + 1)')
+  assert.equal(f.total_sen, 7000)
+  assert.match(f.rows[0].items, /2× Club T-shirt \(M \/ Black\)/)
+})
+
+test('shop: pre-orders close on their date; editing keeps old options for old orders', async () => {
+  const pres = await ownerId()
+  const guest = (await one(`select id from profiles where student_id = '20000110'`)).id
+  const merch = (await one(`select id from shop_sections where name = 'Merch'`)).id
+  const hoodie = { section_id: merch, name: 'Hoodie', price_sen: 8000, mode: 'preorder', preorder_until: null,
+    options: [{ label: 'S' }, { label: 'M' }] }
+  const [{ save_product: pid }] = await asUser(pres, 'select save_product($1)', [{ ...hoodie, preorder_until: '2000-01-01' }])
+  const s = (await one(`select id from product_options where product_id = $1 and label = 'S'`, [pid])).id
+  await rejects(asUser(guest, `select place_order($1, 'cash')`, [JSON.stringify([{ option_id: s, qty: 5 }])]), 'PREORDER_CLOSED')
+  await asUser(pres, 'select save_product($1)', [{ ...hoodie, id: pid, options: [{ id: s, label: 'S' }, { label: 'XL' }] }])
+  const [{ place_order: o }] = await asUser(guest, `select place_order($1, 'cash')`, [JSON.stringify([{ option_id: s, qty: 5 }])])
+  assert.equal(o.total_sen, 40000)
+  assert.equal((await one(`select active from product_options where product_id = $1 and label = 'M'`, [pid])).active, false)
+  assert.equal((await one(`select stock from product_options where id = $1`, [s])).stock, null)
+
+  const [{ save_section: sid }] = await asUser(pres, `select save_section(null, 'Equipment', 3, false)`)
+  const [{ shop_catalog: forGuest }] = await asUser(guest, 'select shop_catalog()')
+  assert.ok(!forGuest.sections.some((x) => x.id === sid))
+  await rejects(asUser(pres, 'select save_product($1)', [{ ...hoodie, section_id: (await one(`select id from shop_sections where kind = 'passes'`)).id }]), 'INVALID_ITEM')
+})
+
+test('the Shop switch can be given from the People page', async () => {
+  const pres = await ownerId()
+  const sec = (await one(`select id from profiles where student_id = '20000092'`)).id
+  await asUser(pres, `select set_permission($1, 'manage_shop', true)`, [sec])
+  const [{ shop_orders_for_review: q }] = await asUser(sec, 'select shop_orders_for_review()')
+  assert.ok(Array.isArray(q))
+  assert.ok((await one(`select action from activity_log order by id desc limit 1`)).action.includes('gave Shop'))
+})

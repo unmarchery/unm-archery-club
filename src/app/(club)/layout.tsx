@@ -19,6 +19,7 @@ export default async function ClubLayout({ children }: { children: React.ReactNo
           topupRequests={can(status, "approve_topups") ? status.pending_topups : null}
           finance={can(status, "export_finance") || can(status, "approve_topups")}
           settings={can(status, "edit_settings")}
+          shop={can(status, "manage_shop")}
         />
         <main className="main">
           <div className="wrap">{children}</div>

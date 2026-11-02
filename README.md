@@ -174,6 +174,20 @@ Needs [`supabase/migrations/0008_phase1_finish.sql`](supabase/migrations/0008_ph
   club's data to Google Drive every Sunday and keeps 12 weeks. Login passwords are not in it (Supabase
   keeps those); after a restore, people use **Forgot password**.
 
+### Shop
+
+Needs [`supabase/migrations/0009_shop.sql`](supabase/migrations/0009_shop.sql) run once, after 0008. It also
+creates a public `shop` storage bucket for product photos.
+
+- **Shop** (everyone): one tab per section. **Passes** is the top-up form (the old Top up page); other
+  sections sell items. An item has photos, a size chart, a price and an optional member price, and
+  options (sizes, colours, or both), each with its own stock. Items are **in stock** (sell out at 0) or
+  **pre-order** (until a closing date). Buyers fill a cart and pay once by DuitNow QR (receipt) or cash.
+- **Exco > Shop orders** (`manage_shop`): confirm or reject payments (stock comes back on reject or
+  cancel), mark paid orders collected, add and edit items and sections, and set the pick-up WhatsApp group
+  that buyers see once their payment is confirmed. Buyers and managers get emails. Shop sales appear on
+  Finance and in its Excel download.
+
 ### Giving someone passes by hand
 
 ```sql
@@ -218,7 +232,7 @@ npm run lint
 | `supabase/migrations/` | Database tables, booking rules and security |
 | `supabase/tests/` | Database tests (run in PGlite) |
 | `src/app/(auth)/` | Sign up, email code, log in, password reset |
-| `src/app/(club)/` | Signed-in pages: Home, Sessions, Top up, My bookings, Profile, Our exco, and the Exco pages (People, Members, Accounts, Approvals, Finance, Manage sessions, Duty, Settings) |
+| `src/app/(club)/` | Signed-in pages: Home, Sessions, Shop, My bookings, Profile, Our committee, and the Exco pages (Exco & JUCO, Members, Accounts, Approvals, Finance, Manage sessions, Duty, Shop orders, Settings) |
 | `src/app/api/members/sync/` | Receives the membership list from Google Sheets |
 | `src/proxy.ts` | Keeps the login session fresh and protects pages |
 | `scripts/members-sync.gs` | Google Apps Script for the membership form |

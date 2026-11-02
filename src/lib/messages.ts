@@ -53,6 +53,13 @@ const MESSAGES: Record<string, string> = {
   WAITLIST_CLOSED: "The waitlist closes 1 hour before the session.",
   SLOT_NOT_FULL: "There's still space. Book it instead.",
   INVALID_SETTING: "One of the values isn't valid. Check the times and numbers.",
+  CART_EMPTY: "Your cart is empty.",
+  ITEM_NOT_FOUND: "That item isn't available any more.",
+  OUT_OF_STOCK: "Sorry, there isn't enough stock for that option. Lower the quantity or pick another option.",
+  PREORDER_CLOSED: "Pre-orders for that item have closed.",
+  ORDER_NOT_FOUND: "That order has already been handled.",
+  INVALID_ITEM: "Check the item's details: name, price and options.",
+  OPTIONS_REQUIRED: "Add at least one option (for example \"One size\").",
   TREASURER_AND_PRESIDENT: "The Treasurer and the President or VP must both agree to delete a receipt.",
 };
 

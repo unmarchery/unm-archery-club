@@ -13,6 +13,7 @@ export const SWITCHES: { key: string; label: string; hint: string }[] = [
   { key: "export_finance", label: "Download finance", hint: "Finance page and the Excel download" },
   { key: "change_positions", label: "Change positions", hint: "Positions and what each exco handles" },
   { key: "write_notes", label: "Write notes", hint: "Notes about exco on this page" },
+  { key: "manage_shop", label: "Shop", hint: "Items, sections, order payments and pick-up" },
   { key: "edit_settings", label: "Settings", hint: "Club rules (page coming soon)" },
   { key: "manage_sessions", label: "Sessions", hint: "Cancel or add sessions (coming soon)" },
   { key: "assign_duty", label: "Duty roster", hint: "Coming soon" },

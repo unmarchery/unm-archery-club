@@ -183,6 +183,22 @@ a:not([class]) { color: var(--gold-text); }
   .note { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--surface2); }
   select.input { appearance: auto; }
 
+  /* Shop */
+  .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .card.product { align-items: flex-start; text-align: left; cursor: pointer; font: inherit; color: inherit; padding: 12px; gap: 8px; transition: border-color 0.15s ease, transform 0.08s ease; }
+  .card.product:hover { border-color: var(--gold); }
+  .card.product:active { transform: scale(0.98); }
+  .card.product:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .product-photo { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; background: var(--surface2); display: block; }
+  .product-photo.large { aspect-ratio: auto; max-height: 360px; object-fit: contain; }
+  .product-photo.empty { background: linear-gradient(135deg, var(--surface2), var(--gold-tint)); }
+  .thumbs { display: flex; gap: 8px; overflow-x: auto; }
+  .thumb { flex: none; width: 56px; height: 56px; padding: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface2); cursor: pointer; }
+  .thumb.on { border: 2px solid var(--gold); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .chip:disabled { opacity: 0.45; cursor: not-allowed; }
+  .card.cart { position: sticky; bottom: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
+
   /* Finance */
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
   .stat-value { font: 700 30px var(--font-display); line-height: 1.1; color: var(--ink); }
