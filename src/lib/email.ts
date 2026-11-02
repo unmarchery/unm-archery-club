@@ -1,6 +1,7 @@
 import "server-only";
 import nodemailer from "nodemailer";
-import { passesLabel } from "./format";
+import { googleCalendarUrl } from "./calendar";
+import { longDay, passesLabel, shortTimeRange } from "./format";
 import { createAdminClient } from "./supabase/admin";
 
 // Top-up emails go out through the club Gmail (an app password, like the Supabase login
@@ -14,12 +15,14 @@ const pass = process.env.GMAIL_APP_PASSWORD;
 const oneLine = (text: string) => text.replace(/[\r\n\t]+/g, " ").trim();
 
 async function send(message: { to?: string; bcc?: string[]; subject: string; text: string }) {
-  if (!user || !pass) return;
+  if (!user || !pass) return false;
   try {
     const transport = nodemailer.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user, pass } });
     await transport.sendMail({ from: { name: "UNM Archery Club", address: user }, ...message });
+    return true;
   } catch (e) {
     console.error("Email failed:", (e as Error).message);
+    return false;
   }
 }
 
@@ -90,4 +93,130 @@ export async function emailArcher(d: Decision, site: string) {
 export function siteFrom(h: Headers) {
   const host = h.get("x-forwarded-host") ?? h.get("host");
   return host ? `https://${host}` : "";
+}
+
+type NoShow = { email: string; full_name: string; noshows: number; warned: boolean; banned_until: string | null; ban_after: number };
+
+const ordinal = (k: number) => (k % 10 === 1 && k !== 11 ? `${k}st` : k % 10 === 2 && k !== 12 ? `${k}nd` : k % 10 === 3 && k !== 13 ? `${k}rd` : `${k}th`);
+
+// The 2nd no-show is a warning; the one that brings a ban says until when.
+export async function emailNoShow(n: NoShow, site: string) {
+  const first = oneLine(n.full_name).split(" ")[0] || "there";
+  const until = n.banned_until
+    ? new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kuala_Lumpur", weekday: "long", day: "numeric", month: "long" }).format(new Date(n.banned_until))
+    : "";
+  await send(
+    n.banned_until
+      ? {
+          to: n.email,
+          subject: "You're paused from booking",
+          text:
+            `Hi ${first},\n\nYou were marked as a no-show ${n.noshows} times, so you can't book sessions until ${until}. ` +
+            `Your bookings in that time were cancelled, and any passes for them were returned.\n\n` +
+            `If this is a mistake, contact the exco: ${site}/exco\n`,
+        }
+      : {
+          to: n.email,
+          subject: "No-show warning",
+          text:
+            `Hi ${first},\n\nYou were marked as a no-show for a session you booked. This is your ${ordinal(n.noshows)} no-show; ` +
+            `at ${n.ban_after} you'll be paused from booking for a while.\n\nIf you can't come, please cancel in time so someone else can take the spot: ${site}/sessions\n`,
+        },
+  );
+}
+
+type Queued = { id: string; kind: "session_cancelled" | "waitlist_booked" | "reminder"; payload: Record<string, unknown>; email: string; full_name: string };
+type Times = { starts_at: string; ends_at: string };
+
+function queuedMessage(q: Queued, site: string) {
+  const first = oneLine(q.full_name).split(" ")[0] || "there";
+  if (q.kind === "reminder") {
+    const slots = (q.payload.slots ?? []) as Times[];
+    const when = `${longDay(slots[0].starts_at)}, ${shortTimeRange(slots[0].starts_at, slots[slots.length - 1].ends_at)}`;
+    return {
+      subject: `Training tomorrow: ${when}`,
+      text:
+        `Hi ${first},\n\nA reminder that you're booked for training tomorrow, ${when}.\n\n` +
+        `Add it to your calendar: ${googleCalendarUrl(slots[0].starts_at, slots[slots.length - 1].ends_at)}\n\n` +
+        `Can't come? Please cancel so someone else can take the spot: ${site}/bookings\n`,
+    };
+  }
+  const p = q.payload as Times & { reason?: string; refund?: boolean; pass?: boolean };
+  const when = `${longDay(p.starts_at)}, ${shortTimeRange(p.starts_at, p.ends_at)}`;
+  if (q.kind === "session_cancelled") {
+    return {
+      subject: `Training cancelled: ${when}`,
+      text:
+        `Hi ${first},\n\nYour training session on ${when} was cancelled${p.reason ? `: ${p.reason}` : ""}.\n` +
+        `${p.refund ? "Your pass for it is back in your account.\n" : ""}\nBook another session: ${site}/sessions\n`,
+    };
+  }
+  return {
+    subject: `You're in: ${when}`,
+    text:
+      `Hi ${first},\n\nA spot opened up, so you were booked from the waitlist for ${when}.` +
+      `${p.pass ? " One single pass was used." : ""}\n\nAdd it to your calendar: ${googleCalendarUrl(p.starts_at, p.ends_at)}\n\n` +
+      `Can't come any more? Please cancel so the next person gets it: ${site}/bookings\n`,
+  };
+}
+
+// Sends what the database queued (cancelled sessions, waitlist spots, reminders) and marks
+// each one sent. Without the Gmail settings nothing is sent and the queue just waits.
+export async function flushOutbox(site: string) {
+  if (!user || !pass) return 0;
+  const admin = createAdminClient();
+  const { data, error } = await admin.rpc("outbox_pending", { p_limit: 100 });
+  if (error) {
+    console.error("Email queue failed:", error.message);
+    return 0;
+  }
+  const sent: string[] = [];
+  for (const q of (data ?? []) as Queued[]) {
+    if (await send({ to: q.email, ...queuedMessage(q, site) })) sent.push(q.id);
+  }
+  if (sent.length) await admin.rpc("outbox_done", { p_ids: sent });
+  return sent.length;
+}
+
+type NewOrder = { number: number; total_sen: number; full_name: string; student_id: string; method: "qr" | "cash"; bankRef: string | null };
+const ringgit = (sen: number) => (sen % 100 === 0 ? `RM${sen / 100}` : `RM${(sen / 100).toFixed(2)}`);
+
+// "New shop order waiting" to everyone who runs the shop, except the buyer.
+export async function emailShopManagers(o: NewOrder, buyerId: string, site: string) {
+  if (!user || !pass) return;
+  const { data, error } = await createAdminClient().rpc("shop_alert_emails", { p_exclude: buyerId });
+  if (error) return console.error("Shop manager list failed:", error.message);
+  const to = ((data ?? []) as { email: string }[]).map((r) => r.email);
+  if (to.length === 0) return;
+  await send({
+    to: user,
+    bcc: to,
+    subject: `New shop order #${o.number}: ${ringgit(o.total_sen)} from ${oneLine(o.full_name)}`,
+    text:
+      `${o.full_name} (${o.student_id}) placed a shop order of ${ringgit(o.total_sen)}, paid by ` +
+      `${o.method === "qr" ? `DuitNow QR, bank reference ${o.bankRef}` : "cash"}.\n\nCheck it: ${site}/exco/shop\n`,
+  });
+}
+
+type OrderDecision = { email: string; full_name: string; number: number; total_sen: number; approved: boolean; reason: string | null; pickup_link: string | null };
+
+// "Order confirmed" (with the pick-up group) or "not approved" to the buyer.
+export async function emailOrderDecision(d: OrderDecision, site: string) {
+  const first = oneLine(d.full_name).split(" ")[0] || "there";
+  await send(
+    d.approved
+      ? {
+          to: d.email,
+          subject: `Your shop order #${d.number} is confirmed`,
+          text:
+            `Hi ${first},\n\nYour payment of ${ringgit(d.total_sen)} for order #${d.number} was checked.\n\n` +
+            (d.pickup_link ? `Join the pick-up group to arrange when and where to collect it: ${d.pickup_link}\n\n` : "We'll tell you when and where to collect it.\n\n") +
+            `Your orders: ${site}/shop\n`,
+        }
+      : {
+          to: d.email,
+          subject: `Your shop order #${d.number} wasn't approved`,
+          text: `Hi ${first},\n\nYour order #${d.number} (${ringgit(d.total_sen)}) wasn't approved.\nReason: ${d.reason ?? "none given"}\n\nYou can order again here: ${site}/shop\n`,
+        },
+  );
 }

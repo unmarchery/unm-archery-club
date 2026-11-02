@@ -15,6 +15,8 @@ type Row = {
   approved_by: string | null;
 };
 
+type ShopRow = { number: number; decided_at: string; student_id: string; full_name: string; items: string; total_sen: number; method: "qr" | "cash"; bank_ref: string | null; approved_by: string | null; collected: boolean };
+
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const stamp = new Intl.DateTimeFormat("en-CA", {
   timeZone: TIMEZONE, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
@@ -60,7 +62,21 @@ export async function GET(request: Request) {
     ].map(cell).join(","),
   );
   const total = rows.reduce((sum, r) => sum + r.amount, 0);
-  const csv = "﻿" + [header.map(cell).join(","), ...lines, "", [cell("Total"), "", "", "", "", "", cell(total)].join(",")].join("\r\n");
+
+  // Shop sales below the top-ups (missing before migration 0009).
+  const { data: shopData } = await supabase.rpc("shop_finance", { p_from: from, p_to: to });
+  const shop = ((shopData as { rows?: ShopRow[] } | null)?.rows ?? []).slice().reverse();
+  const shopHeader = ["Paid", "Order #", "Student ID", "Name", "Items", "Amount (RM)", "Method", "Bank reference", "Checked by", "Collected"];
+  const shopLines = shop.map((r) =>
+    [stamp.format(new Date(r.decided_at)).replace(",", ""), r.number, r.student_id, r.full_name, r.items, (r.total_sen / 100).toFixed(2),
+      r.method === "qr" ? "DuitNow QR" : "Cash", r.bank_ref, r.approved_by, r.collected ? "Yes" : "No"].map(cell).join(","),
+  );
+  const shopTotal = (shop.reduce((sum, r) => sum + r.total_sen, 0) / 100).toFixed(2);
+
+  const csv = "\uFEFF" + [
+    cell("Top-ups"), header.map(cell).join(","), ...lines, [cell("Total"), "", "", "", "", "", cell(total)].join(","),
+    "", cell("Shop sales"), shopHeader.map(cell).join(","), ...shopLines, [cell("Total"), "", "", "", "", cell(shopTotal)].join(","),
+  ].join("\r\n");
 
   return new Response(csv, {
     headers: {

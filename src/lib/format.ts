@@ -98,3 +98,8 @@ export function passesLabel(single: number, full: number) {
   if (full) parts.push(`${full} full day`);
   return parts.join(" + ");
 }
+
+// "Tue 3 Nov" from a calendar day like "2026-11-03", without time zone surprises.
+export function dayLabel(day: string) {
+  return shortDay(`${day}T12:00:00+08:00`);
+}

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { clockLabel, dayKey, passesLabel, requestTime, shortDay } from "@/lib/format";
 import { signedUrls } from "@/lib/receipts";
 import { can, getSession, OFFICERS } from "@/lib/session";
+import { rm } from "@/lib/shop";
 import { AskToDelete, DeletionRequests, type DeletionRequest } from "../_receipts/controls";
 
 type FinanceRow = {
@@ -34,6 +35,13 @@ type Report = {
   unused_value: number;
 };
 
+type ShopSales = {
+  rows: { number: number; decided_at: string; student_id: string; full_name: string; total_sen: number; method: "qr" | "cash"; bank_ref: string | null; approved_by: string | null; collected: boolean; items: string }[];
+  total_sen: number;
+  qr_sen: number;
+  cash_sen: number;
+};
+
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 // Quick ranges in Malaysian calendar days: this month, last month, this year.
@@ -61,13 +69,15 @@ export default async function FinancePage({ searchParams }: PageProps<"/exco/fin
   const to = typeof q.to === "string" && DATE.test(q.to) && q.to >= from ? q.to : today;
 
   const officer = status.position && OFFICERS.includes(status.position) ? status.position : null;
-  const [{ data }, { data: open }] = await Promise.all([
+  const [{ data }, { data: open }, { data: shopData }] = await Promise.all([
     supabase.rpc("finance_report", { p_from: from, p_to: to }),
     officer ? supabase.rpc("receipt_deletions_open") : Promise.resolve({ data: [] }),
+    supabase.rpc("shop_finance", { p_from: from, p_to: to }), // missing before migration 0009
   ]);
   const r = (data ?? { rows: [], count: 0, total: 0, qr_total: 0, cash_total: 0, unused_single: 0, unused_full: 0, unused_value: 0 }) as Report;
   const links = await signedUrls(r.rows.map((x) => x.receipt_path));
   const canExport = can(status, "export_finance");
+  const shop = shopData as ShopSales | null;
 
   return (
     <>
@@ -182,6 +192,40 @@ export default async function FinancePage({ searchParams }: PageProps<"/exco/fin
           </div>
         )}
       </section>
+
+      {shop && (
+        <section className="card">
+          <div className="row">
+            <div className="eyebrow">Shop sales</div>
+            <span className="tag">{rm(shop.total_sen)} · QR {rm(shop.qr_sen)} · cash {rm(shop.cash_sen)}</span>
+          </div>
+          {shop.rows.length === 0 ? (
+            <p className="small muted" style={{ margin: 0 }}>No paid shop orders in these dates.</p>
+          ) : (
+            <div className="table-wrap">
+              <table className="table">
+                <thead>
+                  <tr><th>Paid</th><th>#</th><th>Buyer</th><th>Items</th><th className="num">Amount</th><th>Method</th><th>Checked by</th><th>Collected</th></tr>
+                </thead>
+                <tbody>
+                  {shop.rows.map((x) => (
+                    <tr key={x.number}>
+                      <td>{shortDay(x.decided_at)}, {clockLabel(x.decided_at)}</td>
+                      <td>{x.number}</td>
+                      <td>{x.full_name}<div className="muted">{x.student_id}</div></td>
+                      <td className="soft">{x.items}</td>
+                      <td className="num strong">{rm(x.total_sen)}</td>
+                      <td>{x.method === "qr" ? `QR · ${x.bank_ref}` : "Cash"}</td>
+                      <td className="soft">{x.approved_by ?? "–"}</td>
+                      <td>{x.collected ? "Yes" : "Not yet"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
     </>
   );
 }

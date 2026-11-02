@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/verify", "/forgot", "/api/members/sync"];
+const PUBLIC_PATHS = ["/login", "/signup", "/verify", "/forgot", "/api/members/sync", "/api/cron", "/api/backup"];
 
 // Refreshes the Supabase session cookie on every page request and sends signed-out
 // visitors to the login page. Server Actions still check the user themselves.

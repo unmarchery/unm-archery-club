@@ -64,6 +64,12 @@ export const ShieldIcon = (p: P) => (
 export const ChatIcon = (p: P) => (
   <svg {...base} {...p}><path d="M4 20l1.5-4A8 8 0 1 1 9 19.5z" /><path d="M9 10h6M9 13h4" /></svg>
 );
+export const TicketIcon = (p: P) => (
+  <svg {...base} {...p}><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z" /><path d="M14 5v14" strokeDasharray="2 2" /></svg>
+);
+export const GearIcon = (p: P) => (
+  <svg {...base} {...p}><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></svg>
+);
 export const InfoIcon = (p: P) => (
   <svg {...base} {...p}><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
 );

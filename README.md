@@ -4,8 +4,8 @@ Training-session booking for the University of Nottingham Malaysia Archery Club.
 Students sign up with their student ID and uni email, members book for free, and
 non-members book with single or full-day passes.
 
-Phase 1 so far: accounts, the member check, Home, Sessions with booking and cancelling,
-and top-ups with an approval queue and finance history. Duty and attendance come next.
+Phase 1: accounts, the member check, Home, Sessions with booking and cancelling, top-ups with an
+approval queue and finance history, the exco pages, and duty with attendance.
 
 Built with Next.js 16, Supabase (database, login, email codes) and Netlify (hosting).
 All three have free plans that are enough for the club.
@@ -48,6 +48,7 @@ All three have free plans that are enough for the club.
    | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key |
    | `SUPABASE_SECRET_KEY` | Supabase secret key (keep private) |
    | `MEMBERS_SYNC_SECRET` | any long random string you make up |
+   | `CRON_SECRET` | another long random string (16+ characters), for the evening job and backups |
    | `GMAIL_USER` | the club Gmail address (optional, for top-up emails) |
    | `GMAIL_APP_PASSWORD` | a Gmail app password for it (optional, keep private) |
 
@@ -133,6 +134,60 @@ Needs [`supabase/migrations/0006_people.sql`](supabase/migrations/0006_people.sq
   each exco handles (President, VP and Treasurer positions only by the President). People with
   `write_notes` add notes about exco. Every change is logged at the bottom of the page.
 
+### Duty and attendance
+
+Needs [`supabase/migrations/0007_duty.sql`](supabase/migrations/0007_duty.sql) run once, after 0006.
+
+- **Exco > Duty**: Equipment and Equipment Dept tick the training days they'll be on duty (two weeks
+  ahead). A day with fewer than `duty_min_people` (2) shows a warning. Anyone with `assign_duty` can put
+  someone on or take them off.
+- **Attendance sheet** (`take_attendance`): each slot's bookings with an equipment set-up list and
+  Present / No-show buttons. It can be changed for `attendance_days` (3) after the session; after that
+  only the President or VP. Unticked never counts as a no-show.
+- **Walk-ins**: by student ID (a non-member uses one single pass) or a name only.
+- **No-shows**: the 2nd brings a warning email, the 3rd a `ban_days` (14) ban with an email; bookings in
+  the ban are cancelled and their passes returned, and the count starts again. Set
+  `settings.noshow_count_from` to the first day of a semester to stop older no-shows counting. The
+  President or VP can lift a ban from the sheet.
+
+### Waitlist, cancelling sessions, settings, reminders and backups
+
+Needs [`supabase/migrations/0008_phase1_finish.sql`](supabase/migrations/0008_phase1_finish.sql) run once, after 0007.
+
+- **Waitlist**: a full slot (or full non-member spots) shows **Join the waitlist**. When a spot opens,
+  the first in line who can take it is booked automatically and emailed (a non-member uses one single
+  pass; someone without one is skipped). It stops 1 hour before the slot.
+- **Exco > Manage sessions**: on the day, whoever is on duty, the President or the VP cancels a slot or
+  the rest of the day (rain, lightning); `manage_sessions` can also cancel ahead and close dates (exams,
+  holidays). Bookings not yet marked present are cancelled and emailed. A single pass comes back; a
+  full-day pass comes back whole if the club cancels the whole day, otherwise one single pass per
+  cancelled slot.
+- **Exco > Settings** (`edit_settings`): every club rule; each change is logged on the People page.
+- **My bookings** and **Profile**: upcoming and past sessions with attendance, waitlist places, pass
+  history; phone and default equipment. **Add to Google Calendar** links on Home, Sessions and My bookings.
+- **Evening reminders**: [`.github/workflows/evening.yml`](.github/workflows/evening.yml) runs at 8pm
+  Malaysia time and calls `/api/cron`, which emails everyone booked for tomorrow and sends anything left in
+  the email queue. Add two repository secrets on GitHub (**Settings > Secrets and variables > Actions**):
+  `SITE_URL` and `CRON_SECRET` (the same value as in Netlify). GitHub pauses scheduled jobs in a repository
+  with no activity for 60 days; re-enable it under **Actions** if that happens.
+- **Weekly backup**: follow the steps at the top of [`scripts/backup.gs`](scripts/backup.gs). It saves the
+  club's data to Google Drive every Sunday and keeps 12 weeks. Login passwords are not in it (Supabase
+  keeps those); after a restore, people use **Forgot password**.
+
+### Shop
+
+Needs [`supabase/migrations/0009_shop.sql`](supabase/migrations/0009_shop.sql) run once, after 0008. It also
+creates a public `shop` storage bucket for product photos.
+
+- **Shop** (everyone): one tab per section. **Passes** is the top-up form (the old Top up page); other
+  sections sell items. An item has photos, a size chart, a price and an optional member price, and
+  options (sizes, colours, or both), each with its own stock. Items are **in stock** (sell out at 0) or
+  **pre-order** (until a closing date). Buyers fill a cart and pay once by DuitNow QR (receipt) or cash.
+- **Exco > Shop orders** (`manage_shop`): confirm or reject payments (stock comes back on reject or
+  cancel), mark paid orders collected, add and edit items and sections, and set the pick-up WhatsApp group
+  that buyers see once their payment is confirmed. Buyers and managers get emails. Shop sales appear on
+  Finance and in its Excel download.
+
 ### Giving someone passes by hand
 
 ```sql
@@ -177,7 +232,7 @@ npm run lint
 | `supabase/migrations/` | Database tables, booking rules and security |
 | `supabase/tests/` | Database tests (run in PGlite) |
 | `src/app/(auth)/` | Sign up, email code, log in, password reset |
-| `src/app/(club)/` | Signed-in pages: Home, Sessions, Top up, Our exco, and the Exco pages (People, Members, Accounts, Approvals, Finance) |
+| `src/app/(club)/` | Signed-in pages: Home, Sessions, Shop, My bookings, Profile, Our committee, and the Exco pages (Exco & JUCO, Members, Accounts, Approvals, Finance, Manage sessions, Duty, Shop orders, Settings) |
 | `src/app/api/members/sync/` | Receives the membership list from Google Sheets |
 | `src/proxy.ts` | Keeps the login session fresh and protects pages |
 | `scripts/members-sync.gs` | Google Apps Script for the membership form |
