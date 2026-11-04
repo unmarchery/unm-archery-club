@@ -193,3 +193,52 @@ html[data-exco] .main-v2, html[data-exco] .foot-v2 { padding-left: max(84px, env
 .signin-dlg .modal { position: relative; max-width: none; gap: 14px; animation: materialize .38s var(--ease-out); }
 .signin-dlg form { display: flex; flex-direction: column; gap: 14px; }
 .sp-x { position: absolute; top: 14px; right: 14px; }
+.noshow-line { margin: 0; padding: 12px 14px; border-radius: 14px; background: var(--bull-tint); color: var(--bull-ink); font-size: 14px; font-weight: 600; line-height: 1.45; }
+
+/* Book a session */
+.visitor-book { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.schedule { background: var(--forest); color: #fff; border-radius: 24px; padding: clamp(24px, 4vw, 40px); display: flex; flex-direction: column; gap: 22px; }
+.schedule h2 { margin: 0; font: 850 clamp(2rem, 1.4rem + 2.2vw, 3rem)/1 var(--font-display); font-stretch: 72%; }
+.schedule .time { font: 800 clamp(1.6rem, 1.2rem + 1.4vw, 2.2rem)/1 var(--font-display); font-stretch: 80%; color: var(--bull-tint); }
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.week span { display: grid; place-items: center; height: 52px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .22); font: 700 15px/1 var(--font-display); color: rgba(255, 255, 255, .72); }
+.week span.on { background: #fff; color: var(--forest); border-color: #fff; }
+.hours-strip { display: flex; flex-wrap: wrap; gap: 8px; }
+.hours-strip span { padding: 8px 12px; border-radius: 999px; background: rgba(255, 255, 255, .1); font-weight: 600; font-size: 14px; }
+.good-to-know { list-style: none; margin: 0; padding: 18px 0 0; border-top: 1px solid rgba(255, 255, 255, .2); display: flex; flex-direction: column; gap: 12px; }
+.good-to-know b { display: block; }
+.good-to-know span { color: rgba(255, 255, 255, .82); font-size: 14.5px; }
+.how { display: flex; flex-direction: column; gap: 4px; }
+.how-row { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; padding-block: 18px; border-bottom: 1px solid var(--line); }
+.how-row svg { width: 26px; height: 26px; }
+.how-row h3 { margin: 0; font: 750 1.2rem/1.2 var(--font-display); font-stretch: 88%; }
+.how-row p { margin: 4px 0 0; color: var(--muted); }
+.how .btn { margin-top: 18px; }
+.pass-bar { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 14px 18px; }
+.carousel { display: flex; flex-direction: column; gap: 14px; }
+.car-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.car-nav { display: flex; gap: 8px; }
+.car-track { display: grid; grid-auto-flow: column; grid-auto-columns: min(540px, 88%); gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; padding: 4px 2px 14px; scrollbar-width: thin; }
+@media (min-width: 1100px) { .car-track { grid-auto-columns: calc((100% - 20px) / 2); } }
+.day-box { scroll-snap-align: start; min-width: 0; background: var(--glass); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 6px; container-type: inline-size; }
+.day-box-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 10px; }
+.day-box-head h3, .locked-box h3 { margin: 0; font: 850 clamp(1.7rem, 1.4rem + 1vw, 2.2rem)/1 var(--font-display); font-stretch: 74%; }
+.helper { margin: 0 0 6px; font-size: 14px; background: rgba(230, 235, 221, .7); border-radius: 12px; padding: 10px 12px; }
+.hours { list-style: none; margin: 0; padding: 0; }
+.hour { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 10px 16px; align-items: center; padding-block: 16px; border-top: 1px solid var(--line); }
+.hour-time { font: 850 1.5rem/1 var(--font-display); font-stretch: 76%; }
+.hour-status { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.hour-status b { font: 850 1.2rem/1 var(--font-display); }
+.hour-action { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.hour-action .btn { width: auto; min-height: 40px; padding: 0 16px; font-size: 14px; }
+.day-box-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; }
+.day-box-foot p { margin: 0; }
+.locked-box { background: transparent; border-style: dashed; border-color: var(--line-strong); box-shadow: none; justify-content: center; align-items: flex-start; gap: 12px; min-height: 260px; }
+.locked-box svg { width: 30px; height: 30px; color: var(--muted-c); }
+.locked-box p { margin: 0; color: var(--muted); max-width: 36ch; }
+.locked-box .btn { width: auto; }
+@container (max-width: 430px) { .hour { grid-template-columns: minmax(0, 1fr) auto; } .hour-status { grid-column: 1 / -1; grid-row: 2; } }
+@media (max-width: 860px) { .visitor-book { grid-template-columns: 1fr; } }
+.opening-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.opening-row .seg { flex-wrap: wrap; }
+.opening-row .seg button { flex: none; }

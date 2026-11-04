@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { dayLabel, shortTimeRange } from "@/lib/format";
-import { getSession } from "@/lib/session";
+import { dayLabel, openingLabel, requestTime, shortTimeRange } from "@/lib/format";
+import { can, getSession } from "@/lib/session";
+import { OpeningControl } from "./opening";
 import { CancelSlot, CloseDate, ReopenDate } from "./controls";
 
 type Overview = {
@@ -18,6 +19,20 @@ export default async function SessionsManagerPage() {
   const { data } = await supabase.rpc("sessions_overview");
   if (!data) notFound();
   const o = data as Overview;
+  const manage = can(status, "manage_sessions");
+  type Opening = { day: string; open: boolean; status: string; opens_at: string | null };
+  let openings: Opening[] = [];
+  if (manage) {
+    await supabase.rpc("ensure_slots");
+    const end = new Date(requestTime() + 22 * 86_400_000).toISOString().slice(0, 10);
+    const { data: od } = await supabase.rpc("day_openings", { p_from: o.today, p_to: end });
+    openings = (od ?? []) as Opening[];
+  }
+  const choiceOf = (x: Opening) => {
+    if (x.status !== "scheduled" || !x.opens_at) return x.status as "weekly" | "open" | "locked";
+    const days = Math.round((Date.parse(`${x.day}T09:00:00+08:00`) - Date.parse(x.opens_at)) / 86_400_000);
+    return days >= 11 ? "w2" : "w1";
+  };
 
   return (
     <>
@@ -27,6 +42,17 @@ export default async function SessionsManagerPage() {
           <p className="sub">Cancel a slot or the rest of a day (rain, lightning), or close dates ahead. Everyone booked gets their pass back and an email.</p>
         </div>
       </div>
+
+      {manage && openings.length > 0 && (
+        <section className="card">
+          <h2 className="h2">Booking opens</h2>
+          <p className="muted small" style={{ margin: 0 }}>Choose when each day opens. Members see a countdown and an Add to calendar link for days that aren&apos;t open yet. The weekly rule opens this week and next every Monday.</p>
+          {openings.map((x) => (
+            <OpeningControl key={x.day} day={x.day} label={dayLabel(x.day)} current={choiceOf(x)}
+              note={x.open ? "Open for booking" : x.opens_at ? `Opens ${openingLabel(x.opens_at)}` : "Locked"} />
+          ))}
+        </section>
+      )}
 
       {o.can_close && (
         <section className="card">

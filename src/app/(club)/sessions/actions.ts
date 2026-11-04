@@ -78,3 +78,19 @@ export async function leaveWaitlist(slotId: string): Promise<ActionResult> {
   revalidatePath("/", "layout");
   return { ok: true };
 }
+
+// Members book a whole day as one booking per hour. Stops at the first slot that can't be booked.
+export async function bookDay(input: { slotIds: string[]; gear: Gear }): Promise<ActionResult> {
+  const supabase = await signedInClient();
+  if (!supabase) return { ok: false, message: messageFor({ message: "NOT_SIGNED_IN" }) };
+  if (!input.slotIds.length || !input.slotIds.every((id) => UUID.test(id))) return { ok: false, message: messageFor({ message: "SLOT_NOT_FOUND" }) };
+  const gear = cleanGear(input.gear);
+  if (!gear) return { ok: false, message: "Please check your equipment choices." };
+  await supabase.rpc("save_my_gear", { p_hand: gear.hand, p_draw_lbs: gear.draw_lbs, p_own_bow: gear.own_bow, p_own_bow_type: gear.own_bow_type, p_own_bow_lbs: gear.own_bow_lbs });
+  for (const id of input.slotIds) {
+    const { error } = await supabase.rpc("book_slot", { p_slot: id, p_pass: null, p_equipment: gear });
+    if (error) { revalidatePath("/", "layout"); return { ok: false, message: messageFor(error) }; }
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
