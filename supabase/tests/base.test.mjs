@@ -42,7 +42,7 @@ async function signUp(studentId, email, name = 'Test Archer') {
 // Three slots on one day that is always inside the booking window, plus helpers.
 async function testDay() {
   const { day } = await one(
-    `select ((bookable_until at time zone 'Asia/Kuala_Lumpur')::date - 2) as day from booking_window()`,
+    `select ((weekly_window_end() at time zone 'Asia/Kuala_Lumpur')::date - 2) as day`,
   )
   const ids = []
   for (const hour of ['16:00', '17:00', '18:00']) {
@@ -97,11 +97,11 @@ test('membership needs the form row; email match makes it automatic', async () =
   await db.query(`update settings set membership_valid_until = null`)
 })
 
-test('ensure_slots builds this week and next week once', async () => {
+test('ensure_slots builds this week and the next two once', async () => {
   const before = (await one('select count(*)::int as n from slots')).n
   await db.query('select ensure_slots()')
   const after = (await one('select count(*)::int as n from slots')).n
-  assert.equal(after - before, 12) // Tue and Thu, 3 slots each, 2 weeks
+  assert.equal(after - before, 18) // Tue and Thu, 3 slots each, 3 weeks
   await db.query('select ensure_slots()')
   assert.equal((await one('select count(*)::int as n from slots')).n, after)
   const hours = await db.query(
@@ -803,12 +803,13 @@ test('security: every table has Row Level Security, and signed-out visitors can 
   const open = (await db.query(`select relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
                                 where n.nspname = 'public' and c.relkind = 'r' and not c.relrowsecurity`)).rows
   assert.deepEqual(open, [])
-  const anonCanRead = (await db.query(`select table_name from information_schema.role_table_grants
-                                       where table_schema = 'public' and grantee = 'anon'`)).rows
-  assert.deepEqual(anonCanRead, [])
+  // Visitors may read only what the public pages show: events, prices and the leaderboards.
+  const anonCanRead = (await db.query(`select table_name, privilege_type from information_schema.role_table_grants
+                                       where table_schema = 'public' and grantee = 'anon' order by 1, 2`)).rows
+  assert.deepEqual(anonCanRead, [{ table_name: 'events', privilege_type: 'SELECT' }])
   const anonCanRun = (await db.query(`select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-                                      where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute')`)).rows
-  assert.deepEqual(anonCanRun.map((r) => r.proname), [])
+                                      where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') order by 1`)).rows
+  assert.deepEqual(anonCanRun.map((r) => r.proname), ['leaderboard', 'public_prices', 'rank_overview'])
 
   // A signed-in archer sees only their own rows in the newer tables too.
   const archer = (await one(`select id from profiles where student_id = '20000103'`)).id
@@ -900,4 +901,112 @@ test('the Shop switch can be given from the People page', async () => {
   const [{ shop_orders_for_review: q }] = await asUser(sec, 'select shop_orders_for_review()')
   assert.ok(Array.isArray(q))
   assert.ok((await one(`select action from activity_log order by id desc limit 1`)).action.includes('gave Shop'))
+})
+
+test('events: anyone can read; only people with the Events switch can post', async () => {
+  const pres = await ownerId()
+  const member = (await one(`select id from profiles where student_id = '20000101'`)).id
+  const [{ save_event: id }] = await asUser(pres, `select save_event($1::jsonb)`, [JSON.stringify({ title: 'Open Range Week', starts_on: '2026-11-03', ends_on: '2026-11-12', time_label: 'Every session', featured: true })])
+  assert.ok(id)
+  await rejects(asUser(member, `select save_event($1::jsonb)`, [JSON.stringify({ title: 'Nope', starts_on: '2026-11-20' })]), 'NOT_ALLOWED')
+  await db.exec('set role anon')
+  try {
+    const rows = (await db.query(`select title, featured from events`)).rows
+    assert.deepEqual(rows, [{ title: 'Open Range Week', featured: true }])
+    await rejects(db.query(`insert into events (title, starts_on) values ('x', '2026-11-20')`), 'permission denied')
+  } finally {
+    await db.exec('reset role')
+  }
+})
+
+test('profiles: usernames are unique and lower-case; members edit their own bio and Instagram', async () => {
+  const a = (await one(`insert into auth.users (email, raw_user_meta_data) values ('u1@nottingham.edu.my', $1) returning id`,
+    [JSON.stringify({ student_id: '20000201', full_name: 'User One', phone: '0123456789', username: 'Aisyah.R' })])).id
+  assert.equal((await one(`select username from profiles where id = $1`, [a])).username, 'aisyah.r')
+  await rejects(db.query(`insert into auth.users (email, raw_user_meta_data) values ('u2@nottingham.edu.my', $1)`,
+    [JSON.stringify({ student_id: '20000202', full_name: 'User Two', phone: '0123456789', username: 'aisyah.r' })]), 'USERNAME_TAKEN')
+  await asUser(a, `select save_my_profile('aisyah.shoots', 'Recurve since Year 1', '@aisyah_ig')`)
+  const row = await one(`select username, bio, instagram from profiles where id = $1`, [a])
+  assert.deepEqual(row, { username: 'aisyah.shoots', bio: 'Recurve since Year 1', instagram: 'aisyah_ig' })
+  await rejects(asUser(a, `select save_my_profile('x', null, null)`), 'INVALID_USERNAME')
+  await rejects(asUser(a, `select save_my_profile('ok.name', null, 'bad ig!')`), 'INVALID_INSTAGRAM')
+})
+
+test('session opening: the exco locks, opens or schedules a day; bookings follow it', async () => {
+  const pres = await ownerId()
+  const archer = (await one(`select id from profiles where student_id = '20000101'`)).id
+  await db.query(`select ensure_slots()`)
+  const slot = await one(`select s.id, slot_day(s)::text as day from slots s where s.cancelled_at is null and s.starts_at > now() + interval '1 day' and s.starts_at < now() + interval '20 days'
+                           and not exists (select 1 from bookings b where b.slot_id = s.id) order by s.starts_at desc limit 1`)
+  await asUser(pres, `select set_session_opening($1, 'locked')`, [slot.day])
+  await rejects(asUser(archer, `select book_slot($1)`, [slot.id]), 'NOT_OPEN_YET')
+  await asUser(pres, `select set_session_opening($1, 'scheduled', now() + interval '1 day')`, [slot.day])
+  const [{ day_openings: days }] = await asUser(archer, `select day_openings($1, $1)`, [slot.day])
+  assert.equal(days[0].status, 'scheduled')
+  assert.equal(days[0].open, false)
+  await rejects(asUser(archer, `select set_session_opening($1, 'open')`, [slot.day]), 'NOT_ALLOWED')
+  await asUser(pres, `select set_session_opening($1, 'open')`, [slot.day])
+  await asUser(archer, `select book_slot($1)`, [slot.id])
+  assert.equal((await one(`select count(*)::int as n from bookings where slot_id = $1 and user_id = $2`, [slot.id, archer])).n, 1)
+  await asUser(pres, `select set_session_opening($1, 'weekly')`, [slot.day])
+})
+
+test('reactions: members react to other profiles anonymously; guests and self-reactions are refused', async () => {
+  const member = (await one(`select id from profiles where student_id = '20000101'`)).id
+  const target = (await one(`select id from profiles where username = 'aisyah.shoots'`)).id
+  await db.query(`insert into members (student_id) select '20000201' where not exists (select 1 from members where student_id = '20000201')`)
+  const [{ toggle_reaction: on }] = await asUser(member, `select toggle_reaction($1, 'fire')`, [target])
+  assert.equal(on, true)
+  const [{ public_profile: p }] = await asUser(member, `select public_profile('Aisyah.Shoots')`)
+  assert.equal(p.reactions.fire, 1)
+  assert.deepEqual(p.mine, ['fire'])
+  assert.equal(p.tier, 'beginner')
+  const [{ toggle_reaction: off }] = await asUser(member, `select toggle_reaction($1, 'fire')`, [target])
+  assert.equal(off, false)
+  const guest = await signUp('20000203', 'g203@nottingham.edu.my', 'Guest Two')
+  await rejects(asUser(guest, `select toggle_reaction($1, 'fire')`, [target]), 'MEMBERS_ONLY')
+  await rejects(asUser(member, `select toggle_reaction($1, 'fire')`, [member]), 'NOT_ALLOWED')
+  await rejects(asUser(member, `select profile_reactions from profile_reactions`), 'permission denied')
+})
+
+test('ranking: scores count in the tier they were shot in; only members register', async () => {
+  const pres = await ownerId()
+  const member = (await one(`select id from profiles where student_id = '20000101'`)).id
+  const [{ save_match: m }] = await asUser(pres, `select save_match($1::jsonb)`, [JSON.stringify({ title: 'Rank Match 4', held_on: '2026-11-14', capacity: 2 })])
+  await asUser(member, `select register_match($1, true)`, [m])
+  const guest = await signUp('20000204', 'g204@nottingham.edu.my', 'Guest Three')
+  await rejects(asUser(guest, `select register_match($1, true)`, [m]), 'MEMBERS_ONLY')
+  await asUser(pres, `select save_scores($1, $2::jsonb)`, [m, JSON.stringify([{ student_id: '20000101', score: 512 }])])
+  let [{ leaderboard: b }] = await asUser(member, `select leaderboard('beginner')`)
+  assert.equal(b[0].score, 512)
+  assert.equal(b[0].me, true)
+  await rejects(asUser(member, `select set_tier('20000101', 'pro')`), 'NOT_ALLOWED')
+  await asUser(pres, `select set_tier('20000101', 'intermediate')`)
+  ;[{ leaderboard: b }] = await asUser(member, `select leaderboard('intermediate')`)
+  assert.deepEqual(b, [])
+  ;[{ leaderboard: b }] = await asUser(member, `select leaderboard('beginner')`)
+  assert.equal(b[0].score, 512)
+  await db.query(`select set_config('request.jwt.claim.sub', '', false)`)
+  await db.exec('set role anon')
+  try {
+    const row = (await db.query(`select leaderboard('beginner') as b`)).rows[0]
+    assert.equal(row.b[0].name, null)
+  } finally {
+    await db.exec('reset role')
+  }
+  const [{ rank_overview: o }] = await asUser(member, `select rank_overview()`)
+  assert.equal(o.history[0].top.beginner[0].score, 512)
+})
+
+test('check-in: a member scans today\'s code and their bookings turn present; wrong codes are refused', async () => {
+  const pres = await ownerId()
+  const archer = (await one(`select id from profiles where student_id = '20000101'`)).id
+  const s = await slotOn(0, 23)
+  await db.query(`insert into bookings (slot_id, user_id, is_member, pass_kind, status) values ($1, $2, true, 'member', 'booked')`, [s.id, archer])
+  const [{ checkin_code: code }] = await asUser(pres, `select checkin_code(club_today())`)
+  await rejects(asUser(archer, `select checkin_code(club_today())`), 'NOT_ALLOWED')
+  await rejects(asUser(archer, `select check_in(club_today(), 'wrong')`), 'CHECKIN_INVALID')
+  const [{ check_in: n }] = await asUser(archer, `select check_in(club_today(), $1)`, [code])
+  assert.equal(n, 1)
+  assert.equal((await one(`select status from bookings where slot_id = $1 and user_id = $2`, [s.id, archer])).status, 'present')
 })

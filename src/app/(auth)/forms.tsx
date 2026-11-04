@@ -60,9 +60,10 @@ export function SignupForm() {
   const [state, action] = useActionState(signup, initial);
   return (
     <form action={action}>
-      <Field label="Student ID" name="student_id" inputMode="numeric" pattern="\d{8}" maxLength={8} required hint="8 digits, as on your student card" />
+      <Field label="Username" name="username" autoComplete="nickname" pattern="[A-Za-z0-9._]{3,20}" maxLength={20} required hint="Shown on the leaderboard and your profile. 3–20 letters, numbers, dots or underscores." />
+      <Field label="Student ID" name="student_id" inputMode="numeric" pattern="\d{8}" maxLength={8} required hint="8 digits, as on your student card. We check it against the member list." />
       <Field label="Full name" name="full_name" autoComplete="name" required hint="As it appears on your student ID" />
-      <Field label="Phone number" name="phone" type="tel" autoComplete="tel" required />
+      <Field label="Phone number" name="phone" type="tel" autoComplete="tel" required hint="The exco checks this with your student ID and email." />
       <Field label="Uni email" name="email" autoComplete="email" required hint="Your @nottingham.edu.my email, or just the username" />
       <label className="check">
         <input type="checkbox" name="safety" required />

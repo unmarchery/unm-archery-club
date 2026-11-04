@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { ArrowIcon, CloseIcon } from "@/components/icons";
 import { useShot } from "@/components/shot-provider";
 import { BOW_TYPES, type ClubBows, type Gear } from "@/lib/gear";
-import { bookSlot, cancelBooking } from "./actions";
+import { bookDay, bookSlot, cancelBooking } from "./actions";
 
 type BookProps = {
   slotId: string;
@@ -16,7 +16,21 @@ type BookProps = {
   fullDay: { ok: boolean; note: string };
   gear: Gear;
   clubBows: ClubBows;
+  noshow?: { warn: number; ban: number; days: number };
+  // Whole-day mode: pick the bow first, then confirm. Members book every hour; guests use a day pass.
+  day?: { slotIds: string[] };
 };
+
+// "Book the whole day": the bow step, then the confirmation.
+export function WholeDayButton(props: BookProps) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpen(true)}>Book the whole day</button>
+      {open && <BookingDialog {...props} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
 
 export function BookButton(props: BookProps) {
   const [open, setOpen] = useState(false);
@@ -28,16 +42,18 @@ export function BookButton(props: BookProps) {
   );
 }
 
-function BookingDialog({ slotId, title, fullDayTitle, member, singles, fullDay, gear: initialGear, clubBows, onClose }: BookProps & { onClose: () => void }) {
+function BookingDialog({ slotId, title, fullDayTitle, member, singles, fulls, fullDay, gear: initialGear, clubBows, noshow, day, onClose }: BookProps & { onClose: () => void }) {
   const shoot = useShot();
   const [pass, setPass] = useState<"single" | "full">(singles > 0 || !fullDay.ok ? "single" : "full");
   const [gear, setGear] = useState<Gear>(initialGear);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [step, setStep] = useState<"bow" | "confirm">(day ? "bow" : "confirm");
 
   const weights = (gear.hand === "LH" ? clubBows.LH : clubBows.RH).map(String);
-  const canConfirm = member || (pass === "single" ? singles > 0 : fullDay.ok);
-  const heading = !member && pass === "full" ? fullDayTitle : title;
+  const canConfirm = day ? member || fulls > 0 : member || (pass === "single" ? singles > 0 : fullDay.ok);
+  const heading = day || (!member && pass === "full") ? fullDayTitle : title;
+  const bowLabel = gear.own_bow ? `Own bow · ${gear.own_bow_type ?? "Recurve"}` : `Club bow · ${gear.hand === "LH" ? "left-handed" : "right-handed"}${gear.draw_lbs !== "Not sure" ? ` · ${gear.draw_lbs} lbs` : ""}`;
 
   function setHand(hand: "RH" | "LH") {
     const list = (hand === "LH" ? clubBows.LH : clubBows.RH).map(String);
@@ -47,12 +63,14 @@ function BookingDialog({ slotId, title, fullDayTitle, member, singles, fullDay, 
   function confirm() {
     setError(null);
     startTransition(async () => {
-      const res = await bookSlot({ slotId, pass: member ? null : pass, gear });
+      const res = day
+        ? member ? await bookDay({ slotIds: day.slotIds, gear }) : await bookSlot({ slotId, pass: "full", gear })
+        : await bookSlot({ slotId, pass: member ? null : pass, gear });
       if (!res.ok) {
         setError(res.message);
         return;
       }
-      shoot("Booked!", !member && pass === "full" ? `${fullDayTitle}, full day` : title);
+      shoot("Booked!", day || (!member && pass === "full") ? `${fullDayTitle}, full day` : title);
       onClose();
     });
   }
@@ -66,7 +84,7 @@ function BookingDialog({ slotId, title, fullDayTitle, member, singles, fullDay, 
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="book-title">
         <div className="row">
           <div>
-            <div className="eyebrow">Book</div>
+            <div className="eyebrow">{day && step === "bow" ? "Choose your bow" : "Confirm your booking"}</div>
             <h2 className="h2" id="book-title">{heading}</h2>
           </div>
           <button type="button" className="icon-btn" aria-label="Close" onClick={onClose} autoFocus>
@@ -74,7 +92,9 @@ function BookingDialog({ slotId, title, fullDayTitle, member, singles, fullDay, 
           </button>
         </div>
 
-        {member ? (
+        {day ? (
+          <span className="pill gold" style={{ alignSelf: "flex-start" }}>{member ? "Free for members, all three hours" : `Uses 1 day pass (you have ${fulls})`}</span>
+        ) : member ? (
           <span className="pill gold" style={{ alignSelf: "flex-start" }}>Free for members</span>
         ) : (
           <>
@@ -90,6 +110,9 @@ function BookingDialog({ slotId, title, fullDayTitle, member, singles, fullDay, 
           </>
         )}
 
+        {day && step === "confirm" ? (
+          <div className="row"><span className="strong">{bowLabel}</span><button type="button" className="link-btn" onClick={() => setStep("bow")}>Change bow</button></div>
+        ) : (<>
         <div className="eyebrow">Equipment</div>
         <div className="seg" role="group" aria-label="Bow">
           <button type="button" className={gear.own_bow ? "" : "on"} aria-pressed={!gear.own_bow} onClick={() => setGear((g) => ({ ...g, own_bow: false }))}>Club bow</button>
@@ -137,11 +160,19 @@ function BookingDialog({ slotId, title, fullDayTitle, member, singles, fullDay, 
         )}
 
         <div className="muted small">This is a preference. Club bows are shared, so it isn&apos;t guaranteed.</div>
+        </>)}
+        {noshow && (!day || step === "confirm") && (
+          <p className="noshow-line">If you book and don&apos;t come, it counts as a no-show. {noshow.warn} no-shows bring a warning; {noshow.ban} mean no bookings for {noshow.days} days. Cancel from My bookings if you can&apos;t make it.</p>
+        )}
         {error && <p className="error" role="alert">{error}</p>}
+        {day && step === "bow" ? (
+          <button type="button" className="btn" onClick={() => setStep("confirm")}>Continue</button>
+        ) : (
         <button type="button" className="btn" onClick={confirm} disabled={!canConfirm || pending}>
           {pending ? <span className="spinner" aria-hidden="true" /> : <ArrowIcon />}
           {pending ? "Booking…" : "Confirm booking"}
         </button>
+        )}
       </div>
     </div>
   );

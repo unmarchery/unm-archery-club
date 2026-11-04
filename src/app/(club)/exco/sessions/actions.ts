@@ -34,3 +34,16 @@ export async function reopenDate(day: string) {
   if (!DATE.test(day)) return { ok: false, message: messageFor({ message: "NOT_TRAINING_DAY" }) } as ActionResult;
   return call("reopen_date", { p_day: day });
 }
+
+// Open now, open 1 or 2 weeks before at 9am (club time), lock, or go back to the weekly rule.
+export async function setOpening(day: string, choice: "weekly" | "open" | "w1" | "w2" | "locked") {
+  if (!DATE.test(day)) return { ok: false, message: messageFor({ message: "NOT_TRAINING_DAY" }) } as ActionResult;
+  let opensAt: string | null = null;
+  if (choice === "w1" || choice === "w2") {
+    const d = new Date(`${day}T09:00:00+08:00`);
+    d.setUTCDate(d.getUTCDate() - (choice === "w1" ? 7 : 14));
+    opensAt = d.toISOString();
+  }
+  const status = choice === "w1" || choice === "w2" ? "scheduled" : choice;
+  return call("set_session_opening", { p_day: day, p_status: status, p_opens_at: opensAt });
+}

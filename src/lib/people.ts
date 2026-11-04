@@ -14,10 +14,12 @@ export const SWITCHES: { key: string; label: string; hint: string }[] = [
   { key: "change_positions", label: "Change positions", hint: "Positions and what each exco handles" },
   { key: "write_notes", label: "Write notes", hint: "Notes about exco on this page" },
   { key: "manage_shop", label: "Shop", hint: "Items, sections, order payments and pick-up" },
-  { key: "edit_settings", label: "Settings", hint: "Club rules (page coming soon)" },
-  { key: "manage_sessions", label: "Sessions", hint: "Cancel or add sessions (coming soon)" },
-  { key: "assign_duty", label: "Duty roster", hint: "Coming soon" },
-  { key: "take_attendance", label: "Attendance", hint: "Coming soon" },
+  { key: "edit_settings", label: "Settings", hint: "Club rules, prices and booking times" },
+  { key: "manage_sessions", label: "Sessions", hint: "Open, schedule, lock or cancel sessions" },
+  { key: "assign_duty", label: "Duty roster", hint: "Who is on duty each session" },
+  { key: "take_attendance", label: "Attendance", hint: "Mark attendance, walk-ins and bows" },
+  { key: "manage_events", label: "Events", hint: "Post events on the landing page" },
+  { key: "manage_ranking", label: "Ranking and tiers", hint: "Rank matches, scores and skill badges" },
 ];
 
 // Any "… Dept" position is junior committee (JUCO); the rest of the positions are exco.

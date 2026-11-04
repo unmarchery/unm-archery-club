@@ -1,136 +1,61 @@
 import Link from "next/link";
-import { ArrowIcon, CalendarIcon, InfoIcon, TargetRings } from "@/components/icons";
-import { googleCalendarUrl } from "@/lib/calendar";
-import { clockLabel, longDay, requestTime, timeRange } from "@/lib/format";
-import { gearTags, type Gear } from "@/lib/gear";
-import { getSession } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
-import { MemberCheck } from "./member-check";
+import { BowScene } from "@/components/bow-scene";
+import { EventsList } from "@/components/events-list";
+import { SignInPopup } from "@/components/signin-popup";
+import { TIMEZONE } from "@/lib/format";
+import { getOptionalSession } from "@/lib/session";
+import { getPublicInfo } from "@/lib/public-info";
 
-type Upcoming = {
-  id: string;
-  pass_kind: "member" | "single" | "full";
-  full_day_group: string | null;
-  equipment: Partial<Gear>;
-  slots: { starts_at: string; ends_at: string };
-};
-
-export default async function HomePage() {
-  // Everything in one round of requests: the database is far from the server, so each wave costs.
-  const supabase = await createClient();
-  const [{ profile, status }, { data: upcoming }, { data: cfg }] = await Promise.all([
-    getSession(),
-    supabase
-      .from("bookings")
-      .select("id, pass_kind, full_day_group, equipment, slots!inner(starts_at, ends_at)")
-      .eq("status", "booked")
-      .gt("slots.starts_at", new Date().toISOString())
-      .returns<Upcoming[]>(),
-    supabase.from("settings").select("noshow_ban_after, nonmember_refund_hours").single(),
-  ]);
-
-  const sorted = [...(upcoming ?? [])].sort((a, b) => Date.parse(a.slots.starts_at) - Date.parse(b.slots.starts_at));
-  const next = sorted[0];
-  const refundMs = (cfg?.nonmember_refund_hours ?? 2) * 3_600_000;
-  const firstName = profile.full_name.split(/\s+/)[0] || profile.full_name;
-
-  let nextView: { day: string; time: string; note: string; calendar: string } | null = null;
-  if (next) {
-    const start = next.slots.starts_at;
-    const cancelBy = clockLabel(new Date(Date.parse(start) - refundMs).toISOString());
-    if (next.full_day_group) {
-      const group = sorted.filter((b) => b.full_day_group === next.full_day_group);
-      nextView = {
-        day: longDay(start),
-        time: `${timeRange(start, group[group.length - 1].slots.ends_at)}, full day`,
-        note: `Free cancellation for the whole day until ${cancelBy}.`,
-        calendar: googleCalendarUrl(start, group[group.length - 1].slots.ends_at),
-      };
-    } else {
-      nextView = {
-        day: longDay(start),
-        time: timeRange(start, next.slots.ends_at),
-        note: next.pass_kind === "member" ? `You can cancel any time before ${clockLabel(start)}.` : `Free cancellation until ${cancelBy}.`,
-        calendar: googleCalendarUrl(start, next.slots.ends_at),
-      };
-    }
-  }
-  const tags = gearTags(next && Object.keys(next.equipment ?? {}).length ? next.equipment : profile);
+// The public landing page: the range animation, the session basics, and a way in.
+export default async function LandingPage() {
+  const session = await getOptionalSession();
+  const member = session?.status.membership === "member";
+  const info = await getPublicInfo();
+  const single = info.single_price;
+  const full = info.fullday_price;
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: TIMEZONE }).format(new Date());
 
   return (
-    <>
-      <div className="page-head">
-        <div>
-          <div className="eyebrow">Welcome back</div>
-          <h1 className="h1">Hi, {firstName}</h1>
+    <div className="landing">
+      <section className="hero-top">
+        <h1 className="hero-title">Find your<br />anchor point.</h1>
+        <div className="hero-lead">
+          <p>UNM Archery Club trains every Tuesday and Thursday, 4–7pm, at the Sports Complex. The club provides all the equipment. Members shoot free; everyone else books with an hour or day pass.</p>
+          <div className="hero-actions">
+            <Link href="/sessions" className="btn btn-lg cta-shoot">
+              Book a session
+              <span className="cta-arrow" aria-hidden="true"><svg viewBox="0 0 30 14"><path d="M2 7h22" /><path d="M21 3.2 27 7l-6 3.8" /><path d="M2 3.5 5.5 7 2 10.5M6 3.5 9.5 7 6 10.5" /></svg></span>
+            </Link>
+            {!member && <Link href={session ? "/me" : "/signup"} className="btn btn-ghost btn-lg">Join the club</Link>}
+          </div>
         </div>
-        <Link href="/sessions" className="btn btn-sm">
-          <ArrowIcon />Book a session
-        </Link>
-      </div>
+      </section>
 
-      {status.banned_until && Date.parse(status.banned_until) > requestTime() && (
-        <div className="card notice">
-          <InfoIcon />
-          <p className="small" style={{ margin: 0 }}>
-            You&apos;re paused from booking until {longDay(status.banned_until)} because of {status.noshows} no-shows.
-          </p>
-        </div>
+      <BowScene />
+
+      <dl className="facts card">
+        <div><dt>Training</dt><dd>Tue &amp; Thu, 4–7pm</dd></div>
+        <div><dt>Venue</dt><dd>Sports Complex</dd></div>
+        <div><dt>Members</dt><dd>Free, every session</dd></div>
+        <div><dt>Guests</dt><dd>RM{single} hour · RM{full} day</dd></div>
+      </dl>
+
+      {!session && (
+        <section className="inline-signin card" aria-labelledby="is-title">
+          <div>
+            <h2 id="is-title" className="h2">Let&apos;s get you into the Archery Range!!</h2>
+            <p className="muted">Only for UNM Students. Sign in to see open slots and book.</p>
+          </div>
+          <div className="is-actions">
+            <Link href="/login" className="btn">Sign in</Link>
+            <Link href="/signup" className="btn btn-ghost">Sign up</Link>
+          </div>
+          <p className="muted small" style={{ gridColumn: "1 / -1", margin: 0 }}>First time? <Link href="/faq">Read the FAQ</Link>: what to wear, where the range is, and what to expect.</p>
+        </section>
       )}
 
-      <div className="grid">
-        {status.membership === "member" ? (
-          <section className="card pass-card" aria-label="Your membership">
-            <TargetRings className="rings" />
-            <div className="eyebrow">Membership</div>
-            <div className="big" style={{ fontSize: 40 }}>Member</div>
-            <div className="tags">
-              <span className="pill gold">Unlimited sessions</span>
-              <span className="pill">No-shows {status.noshows} of {cfg?.noshow_ban_after ?? 3}</span>
-            </div>
-          </section>
-        ) : (
-          <section className="card pass-card" aria-label="Your passes">
-            <TargetRings className="rings" />
-            <div className="eyebrow">Your passes</div>
-            <div className="pass-row">
-              <div><div className="big">{status.single}</div><div className="pass-label">Single</div></div>
-              <div><div className="big">{status.full}</div><div className="pass-label">Full day</div></div>
-            </div>
-            <Link href="/top-up" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }}>Top up</Link>
-          </section>
-        )}
-
-        {nextView ? (
-          <section className="card">
-            <div className="row">
-              <div className="eyebrow">Next session</div>
-              <span className="tag"><span className="dot" style={{ background: "var(--gold)" }} />Booked</span>
-            </div>
-            <div>
-              <div className="when">{nextView.day}</div>
-              <div className="when-time">{nextView.time}</div>
-            </div>
-            <div className="tags">
-              {tags.map((t) => (
-                <span key={t.label} className={`pill${t.tone ? ` ${t.tone}` : ""}`}>{t.label}</span>
-              ))}
-            </div>
-            <div className="muted small">{nextView.note}</div>
-            <a className="link-btn" style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 6 }} href={nextView.calendar} target="_blank" rel="noreferrer">
-              <CalendarIcon className="inline-icon" />Add to Google Calendar
-            </a>
-          </section>
-        ) : (
-          <section className="card">
-            <div className="eyebrow">Next session</div>
-            <p className="muted small" style={{ margin: 0 }}>Nothing booked yet.</p>
-            <Link href="/sessions" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }}>See sessions</Link>
-          </section>
-        )}
-
-        {status.membership !== "member" && <MemberCheck membership={status.membership} request={status.request} />}
-      </div>
-    </>
+      <EventsList today={today} />
+      {!session && <SignInPopup />}
+    </div>
   );
 }

@@ -46,6 +46,11 @@ export async function saveSettings(_: SettingsState, fd: FormData): Promise<Sett
 
   const { error } = await supabase.rpc("update_settings", { p });
   if (error) return { message: messageFor(error) };
+  const feeText = String(fd.get("membership_fee") ?? "").trim();
+  const fee = feeText === "" ? null : Number(feeText);
+  if (fee !== null && (!Number.isInteger(fee) || fee < 0)) return { message: messageFor({ message: "INVALID_SETTING" }) };
+  const { error: feeError } = await supabase.rpc("save_membership_fee", { p_fee: fee });
+  if (feeError) return { message: messageFor(feeError) };
   revalidatePath("/", "layout");
   return { ok: true, message: "Saved. Every change is in the log on the People page." };
 }

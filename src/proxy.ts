@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/verify", "/forgot", "/api/members/sync", "/api/cron", "/api/backup"];
+// Pages visitors can open without signing in. "/" is matched exactly below.
+const PUBLIC_PATHS = ["/login", "/signup", "/verify", "/forgot", "/faq", "/sessions", "/ranking", "/api/members/sync", "/api/cron", "/api/backup"];
 
 // Refreshes the Supabase session cookie on every page request and sends signed-out
 // visitors to the login page. Server Actions still check the user themselves.
@@ -29,7 +30,7 @@ export async function proxy(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims?.sub);
   const path = request.nextUrl.pathname;
-  const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+  const isPublic = path === "/" || PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
 
   if (!signedIn && !isPublic) {
     const url = request.nextUrl.clone();

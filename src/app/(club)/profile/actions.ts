@@ -36,3 +36,18 @@ export async function saveProfile(_: ProfileState, fd: FormData): Promise<Profil
   revalidatePath("/", "layout");
   return { ok: true, message: "Saved." };
 }
+
+// Username, bio and Instagram: what other archers see on your public profile.
+export async function savePublicProfile(_: ProfileState, fd: FormData): Promise<ProfileState> {
+  const username = String(fd.get("username") ?? "").trim().toLowerCase();
+  const bio = String(fd.get("bio") ?? "").trim();
+  const ig = String(fd.get("instagram") ?? "").trim().replace(/^@/, "");
+  if (!/^[a-z0-9._]{3,20}$/.test(username)) return { message: messageFor({ message: "INVALID_USERNAME" }) };
+  if (ig && !/^[A-Za-z0-9._]{1,30}$/.test(ig)) return { message: messageFor({ message: "INVALID_INSTAGRAM" }) };
+  if (bio.length > 160) return { message: messageFor({ message: "BIO_TOO_LONG" }) };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("save_my_profile", { p_username: username, p_bio: bio, p_instagram: ig });
+  if (error) return { message: messageFor(error) };
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Saved. Others see this on your profile." };
+}

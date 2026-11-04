@@ -1,21 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
-import { cookies } from "next/headers";
+import { Archivo, Atkinson_Hyperlegible_Next } from "next/font/google";
 import "./globals.css";
+import "./site.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const poppins = Poppins({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-poppins" });
+// Archivo's width axis gives the condensed display voice; Atkinson Hyperlegible Next is the reading face.
+const archivo = Archivo({ subsets: ["latin"], axes: ["wdth"], variable: "--font-archivo" });
+const atkinson = Atkinson_Hyperlegible_Next({ subsets: ["latin"], variable: "--font-atkinson" });
 
 export const metadata: Metadata = {
   title: "UNM Archery Club",
   description: "Book training sessions with the University of Nottingham Malaysia Archery Club.",
 };
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  // The theme lives in a cookie so the server renders the right colours first time.
-  const theme = (await cookies()).get("theme")?.value === "light" ? "light" : "dark";
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} ${poppins.variable} theme-${theme}`}>
+    <html lang="en" className={`${archivo.variable} ${atkinson.variable}`}>
       <body>{children}</body>
     </html>
   );

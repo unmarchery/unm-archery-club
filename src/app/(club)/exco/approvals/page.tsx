@@ -3,6 +3,7 @@ import { clockLabel, passesLabel, shortDay } from "@/lib/format";
 import { signedUrls } from "@/lib/receipts";
 import { can, getSession, OFFICERS } from "@/lib/session";
 import { AskToDelete, DeletionRequests, type DeletionRequest } from "../_receipts/controls";
+import { BulkApprove } from "./bulk";
 import { PaymentSettingsForm, TopupActions } from "./decide";
 
 type Pending = {
@@ -72,6 +73,8 @@ export default async function ApprovalsPage() {
       {queue.pending.length === 0 && (
         <div className="card"><p className="muted small" style={{ margin: 0 }}>No top-ups waiting.</p></div>
       )}
+
+      {queue.pending.length > 1 && <BulkApprove items={queue.pending.map((t) => ({ id: t.id, label: `${t.full_name} · RM${t.amount}${t.method === "cash" ? " · cash" : ""}` }))} />}
 
       <div className="grid">
         {queue.pending.map((t) => {

@@ -44,10 +44,12 @@ function otpError(message: string) {
 
 export async function signup(_: FormState, fd: FormData): Promise<FormState> {
   const studentId = field(fd, "student_id");
+  const username = field(fd, "username").toLowerCase();
   const fullName = field(fd, "full_name");
   const phone = field(fd, "phone");
   const email = normalizeEmail(field(fd, "email"));
 
+  if (!/^[a-z0-9._]{3,20}$/.test(username)) return { error: "Usernames are 3–20 letters, numbers, dots or underscores." };
   if (!/^\d{8}$/.test(studentId)) return { error: "Student ID must be 8 digits." };
   if (fullName.length < 2) return { error: "Enter your full name as it appears on your student ID." };
   if (!/^\+?[0-9 -]{8,16}$/.test(phone)) return { error: "Enter a valid phone number." };
@@ -63,6 +65,9 @@ export async function signup(_: FormState, fd: FormData): Promise<FormState> {
     console.error("Signup lookup failed:", (byId.error ?? byEmail.error)?.message);
     return { error: SETUP_ERROR };
   }
+  const { data: taken } = await admin.from("profiles").select("id, student_id").eq("username", username).maybeSingle();
+  if (taken && taken.student_id !== studentId) return { error: "That username is taken. Try another." };
+
   const existing = [byId.data, byEmail.data].filter(
     (row, i, all): row is { id: string; student_id: string; email: string } =>
       Boolean(row) && all.findIndex((r) => r?.id === row?.id) === i,
@@ -87,7 +92,7 @@ export async function signup(_: FormState, fd: FormData): Promise<FormState> {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { shouldCreateUser: true, data: { student_id: studentId, full_name: fullName, phone } },
+    options: { shouldCreateUser: true, data: { student_id: studentId, username, full_name: fullName, phone } },
   });
   if (error) return { error: otpError(error.message) };
 

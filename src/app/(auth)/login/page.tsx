@@ -5,8 +5,8 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <>
       <div>
-        <h1 className="h1">Log in</h1>
-        <p className="sub">Use your student ID and password.</p>
+        <h1 className="h1">Let&apos;s get you into the Archery Range!!</h1>
+        <p className="sub">Only for UNM Students. Use your student ID and password.</p>
       </div>
       {e === "no-profile" && (
         <p className="error" role="alert">

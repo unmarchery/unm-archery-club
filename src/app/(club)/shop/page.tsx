@@ -37,7 +37,10 @@ export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
     supabase.from("settings").select("*").single<{ payment_qr_path?: string | null }>(),
   ]);
   const catalog = data as Catalog | null;
-  const sections = (catalog?.sections ?? []).filter((s) => s.visible);
+  // Members train free, so passes are hidden for them. Guests see passes first.
+  const sections = (catalog?.sections ?? [])
+    .filter((s) => s.visible && !(catalog?.member && s.kind === "passes"))
+    .sort((a, b) => (a.kind === "passes" ? -1 : 0) - (b.kind === "passes" ? -1 : 0));
   // Before the shop is set up, the Passes form still works on its own.
   if (!catalog || sections.length === 0) {
     return (
@@ -56,7 +59,7 @@ export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
       <div className="page-head">
         <div>
           <h1 className="h1">Shop</h1>
-          <p className="sub">Passes for sessions, club merch and more.</p>
+          <p className="sub">{catalog.member ? "Club merch and more. You're a member, so sessions are free and passes are hidden." : "Session passes first, then club merch. Pay by DuitNow QR or in cash at the range."}</p>
         </div>
       </div>
 

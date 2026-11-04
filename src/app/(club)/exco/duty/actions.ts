@@ -72,3 +72,8 @@ export async function removeWalkin(id: string) {
   if (!UUID.test(id)) return bad("BOOKING_NOT_FOUND");
   return call("remove_walkin", { p_id: id });
 }
+
+// Everyone still "booked" in the slot becomes present; change the no-shows after.
+export async function markAllPresent(slotId: string) {
+  return call("mark_all_present", { p_slot: slotId });
+}
