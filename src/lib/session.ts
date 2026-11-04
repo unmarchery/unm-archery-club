@@ -37,9 +37,16 @@ export function can(status: Status, permission: string) {
 
 // The signed-in archer, read once per request. Sends signed-out visitors to /login.
 export const getSession = cache(async () => {
+  const session = await getOptionalSession();
+  if (!session) redirect("/login");
+  return session;
+});
+
+// Who is visiting: the signed-in archer, or null for a visitor. Public pages use this.
+export const getOptionalSession = cache(async () => {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
-  if (!data?.claims?.sub) redirect("/login");
+  if (!data?.claims?.sub) return null;
 
   const [{ data: profile }, { data: status }] = await Promise.all([
     supabase
