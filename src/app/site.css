@@ -242,3 +242,6 @@ html[data-exco] .main-v2, html[data-exco] .foot-v2 { padding-left: max(84px, env
 .opening-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding-top: 12px; border-top: 1px solid var(--line); }
 .opening-row .seg { flex-wrap: wrap; }
 .opening-row .seg button { flex: none; }
+
+/* Shop: the cart floats in the bottom-right corner, on the shop page only */
+.card.cart { position: fixed; z-index: 45; right: calc(20px + env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); width: min(360px, calc(100vw - 40px)); max-height: min(60vh, 520px); overflow-y: auto; background: var(--glass-strong); box-shadow: 0 24px 48px -20px rgba(15, 42, 32, .45), 0 2px 8px rgba(15, 42, 32, .12); animation: materialize .38s var(--ease-out); transform-origin: bottom right; }
