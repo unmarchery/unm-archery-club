@@ -997,3 +997,16 @@ test('ranking: scores count in the tier they were shot in; only members register
   const [{ rank_overview: o }] = await asUser(member, `select rank_overview()`)
   assert.equal(o.history[0].top.beginner[0].score, 512)
 })
+
+test('check-in: a member scans today\'s code and their bookings turn present; wrong codes are refused', async () => {
+  const pres = await ownerId()
+  const archer = (await one(`select id from profiles where student_id = '20000101'`)).id
+  const s = await slotOn(0, 23)
+  await db.query(`insert into bookings (slot_id, user_id, is_member, pass_kind, status) values ($1, $2, true, 'member', 'booked')`, [s.id, archer])
+  const [{ checkin_code: code }] = await asUser(pres, `select checkin_code(club_today())`)
+  await rejects(asUser(archer, `select checkin_code(club_today())`), 'NOT_ALLOWED')
+  await rejects(asUser(archer, `select check_in(club_today(), 'wrong')`), 'CHECKIN_INVALID')
+  const [{ check_in: n }] = await asUser(archer, `select check_in(club_today(), $1)`, [code])
+  assert.equal(n, 1)
+  assert.equal((await one(`select status from bookings where slot_id = $1 and user_id = $2`, [s.id, archer])).status, 'present')
+})

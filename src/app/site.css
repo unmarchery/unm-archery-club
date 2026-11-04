@@ -320,3 +320,5 @@ html[data-exco] .main-v2, html[data-exco] .foot-v2 { padding-left: max(84px, env
 .results li { display: flex; justify-content: space-between; padding: 6px 12px; border-radius: 10px; }
 .results li:nth-child(odd) { background: rgba(255, 255, 255, .55); }
 @media (max-width: 640px) { .podium-block { font-size: 2.4rem; } .p1 .podium-block { height: 140px; } .p2 .podium-block { height: 104px; } .p3 .podium-block { height: 80px; } .match { grid-template-columns: 1fr; } .match-act { align-items: flex-start; } }
+.qr-card { flex-direction: row; align-items: center; gap: 20px; flex-wrap: wrap; }
+.qr-img { width: 180px; flex: none; } .qr-img svg { width: 100%; height: auto; display: block; border-radius: 12px; }

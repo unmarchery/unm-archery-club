@@ -1,7 +1,10 @@
+import { headers } from "next/headers";
 import Link from "next/link";
+import QRCode from "qrcode";
 import { notFound } from "next/navigation";
-import { dayLabel, shortTimeRange } from "@/lib/format";
+import { dayLabel, requestTime, shortTimeRange } from "@/lib/format";
 import { getSession } from "@/lib/session";
+import { MarkAllPresent } from "./mark-all";
 import { AddWalkin, BookingRow, NameWalkin, type SheetBooking } from "./sheet";
 
 type Sheet = {
@@ -32,6 +35,15 @@ export default async function AttendancePage({ params }: PageProps<"/exco/duty/[
   const { data } = await supabase.rpc("attendance_day", { p_day: day });
   if (!data) notFound();
   const s = data as Sheet;
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kuala_Lumpur" }).format(new Date(requestTime()));
+  let qr: string | null = null;
+  if (s.day === today) {
+    const { data: code } = await supabase.rpc("checkin_code", { p_day: s.day });
+    const h = await headers();
+    const origin = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("x-forwarded-host") ?? h.get("host")}`;
+    if (code) qr = await QRCode.toString(`${origin}/checkin?d=${s.day}&k=${code}`, { type: "svg", margin: 1, color: { dark: "#183F32", light: "#FFFFFF" } });
+  }
+  const dayPrep = prepList(s.slots.flatMap((x) => x.bookings));
 
   return (
     <>
@@ -47,6 +59,14 @@ export default async function AttendancePage({ params }: PageProps<"/exco/duty/[
           </p>
         </div>
       </div>
+
+      {qr && (
+        <section className="card qr-card">
+          <div className="qr-img" dangerouslySetInnerHTML={{ __html: qr }} />
+          <div><h2 className="h2">Today&apos;s check-in</h2><p className="muted small" style={{ margin: 0 }}>Show this at the range. Members scan it to mark themselves present; change anything below.</p></div>
+        </section>
+      )}
+      {dayPrep.length > 0 && <div className="card notice"><p className="small" style={{ margin: 0 }}><strong>Bows for the whole day:</strong> {dayPrep.join(" · ")}</p></div>}
 
       {s.slots.length === 0 && <div className="card"><p className="small muted" style={{ margin: 0 }}>No training on this day.</p></div>}
 
@@ -74,6 +94,7 @@ export default async function AttendancePage({ params }: PageProps<"/exco/duty/[
                 <NameWalkin key={w.id} walkin={w} open={s.open} />
               ))}
             </div>
+            {s.open && slot.bookings.some((b) => b.status === "booked") && <MarkAllPresent slotId={slot.id} />}
             {s.open && <AddWalkin slotId={slot.id} />}
           </section>
         );
