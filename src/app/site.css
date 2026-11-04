@@ -245,3 +245,26 @@ html[data-exco] .main-v2, html[data-exco] .foot-v2 { padding-left: max(84px, env
 
 /* Shop: the cart floats in the bottom-right corner, on the shop page only */
 .card.cart { position: fixed; z-index: 45; right: calc(20px + env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); width: min(360px, calc(100vw - 40px)); max-height: min(60vh, 520px); overflow-y: auto; background: var(--glass-strong); box-shadow: 0 24px 48px -20px rgba(15, 42, 32, .45), 0 2px 8px rgba(15, 42, 32, .12); animation: materialize .38s var(--ease-out); transform-origin: bottom right; }
+
+/* Profiles and reactions */
+.profile-grid { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.id-card { align-items: flex-start; gap: 16px; }
+.avatar.xl { width: 104px; height: 104px; font-size: 36px; box-shadow: 0 0 0 5px rgba(255, 255, 255, .9), 0 0 0 7px var(--line-strong); }
+.tier { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; background: rgba(255, 255, 255, .7); border: 1px solid var(--line); }
+.tier-pro { background: var(--bull-tint); border-color: rgba(216, 169, 40, .45); color: var(--bull-ink); }
+.tier-intermediate { background: var(--sage); border-color: var(--line-strong); }
+.ig-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; text-decoration: none; color: var(--forest); padding: 8px 14px 8px 10px; border-radius: 999px; background: rgba(255, 255, 255, .62); border: 1px solid var(--glass-edge); }
+.ig-link:hover { background: rgba(255, 255, 255, .95); text-decoration: underline; }
+.reacts { display: flex; flex-wrap: wrap; gap: 10px; }
+.react { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--glass-edge); background: rgba(255, 255, 255, .62); font: 800 15px var(--font-sans); color: var(--forest); cursor: pointer; transition: transform .5s var(--spring), background-color .2s; }
+.react .emo { font-size: 22px; line-height: 1; }
+.react:hover:not(:disabled) { background: rgba(255, 255, 255, .92); }
+.react:active:not(:disabled) { transform: scale(.92); transition-duration: .12s; }
+.react.on, .react.on:hover:not(:disabled) { background: var(--forest); color: #fff; border-color: var(--forest); }
+.react:disabled { cursor: default; opacity: .8; }
+.react.pop .emo { animation: emopop .45s var(--spring); }
+@keyframes emopop { 40% { transform: scale(1.45) rotate(-8deg); } }
+.react-float { position: absolute; left: 16px; top: 0; font-size: 22px; pointer-events: none; animation: floatup .9s var(--ease-out) forwards; }
+@keyframes floatup { to { opacity: 0; transform: translateY(-46px) scale(1.4); } }
+@media (max-width: 860px) { .profile-grid { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .react.pop .emo, .react-float { animation: none; } }

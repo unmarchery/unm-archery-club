@@ -6,6 +6,7 @@ const MESSAGES: Record<string, string> = {
   INVALID_INSTAGRAM: "Instagram usernames use letters, numbers, dots and underscores.",
   BIO_TOO_LONG: "Keep your bio to 160 characters.",
   NOT_FOUND: "That no longer exists.",
+  MEMBERS_ONLY: "Only members can do that. Join the club to take part.",
   NO_PROFILE: "Your account has no student profile yet. Ask the exco to check it.",
   BANNED: "You're paused from booking because of no-shows. You can book again once the ban ends.",
   SLOT_NOT_FOUND: "That session no longer exists.",

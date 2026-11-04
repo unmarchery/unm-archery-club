@@ -950,3 +950,21 @@ test('session opening: the exco locks, opens or schedules a day; bookings follow
   assert.equal((await one(`select count(*)::int as n from bookings where slot_id = $1 and user_id = $2`, [slot.id, archer])).n, 1)
   await asUser(pres, `select set_session_opening($1, 'weekly')`, [slot.day])
 })
+
+test('reactions: members react to other profiles anonymously; guests and self-reactions are refused', async () => {
+  const member = (await one(`select id from profiles where student_id = '20000101'`)).id
+  const target = (await one(`select id from profiles where username = 'aisyah.shoots'`)).id
+  await db.query(`insert into members (student_id) select '20000201' where not exists (select 1 from members where student_id = '20000201')`)
+  const [{ toggle_reaction: on }] = await asUser(member, `select toggle_reaction($1, 'fire')`, [target])
+  assert.equal(on, true)
+  const [{ public_profile: p }] = await asUser(member, `select public_profile('Aisyah.Shoots')`)
+  assert.equal(p.reactions.fire, 1)
+  assert.deepEqual(p.mine, ['fire'])
+  assert.equal(p.tier, 'beginner')
+  const [{ toggle_reaction: off }] = await asUser(member, `select toggle_reaction($1, 'fire')`, [target])
+  assert.equal(off, false)
+  const guest = await signUp('20000203', 'g203@nottingham.edu.my', 'Guest Two')
+  await rejects(asUser(guest, `select toggle_reaction($1, 'fire')`, [target]), 'MEMBERS_ONLY')
+  await rejects(asUser(member, `select toggle_reaction($1, 'fire')`, [member]), 'NOT_ALLOWED')
+  await rejects(asUser(member, `select profile_reactions from profile_reactions`), 'permission denied')
+})

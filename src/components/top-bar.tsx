@@ -113,7 +113,7 @@ export function TopBar({ user }: { user: BarUser | null }) {
 
       {user && card && (
         <div className="profile-card" id="profile-card" ref={cardRef} role="dialog" aria-label="Your profile card">
-          <Link href="/me" className="pc-head">
+          <Link href="/profile" className="pc-head">
             <span className="avatar lg">{initials(user.name)}</span>
             <span className="pc-who">
               <span className="pc-name">{user.name}</span>

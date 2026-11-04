@@ -12,6 +12,8 @@ export type Profile = Gear & {
   phone: string | null;
   banned_until: string | null;
   must_change_password?: boolean; // starter accounts; missing before migration 0003
+  username?: string | null; bio?: string | null; instagram?: string | null; // 0012
+  tier?: "beginner" | "intermediate" | "pro"; // 0014
 };
 
 export type Status = {
