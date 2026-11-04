@@ -186,3 +186,10 @@ html[data-exco] .main-v2, html[data-exco] .foot-v2 { padding-left: max(84px, env
 .value-line svg { width: 24px; height: 24px; }
 .value-line strong { color: var(--forest); display: block; }
 @media (max-width: 860px) { .join-grid { grid-template-columns: 1fr; } }
+
+/* First-visit sign-in pop-up */
+.signin-dlg { border: 0; padding: 0; background: transparent; width: min(460px, calc(100vw - 32px)); max-width: none; max-height: none; }
+.signin-dlg::backdrop { background: rgba(15, 42, 32, 0.28); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.signin-dlg .modal { position: relative; max-width: none; gap: 14px; animation: materialize .38s var(--ease-out); }
+.signin-dlg form { display: flex; flex-direction: column; gap: 14px; }
+.sp-x { position: absolute; top: 14px; right: 14px; }

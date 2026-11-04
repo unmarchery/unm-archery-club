@@ -47,7 +47,7 @@ export default async function ClubLayout({ children }: { children: React.ReactNo
               <span className="muted small">University of Nottingham Malaysia. Training every Tuesday and Thursday, 4–7pm, at the Sports Complex.</span>
             </div>
             <nav aria-label="Footer">
-              <Link href="/sessions">Book a session</Link><Link href="/shop">Shop</Link><Link href="/ranking">Ranking</Link><Link href="/faq">FAQ</Link><Link href="/join">Join Club</Link>
+              <Link href="/sessions">Book a session</Link><Link href="/shop">Shop</Link><Link href="/ranking">Ranking</Link><Link href="/faq">FAQ</Link><Link href={user ? "/me" : "/signup"}>Join Club</Link>
             </nav>
           </div>
         </footer>

@@ -918,3 +918,16 @@ test('events: anyone can read; only people with the Events switch can post', asy
     await db.exec('reset role')
   }
 })
+
+test('profiles: usernames are unique and lower-case; members edit their own bio and Instagram', async () => {
+  const a = (await one(`insert into auth.users (email, raw_user_meta_data) values ('u1@nottingham.edu.my', $1) returning id`,
+    [JSON.stringify({ student_id: '20000201', full_name: 'User One', phone: '0123456789', username: 'Aisyah.R' })])).id
+  assert.equal((await one(`select username from profiles where id = $1`, [a])).username, 'aisyah.r')
+  await rejects(db.query(`insert into auth.users (email, raw_user_meta_data) values ('u2@nottingham.edu.my', $1)`,
+    [JSON.stringify({ student_id: '20000202', full_name: 'User Two', phone: '0123456789', username: 'aisyah.r' })]), 'USERNAME_TAKEN')
+  await asUser(a, `select save_my_profile('aisyah.shoots', 'Recurve since Year 1', '@aisyah_ig')`)
+  const row = await one(`select username, bio, instagram from profiles where id = $1`, [a])
+  assert.deepEqual(row, { username: 'aisyah.shoots', bio: 'Recurve since Year 1', instagram: 'aisyah_ig' })
+  await rejects(asUser(a, `select save_my_profile('x', null, null)`), 'INVALID_USERNAME')
+  await rejects(asUser(a, `select save_my_profile('ok.name', null, 'bad ig!')`), 'INVALID_INSTAGRAM')
+})

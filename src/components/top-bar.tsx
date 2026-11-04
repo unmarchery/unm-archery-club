@@ -78,7 +78,7 @@ export function TopBar({ user }: { user: BarUser | null }) {
             ))}
           </div>
           <div className="tabs-account">
-            {!user?.member && <Link href="/join" className="btn btn-ghost tab-join" aria-current={current("/join")}>Join Club</Link>}
+            {!user?.member && <Link href={user ? "/me" : "/signup"} className="btn btn-ghost tab-join">Join Club</Link>}
             {!user && <Link href="/login" className="btn">Sign In</Link>}
             {user && (
               <div className="chip-wrap">
@@ -106,7 +106,7 @@ export function TopBar({ user }: { user: BarUser | null }) {
         <div className="mobile-menu" id="mobile-menu">
           <nav className="wrap-v2 gutter" aria-label="Main, mobile">
             {TABS.map((t) => <Link key={t.href} href={t.href} className="mm-link" aria-current={current(t.href)}>{t.label}<ArrowIcon className="inline-icon" /></Link>)}
-            {!user?.member && <Link href="/join" className="btn btn-ghost">Join Club</Link>}
+            {!user?.member && <Link href={user ? "/me" : "/signup"} className="btn btn-ghost">Join Club</Link>}
           </nav>
         </div>
       )}

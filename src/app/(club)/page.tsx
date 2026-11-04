@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BowScene } from "@/components/bow-scene";
 import { EventsList } from "@/components/events-list";
+import { SignInPopup } from "@/components/signin-popup";
 import { TIMEZONE } from "@/lib/format";
 import { getOptionalSession } from "@/lib/session";
 import { getPublicInfo } from "@/lib/public-info";
@@ -25,7 +26,7 @@ export default async function LandingPage() {
               Book a session
               <span className="cta-arrow" aria-hidden="true"><svg viewBox="0 0 30 14"><path d="M2 7h22" /><path d="M21 3.2 27 7l-6 3.8" /><path d="M2 3.5 5.5 7 2 10.5M6 3.5 9.5 7 6 10.5" /></svg></span>
             </Link>
-            {!member && <Link href="/join" className="btn btn-ghost btn-lg">Join the club</Link>}
+            {!member && <Link href={session ? "/me" : "/signup"} className="btn btn-ghost btn-lg">Join the club</Link>}
           </div>
         </div>
       </section>
@@ -54,6 +55,7 @@ export default async function LandingPage() {
       )}
 
       <EventsList today={today} />
+      {!session && <SignInPopup />}
     </div>
   );
 }

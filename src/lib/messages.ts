@@ -1,6 +1,11 @@
 // Turns the short error codes raised by the database functions into plain messages.
 const MESSAGES: Record<string, string> = {
   NOT_SIGNED_IN: "Please log in again.",
+  USERNAME_TAKEN: "That username is taken. Try another.",
+  INVALID_USERNAME: "Usernames are 3–20 letters, numbers, dots or underscores.",
+  INVALID_INSTAGRAM: "Instagram usernames use letters, numbers, dots and underscores.",
+  BIO_TOO_LONG: "Keep your bio to 160 characters.",
+  NOT_FOUND: "That no longer exists.",
   NO_PROFILE: "Your account has no student profile yet. Ask the exco to check it.",
   BANNED: "You're paused from booking because of no-shows. You can book again once the ban ends.",
   SLOT_NOT_FOUND: "That session no longer exists.",
