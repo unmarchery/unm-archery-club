@@ -16,7 +16,7 @@ export default async function ClubLayout({ children }: { children: React.ReactNo
     : null;
 
   // The exco sidebar shows only the tools this person's permissions allow.
-  let tools: RailTool[] = [];
+  const tools: RailTool[] = [];
   if (status?.is_exco) {
     const add = (on: boolean, t: RailTool) => { if (on) tools.push(t); };
     add(true, { href: "/exco", label: "Overview", icon: "home" });
@@ -25,11 +25,11 @@ export default async function ClubLayout({ children }: { children: React.ReactNo
     add(can(status, "manage_members"), { href: "/exco/members", label: "Members", icon: "users", badge: status.pending_member_requests });
     add(can(status, "manage_members"), { href: "/exco/accounts", label: "Accounts", icon: "key" });
     add(true, { href: "/exco/sessions", label: "Sessions", icon: "calendar" });
+    add(can(status, "manage_events"), { href: "/exco/events", label: "Events", icon: "star" });
     add(can(status, "manage_shop"), { href: "/exco/shop", label: "Shop orders", icon: "wallet" });
     add(can(status, "export_finance") || can(status, "approve_topups"), { href: "/exco/finance", label: "Finance", icon: "chart" });
     add(true, { href: "/exco/people", label: "Exco & roles", icon: "shield" });
     add(can(status, "edit_settings"), { href: "/exco/settings", label: "Settings", icon: "gear" });
-    tools = tools.filter(Boolean);
   }
 
   return (

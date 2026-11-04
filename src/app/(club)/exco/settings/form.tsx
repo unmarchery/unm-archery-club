@@ -8,7 +8,7 @@ export type Settings = {
   slot_minutes: number; capacity: number; nonmember_cap_pct: number; booking_open_dow: number; booking_open_time: string;
   nonmember_refund_hours: number; member_cancel_minutes: number; noshow_warn_after: number; noshow_ban_after: number;
   ban_days: number; membership_valid_until: string | null; club_bows: { RH: number[]; LH: number[] };
-  starter_password_days?: number; duty_min_people?: number; attendance_days?: number; noshow_count_from?: string | null;
+  membership_fee?: number | null; starter_password_days?: number; duty_min_people?: number; attendance_days?: number; noshow_count_from?: string | null;
 };
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -32,7 +32,9 @@ export function SettingsForm({ s }: { s: Settings }) {
         <div className="filters">
           <Num name="single_price" label="Single pass" unit="RM" value={s.single_price} />
           <Num name="fullday_price" label="Full-day pass" unit="RM" value={s.fullday_price} />
+          <label className="field"><span className="field-label">Membership fee a year (RM, optional)</span><input className="input" type="number" name="membership_fee" defaultValue={s.membership_fee ?? ""} min={0} /></label>
         </div>
+        <p className="muted small">The fee shows on the Join page with how many hour passes it is worth. Leave it empty to hide it.</p>
       </section>
 
       <section className="card">

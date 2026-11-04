@@ -803,12 +803,13 @@ test('security: every table has Row Level Security, and signed-out visitors can 
   const open = (await db.query(`select relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
                                 where n.nspname = 'public' and c.relkind = 'r' and not c.relrowsecurity`)).rows
   assert.deepEqual(open, [])
-  const anonCanRead = (await db.query(`select table_name from information_schema.role_table_grants
-                                       where table_schema = 'public' and grantee = 'anon'`)).rows
-  assert.deepEqual(anonCanRead, [])
+  // Visitors may read only what the public pages show: events, and the pass prices.
+  const anonCanRead = (await db.query(`select table_name, privilege_type from information_schema.role_table_grants
+                                       where table_schema = 'public' and grantee = 'anon' order by 1, 2`)).rows
+  assert.deepEqual(anonCanRead, [{ table_name: 'events', privilege_type: 'SELECT' }])
   const anonCanRun = (await db.query(`select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-                                      where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute')`)).rows
-  assert.deepEqual(anonCanRun.map((r) => r.proname), [])
+                                      where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') order by 1`)).rows
+  assert.deepEqual(anonCanRun.map((r) => r.proname), ['public_prices'])
 
   // A signed-in archer sees only their own rows in the newer tables too.
   const archer = (await one(`select id from profiles where student_id = '20000103'`)).id
@@ -900,4 +901,20 @@ test('the Shop switch can be given from the People page', async () => {
   const [{ shop_orders_for_review: q }] = await asUser(sec, 'select shop_orders_for_review()')
   assert.ok(Array.isArray(q))
   assert.ok((await one(`select action from activity_log order by id desc limit 1`)).action.includes('gave Shop'))
+})
+
+test('events: anyone can read; only people with the Events switch can post', async () => {
+  const pres = await ownerId()
+  const member = (await one(`select id from profiles where student_id = '20000101'`)).id
+  const [{ save_event: id }] = await asUser(pres, `select save_event($1::jsonb)`, [JSON.stringify({ title: 'Open Range Week', starts_on: '2026-11-03', ends_on: '2026-11-12', time_label: 'Every session', featured: true })])
+  assert.ok(id)
+  await rejects(asUser(member, `select save_event($1::jsonb)`, [JSON.stringify({ title: 'Nope', starts_on: '2026-11-20' })]), 'NOT_ALLOWED')
+  await db.exec('set role anon')
+  try {
+    const rows = (await db.query(`select title, featured from events`)).rows
+    assert.deepEqual(rows, [{ title: 'Open Range Week', featured: true }])
+    await rejects(db.query(`insert into events (title, starts_on) values ('x', '2026-11-20')`), 'permission denied')
+  } finally {
+    await db.exec('reset role')
+  }
 })

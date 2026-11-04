@@ -1,17 +1,18 @@
 import Link from "next/link";
 import { BowScene } from "@/components/bow-scene";
+import { EventsList } from "@/components/events-list";
+import { TIMEZONE } from "@/lib/format";
 import { getOptionalSession } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
+import { getPublicInfo } from "@/lib/public-info";
 
 // The public landing page: the range animation, the session basics, and a way in.
 export default async function LandingPage() {
   const session = await getOptionalSession();
   const member = session?.status.membership === "member";
-  const supabase = await createClient();
-  const { data } = await supabase.rpc("public_prices");
-  const cfg = data as { single_price: number; fullday_price: number } | null;
-  const single = cfg?.single_price ?? 5;
-  const full = cfg?.fullday_price ?? 12;
+  const info = await getPublicInfo();
+  const single = info.single_price;
+  const full = info.fullday_price;
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: TIMEZONE }).format(new Date());
 
   return (
     <div className="landing">
@@ -51,6 +52,8 @@ export default async function LandingPage() {
           <p className="muted small" style={{ gridColumn: "1 / -1", margin: 0 }}>First time? <Link href="/faq">Read the FAQ</Link>: what to wear, where the range is, and what to expect.</p>
         </section>
       )}
+
+      <EventsList today={today} />
     </div>
   );
 }
