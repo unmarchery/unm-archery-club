@@ -42,7 +42,7 @@ async function signUp(studentId, email, name = 'Test Archer') {
 // Three slots on one day that is always inside the booking window, plus helpers.
 async function testDay() {
   const { day } = await one(
-    `select ((bookable_until at time zone 'Asia/Kuala_Lumpur')::date - 2) as day from booking_window()`,
+    `select ((weekly_window_end() at time zone 'Asia/Kuala_Lumpur')::date - 2) as day`,
   )
   const ids = []
   for (const hour of ['16:00', '17:00', '18:00']) {
@@ -97,11 +97,11 @@ test('membership needs the form row; email match makes it automatic', async () =
   await db.query(`update settings set membership_valid_until = null`)
 })
 
-test('ensure_slots builds this week and next week once', async () => {
+test('ensure_slots builds this week and the next two once', async () => {
   const before = (await one('select count(*)::int as n from slots')).n
   await db.query('select ensure_slots()')
   const after = (await one('select count(*)::int as n from slots')).n
-  assert.equal(after - before, 12) // Tue and Thu, 3 slots each, 2 weeks
+  assert.equal(after - before, 18) // Tue and Thu, 3 slots each, 3 weeks
   await db.query('select ensure_slots()')
   assert.equal((await one('select count(*)::int as n from slots')).n, after)
   const hours = await db.query(
@@ -930,4 +930,23 @@ test('profiles: usernames are unique and lower-case; members edit their own bio 
   assert.deepEqual(row, { username: 'aisyah.shoots', bio: 'Recurve since Year 1', instagram: 'aisyah_ig' })
   await rejects(asUser(a, `select save_my_profile('x', null, null)`), 'INVALID_USERNAME')
   await rejects(asUser(a, `select save_my_profile('ok.name', null, 'bad ig!')`), 'INVALID_INSTAGRAM')
+})
+
+test('session opening: the exco locks, opens or schedules a day; bookings follow it', async () => {
+  const pres = await ownerId()
+  const archer = (await one(`select id from profiles where student_id = '20000101'`)).id
+  await db.query(`select ensure_slots()`)
+  const slot = await one(`select s.id, slot_day(s)::text as day from slots s where s.cancelled_at is null and s.starts_at > now() + interval '1 day' and s.starts_at < now() + interval '20 days'
+                           and not exists (select 1 from bookings b where b.slot_id = s.id) order by s.starts_at desc limit 1`)
+  await asUser(pres, `select set_session_opening($1, 'locked')`, [slot.day])
+  await rejects(asUser(archer, `select book_slot($1)`, [slot.id]), 'NOT_OPEN_YET')
+  await asUser(pres, `select set_session_opening($1, 'scheduled', now() + interval '1 day')`, [slot.day])
+  const [{ day_openings: days }] = await asUser(archer, `select day_openings($1, $1)`, [slot.day])
+  assert.equal(days[0].status, 'scheduled')
+  assert.equal(days[0].open, false)
+  await rejects(asUser(archer, `select set_session_opening($1, 'open')`, [slot.day]), 'NOT_ALLOWED')
+  await asUser(pres, `select set_session_opening($1, 'open')`, [slot.day])
+  await asUser(archer, `select book_slot($1)`, [slot.id])
+  assert.equal((await one(`select count(*)::int as n from bookings where slot_id = $1 and user_id = $2`, [slot.id, archer])).n, 1)
+  await asUser(pres, `select set_session_opening($1, 'weekly')`, [slot.day])
 })
