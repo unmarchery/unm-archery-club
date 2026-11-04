@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 // Pages visitors can open without signing in. "/" is matched exactly below.
-const PUBLIC_PATHS = ["/login", "/signup", "/verify", "/forgot", "/faq", "/sessions", "/api/members/sync", "/api/cron", "/api/backup"];
+const PUBLIC_PATHS = ["/login", "/signup", "/verify", "/forgot", "/faq", "/sessions", "/ranking", "/api/members/sync", "/api/cron", "/api/backup"];
 
 // Refreshes the Supabase session cookie on every page request and sends signed-out
 // visitors to the login page. Server Actions still check the user themselves.

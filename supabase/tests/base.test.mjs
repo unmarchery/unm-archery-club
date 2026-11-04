@@ -803,13 +803,13 @@ test('security: every table has Row Level Security, and signed-out visitors can 
   const open = (await db.query(`select relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
                                 where n.nspname = 'public' and c.relkind = 'r' and not c.relrowsecurity`)).rows
   assert.deepEqual(open, [])
-  // Visitors may read only what the public pages show: events, and the pass prices.
+  // Visitors may read only what the public pages show: events, prices and the leaderboards.
   const anonCanRead = (await db.query(`select table_name, privilege_type from information_schema.role_table_grants
                                        where table_schema = 'public' and grantee = 'anon' order by 1, 2`)).rows
   assert.deepEqual(anonCanRead, [{ table_name: 'events', privilege_type: 'SELECT' }])
   const anonCanRun = (await db.query(`select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
                                       where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') order by 1`)).rows
-  assert.deepEqual(anonCanRun.map((r) => r.proname), ['public_prices'])
+  assert.deepEqual(anonCanRun.map((r) => r.proname), ['leaderboard', 'public_prices', 'rank_overview'])
 
   // A signed-in archer sees only their own rows in the newer tables too.
   const archer = (await one(`select id from profiles where student_id = '20000103'`)).id
@@ -967,4 +967,33 @@ test('reactions: members react to other profiles anonymously; guests and self-re
   await rejects(asUser(guest, `select toggle_reaction($1, 'fire')`, [target]), 'MEMBERS_ONLY')
   await rejects(asUser(member, `select toggle_reaction($1, 'fire')`, [member]), 'NOT_ALLOWED')
   await rejects(asUser(member, `select profile_reactions from profile_reactions`), 'permission denied')
+})
+
+test('ranking: scores count in the tier they were shot in; only members register', async () => {
+  const pres = await ownerId()
+  const member = (await one(`select id from profiles where student_id = '20000101'`)).id
+  const [{ save_match: m }] = await asUser(pres, `select save_match($1::jsonb)`, [JSON.stringify({ title: 'Rank Match 4', held_on: '2026-11-14', capacity: 2 })])
+  await asUser(member, `select register_match($1, true)`, [m])
+  const guest = await signUp('20000204', 'g204@nottingham.edu.my', 'Guest Three')
+  await rejects(asUser(guest, `select register_match($1, true)`, [m]), 'MEMBERS_ONLY')
+  await asUser(pres, `select save_scores($1, $2::jsonb)`, [m, JSON.stringify([{ student_id: '20000101', score: 512 }])])
+  let [{ leaderboard: b }] = await asUser(member, `select leaderboard('beginner')`)
+  assert.equal(b[0].score, 512)
+  assert.equal(b[0].me, true)
+  await rejects(asUser(member, `select set_tier('20000101', 'pro')`), 'NOT_ALLOWED')
+  await asUser(pres, `select set_tier('20000101', 'intermediate')`)
+  ;[{ leaderboard: b }] = await asUser(member, `select leaderboard('intermediate')`)
+  assert.deepEqual(b, [])
+  ;[{ leaderboard: b }] = await asUser(member, `select leaderboard('beginner')`)
+  assert.equal(b[0].score, 512)
+  await db.query(`select set_config('request.jwt.claim.sub', '', false)`)
+  await db.exec('set role anon')
+  try {
+    const row = (await db.query(`select leaderboard('beginner') as b`)).rows[0]
+    assert.equal(row.b[0].name, null)
+  } finally {
+    await db.exec('reset role')
+  }
+  const [{ rank_overview: o }] = await asUser(member, `select rank_overview()`)
+  assert.equal(o.history[0].top.beginner[0].score, 512)
 })

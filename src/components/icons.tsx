@@ -86,3 +86,6 @@ export function TargetRings({ className }: P) {
     </svg>
   );
 }
+export const TrophyIcon = (p: P) => (
+  <svg {...base} {...p}><path d="M8 20.5h8M12 16v4.5M7 4h10v5a5 5 0 0 1-10 0z" /><path d="M7 6H4.5A2.5 2.5 0 0 0 7 10.5M17 6h2.5A2.5 2.5 0 0 1 17 10.5" /></svg>
+);

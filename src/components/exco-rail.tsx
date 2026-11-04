@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { CalendarIcon, ChartIcon, CheckCircleIcon, ClipboardIcon, GearIcon, HomeIcon, KeyIcon, ShieldIcon, StarIcon, UsersIcon, WalletIcon } from "./icons";
+import { CalendarIcon, ChartIcon, CheckCircleIcon, ClipboardIcon, GearIcon, HomeIcon, KeyIcon, ShieldIcon, StarIcon, TrophyIcon, UsersIcon, WalletIcon } from "./icons";
 
-const ICONS = { home: HomeIcon, shield: ShieldIcon, users: UsersIcon, key: KeyIcon, check: CheckCircleIcon, chart: ChartIcon, calendar: CalendarIcon, clipboard: ClipboardIcon, wallet: WalletIcon, gear: GearIcon, star: StarIcon };
+const ICONS = { home: HomeIcon, shield: ShieldIcon, users: UsersIcon, key: KeyIcon, check: CheckCircleIcon, chart: ChartIcon, calendar: CalendarIcon, clipboard: ClipboardIcon, wallet: WalletIcon, gear: GearIcon, star: StarIcon, trophy: TrophyIcon };
 export type RailTool = { href: string; label: string; icon: keyof typeof ICONS; badge?: number };
 
 // One bubble at rest showing the last tool you hovered; a liquid column with every tool's name when
