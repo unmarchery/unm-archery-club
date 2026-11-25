@@ -188,6 +188,19 @@ creates a public `shop` storage bucket for product photos.
   that buyers see once their payment is confirmed. Buyers and managers get emails. Shop sales appear on
   Finance and in its Excel download.
 
+### Event pictures and booking edits (site redesign)
+
+Needs [`supabase/migrations/0017_event_pictures.sql`](supabase/migrations/0017_event_pictures.sql) and
+[`supabase/migrations/0018_edit_booking.sql`](supabase/migrations/0018_edit_booking.sql) run once, in that order, after 0016.
+
+- **Event pictures** (`manage_events`): Exco > Events has a picture field. Photos are shrunk in the browser and
+  stored in the public `shop` bucket under `e/`; replacing or removing one deletes the old file. Events without a
+  picture show drawn art on the landing page, picked from the event's name (Robin Hood, Ranking, Cupid/Valentine,
+  or a target).
+- **Editing a booking**: on Book a session, a booked hour has **Edit** to change the equipment (club or own bow,
+  hand, draw weight) until the hour starts. A day-pass booking shares one set-up, so editing one hour changes every
+  hour of that day still to come.
+
 ### Giving someone passes by hand
 
 ```sql
@@ -236,3 +249,5 @@ npm run lint
 | `src/app/api/members/sync/` | Receives the membership list from Google Sheets |
 | `src/proxy.ts` | Keeps the login session fresh and protects pages |
 | `scripts/members-sync.gs` | Google Apps Script for the membership form |
+| `design/unm-archery-prototype/` | The designer's approved static prototype; its `HANDOFF.md` is the design spec |
+| `src/app/palettes/` | Colour palettes: swap the import in `src/app/layout.tsx` to re-colour the site |

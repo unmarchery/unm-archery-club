@@ -296,3 +296,9 @@ html[data-exco] .main-v2, html[data-exco] .footer__inner { padding-left: max(84p
 .main-v2:has(> .wrap > .page-bleed) { padding-inline: 0; padding-top: var(--bar-h); }
 .main-v2:has(> .wrap > .page-bleed) > .wrap { max-width: none; display: block; }
 .page-bleed { overflow-x: clip; }
+
+/* 404 */
+.nf { display: grid; justify-items: center; gap: 18px; text-align: center; padding-block: clamp(40px, 10svh, 120px); }
+.nf__text { margin: 0; max-width: 46ch; color: var(--body); font-size: 18px; }
+.nf__acts { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.nf-page { min-height: 100svh; display: grid; place-items: center; padding: 24px var(--gutter); }

@@ -52,3 +52,6 @@
 
 /* the name hover card is for pointers; on phones it would only push the page sideways */
 @media (max-width: 640px), (hover: none) { .hovercard { display: none; } .lb-bar { display: none; } }
+/* name cards open centred under the name, so the third-place card never pokes past the window */
+.rank .hovercard { left: 50%; transform: translate(-50%, -4px); }
+.rank .ulink-wrap:hover .hovercard, .rank .ulink-wrap:focus-within .hovercard { transform: translate(-50%, 0); }
