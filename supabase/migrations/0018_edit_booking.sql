@@ -4,8 +4,8 @@
 -- Only the archer's own booking, while it is still booked and its slot hasn't started or been cancelled.
 -- A day-pass booking shares one set-up, so the change applies to every hour of that day that hasn't
 -- started yet. The website checks the equipment's shape before calling this (as it does for book_slot).
--- Returns how many bookings changed.
-create function public.update_booking_equipment(p_booking uuid, p_equipment jsonb)
+-- Returns how many bookings changed. Safe to run again (create or replace).
+create or replace function public.update_booking_equipment(p_booking uuid, p_equipment jsonb)
 returns int
 language plpgsql volatile security definer set search_path = public as $$
 declare
