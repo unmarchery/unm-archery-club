@@ -9,7 +9,8 @@ import { Board, type Standing } from "./board";
 import "./rank.css";
 import { RegisterButton } from "./register";
 
-export const metadata: Metadata = { title: "Ranking · UNM Archery Club" };
+// Kept out of Google results: it lists members' usernames.
+export const metadata: Metadata = { title: "Ranking · UNM Archery Club", robots: { index: false } };
 
 type Overview = {
   upcoming: { id: string; title: string; held_on: string; time_label: string | null; format: string | null; capacity: number; taken: number; registered: boolean }[];

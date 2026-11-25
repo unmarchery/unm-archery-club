@@ -209,6 +209,18 @@ select id, 'single', 3, 'adjust', 'paid cash to treasurer' from profiles where s
 -- kind: 'single' or 'full'
 ```
 
+## Google search
+
+Home, Training sessions and FAQ are listed in `src/app/sitemap.ts` for Google; `robots.txt` comes from
+`src/app/robots.ts`. The sign-in pages and Ranking (members' usernames) ask Google not to list them, and
+every other page sends logged-out visitors to sign in. Link previews (WhatsApp, Instagram) use the
+title, description and logo in `src/app/layout.tsx`.
+
+To get listed faster, add the site in [Google Search Console](https://search.google.com/search-console)
+as a URL-prefix property, pick the "HTML tag" method, and put just the `content="..."` value in the
+Netlify env var `GOOGLE_SITE_VERIFICATION`. After the next deploy, press Verify, submit `sitemap.xml`,
+and request indexing for the home page.
+
 ## Rules the base already enforces
 
 - Tuesdays and Thursdays, 4–5, 5–6 and 6–7pm, 20 archers per slot; non-members at most 25% (5).

@@ -3,7 +3,11 @@ import { ShopSign } from "@/components/shop-sign";
 import { getPublicInfo } from "@/lib/public-info";
 import { OpenFromHash } from "./open-from-hash";
 
-export const metadata: Metadata = { title: "FAQ · UNM Archery Club" };
+export const metadata: Metadata = {
+  title: "FAQ · UNM Archery Club",
+  description: "Questions about joining the UNM Archery Club, passes, booking training and what to bring.",
+  alternates: { canonical: "/faq" },
+};
 
 // Answers for first-timers and members. Public, so visitors can read it before signing up.
 export default async function FaqPage() {

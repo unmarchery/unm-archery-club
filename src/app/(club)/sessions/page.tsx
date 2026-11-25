@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { bookingOpensUrl, googleCalendarUrl } from "@/lib/calendar";
 import { clockLabel, dayKey, longDay, openingLabel, requestTime, shortDay, shortTimeRange } from "@/lib/format";
 import type { ClubBows, Gear } from "@/lib/gear";
@@ -8,6 +9,12 @@ import { BookTitle } from "./title";
 import type { DayCard, MyBooking } from "./types";
 import { VisitorInfo } from "./visitor-info";
 import "./book.css";
+
+export const metadata: Metadata = {
+  title: "Training sessions · UNM Archery Club",
+  description: "This week's archery training sessions at the University of Nottingham Malaysia, and how to book a spot.",
+  alternates: { canonical: "/sessions" },
+};
 
 type Row = {
   slot_id: string; starts_at: string; ends_at: string; cancelled: boolean; cancelled_reason: string | null;
