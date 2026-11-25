@@ -12,6 +12,9 @@ type Props = {
   fullPrice: number;
   qrUrl: string | null;
   whatsappLink: string | null;
+  start?: { single: number; full: number }; // what the form starts with (the Shop's pass cards preset it)
+  bare?: boolean; // inside a pop-up: no card of its own
+  onSent?: () => void;
 };
 
 const MAX = 20;
@@ -36,10 +39,10 @@ function Stepper({ label, hint, value, onChange }: { label: string; hint: string
   );
 }
 
-export function TopupForm({ studentId, singlePrice, fullPrice, qrUrl, whatsappLink }: Props) {
+export function TopupForm({ studentId, singlePrice, fullPrice, qrUrl, whatsappLink, start = { single: 1, full: 0 }, bare, onSent }: Props) {
   const shoot = useShot();
-  const [single, setSingle] = useState(1);
-  const [full, setFull] = useState(0);
+  const [single, setSingle] = useState(start.single);
+  const [full, setFull] = useState(start.full);
   const [method, setMethod] = useState<"qr" | "cash">(qrUrl ? "qr" : "cash");
   const [bankRef, setBankRef] = useState("");
   const [receipt, setReceipt] = useState<File | null>(null);
@@ -72,15 +75,16 @@ export function TopupForm({ studentId, singlePrice, fullPrice, qrUrl, whatsappLi
       const res = await submitTopup(fd);
       if (!res.ok) return setError(res.message);
       shoot("Top-up sent", `#${res.number} · RM${res.amount}. Your passes appear once the treasurer checks it.`);
-      setSingle(1);
-      setFull(0);
+      setSingle(start.single);
+      setFull(start.full);
       setBankRef("");
       setReceipt(null);
+      onSent?.();
     });
   }
 
   return (
-    <section className="card">
+    <section className={bare ? "field topup-form" : "card topup-form"} style={bare ? { gap: 12 } : undefined}>
       <div className="eyebrow">Choose passes</div>
       <Stepper label="Single pass" hint={`RM${singlePrice} · any one slot`} value={single} onChange={setSingle} />
       <Stepper label="Full-day pass" hint={`RM${fullPrice} · all 3 slots of one day`} value={full} onChange={setFull} />

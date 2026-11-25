@@ -300,3 +300,8 @@ html[data-exco] .main-v2, html[data-exco] .footer__inner { padding-left: max(84p
 .dlg__x:active { transform: scale(.92); }
 .dlg__x svg { width: 18px; height: 18px; }
 @media (prefers-reduced-motion: reduce) { .dlg[open], .dlg[open]::backdrop { animation: none; } }
+
+/* Full-bleed pages (Shop, Book a session): bands and panels run edge to edge; content keeps the gutters. */
+.main-v2:has(> .wrap > .page-bleed) { padding-inline: 0; padding-top: var(--bar-h); }
+.main-v2:has(> .wrap > .page-bleed) > .wrap { max-width: none; display: block; }
+.page-bleed { overflow-x: clip; }
