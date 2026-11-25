@@ -145,9 +145,6 @@ dialog:modal { margin: auto; }
   .when-time { font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--gold-text); margin-top: 2px; }
 
   /* Sessions */
-  .day { display: flex; flex-direction: column; gap: 12px; }
-  .day-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-  .slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
   .slot-time { font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--ink); }
   .locked { flex-direction: row; align-items: center; gap: 14px; border-style: dashed; }
   .locked svg { width: 22px; height: 22px; flex: none; color: var(--gold-text); }

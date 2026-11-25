@@ -179,6 +179,41 @@ test('full-day pass books all three slots; only a whole-day cancel refunds it', 
   assert.equal((await one(`select pass_balance($1, 'full') as n`, [guest])).n, 2)
 })
 
+test('editing a booking changes its equipment; a day pass changes the whole day; others are refused', async () => {
+  await db.query('delete from slots')
+  const [s1, s2, s3] = await testDay()
+  const exco = (await one(`select user_id from permissions where permission = 'owner'`)).user_id
+  const member = await signUp('20000098', 'mem98@nottingham.edu.my')
+  await db.query(`insert into members (student_id, email) values ('20000098', 'mem98@nottingham.edu.my')`)
+  const other = await signUp('20000099', 'guest99@nottingham.edu.my')
+  const club = { hand: 'RH', draw_lbs: '18', own_bow: false }
+  const lefty = { hand: 'LH', draw_lbs: '22', own_bow: false }
+  const gear = async (id) => (await one(`select equipment from bookings where id = $1`, [id])).equipment
+
+  const [{ book_slot: mine }] = await asUser(member, `select book_slot($1, null, $2::jsonb)`, [s1, JSON.stringify(club)])
+  const [{ update_booking_equipment: n }] = await asUser(member, `select update_booking_equipment($1, $2::jsonb)`, [mine, JSON.stringify(lefty)])
+  assert.equal(n, 1)
+  assert.deepEqual(await gear(mine), lefty)
+
+  await rejects(asUser(other, `select update_booking_equipment($1, $2::jsonb)`, [mine, JSON.stringify(club)]), 'BOOKING_NOT_FOUND')
+  await rejects(asUser(member, `select update_booking_equipment($1, '"x"'::jsonb)`, [mine]), 'INVALID_EQUIPMENT')
+
+  // A day pass shares one set-up: editing any hour changes all three.
+  await asUser(exco, `select adjust_passes('20000099', 'full', 1, 'test')`)
+  const [{ book_slot: day }] = await asUser(other, `select book_slot($1, 'full', $2::jsonb)`, [s2, JSON.stringify(club)])
+  const [{ update_booking_equipment: m }] = await asUser(other, `select update_booking_equipment($1, $2::jsonb)`, [day, JSON.stringify(lefty)])
+  assert.equal(m, 3)
+  const all = await db.query(`select equipment from bookings where user_id = $1 and status = 'booked'`, [other])
+  assert.ok(all.rows.every((r) => r.equipment.hand === 'LH'))
+
+  // Cancelled or started bookings can't be edited.
+  await asUser(member, 'select cancel_booking($1, false)', [mine])
+  await rejects(asUser(member, `select update_booking_equipment($1, $2::jsonb)`, [mine, JSON.stringify(club)]), 'NOT_EDITABLE')
+  const [{ book_slot: later }] = await asUser(member, `select book_slot($1)`, [s3])
+  await db.query(`update slots set starts_at = now() - interval '5 minutes', ends_at = now() + interval '55 minutes' where id = $1`, [s3])
+  await rejects(asUser(member, `select update_booking_equipment($1, $2::jsonb)`, [later, JSON.stringify(club)]), 'ALREADY_STARTED')
+})
+
 test('single pass comes back only when cancelled 2 hours or more before', async () => {
   await db.query('delete from slots')
   const [s1] = await testDay()

@@ -6,7 +6,7 @@ export function VisitorInfo({ single, full }: { single: number; full: number }) 
   const days = ["M", "T", "W", "T", "F", "S", "S"];
   return (
     <div className="visitor-book">
-      <div className="schedule">
+      <div className="schedule-card">
         <h2>Every Tuesday and Thursday</h2>
         <div className="time">4:00 – 7:00 pm</div>
         <div className="week" role="img" aria-label="Sessions on Tuesday and Thursday">

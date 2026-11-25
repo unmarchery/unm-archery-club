@@ -43,9 +43,9 @@ export default async function MyBookingsPage() {
 
   const note = (b: Booking) =>
     b.pass_kind === "member"
-      ? "Cancel this booking?"
+      ? "You can rebook if there's still space."
       : b.pass_kind === "single"
-        ? now <= Date.parse(b.slots.starts_at) - refundMs ? "Cancel? You'll get your single pass back." : "It's less than 2 hours to go, so the pass won't come back. Cancel anyway?"
+        ? now <= Date.parse(b.slots.starts_at) - refundMs ? "You'll get your hour pass back." : "It's less than 2 hours to go, so the hour pass won't come back."
         : "A full-day pass comes back only when you cancel the whole day in time.";
 
   return (
