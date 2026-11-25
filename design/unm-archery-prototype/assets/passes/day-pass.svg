@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6d27a"/><stop offset=".55" stop-color="#e3b955"/><stop offset="1" stop-color="#c08a2a"/></linearGradient>
+    <linearGradient id="goldDim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9b25e"/><stop offset="1" stop-color="#9c6f1f"/></linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".22"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <filter id="drop" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#000" flood-opacity=".5"/></filter>
+  </defs>
+  <g filter="url(#drop)" transform="translate(66 70) rotate(-18 150 70)"><g id="d3">
+    <path d="M12 0H68A10 10 0 0 0 88 0H288Q300 0 300 12V128Q300 140 288 140H88A10 10 0 0 0 68 140H12Q0 140 0 128V12Q0 0 12 0Z" fill="url(#goldDim)"/>
+    <clipPath id="clip-d3"><path d="M12 0H68A10 10 0 0 0 88 0H288Q300 0 300 12V128Q300 140 288 140H88A10 10 0 0 0 68 140H12Q0 140 0 128V12Q0 0 12 0Z"/></clipPath>
+    <g clip-path="url(#clip-d3)">
+      <rect x="0" y="0" width="78" height="140" fill="#f3e6c6"/>
+      <rect x="0" y="0" width="300" height="140" fill="url(#sheen)"/>
+    </g>
+    <line x1="78" y1="14" x2="78" y2="126" stroke="#2a1d05" stroke-opacity=".45" stroke-width="2" stroke-dasharray="4 5"/>
+    <g fill="#2a1d05" fill-opacity=".85"><rect x="14.0" y="24" width="1.6" height="92"/><rect x="18.6" y="24" width="1.6" height="92"/><rect x="21.8" y="24" width="4.2" height="92"/><rect x="27.6" y="24" width="4.2" height="92"/><rect x="34.8" y="24" width="1.2" height="92"/><rect x="37.6" y="24" width="2.4" height="92"/><rect x="41.6" y="24" width="4.2" height="92"/><rect x="47.4" y="24" width="3.4" height="92"/><rect x="53.0" y="24" width="2.4" height="92"/><rect x="58.4" y="24" width="1.6" height="92"/></g>
+    <g fill="#2a1d05" fill-opacity=".72"><rect x="100" y="28" width="88" height="8" rx="4"/><rect x="100" y="44" width="56" height="6" rx="3"/><rect x="100" y="112" width="64" height="6" rx="3"/></g>
+    <circle cx="238" cy="70" r="46" fill="#f6ead0" stroke="#2a1d05" stroke-width="2"/>
+    <circle cx="238" cy="70" r="34" fill="#c4421f"/>
+    <circle cx="238" cy="70" r="22" fill="#f6ead0"/>
+    <circle cx="238" cy="70" r="11" fill="#e3b955" stroke="#2a1d05" stroke-width="1.5"/>
+    <line x1="104" y1="96.0" x2="232" y2="72.0" stroke="#2a1d05" stroke-width="3" stroke-linecap="round"/><path d="M104 96.0l-12-9 4 11zM104 96.0l-11 8 12 1z" fill="#c4421f"/>
+  </g></g>
+  <g filter="url(#drop)" transform="translate(58 128) rotate(-8 150 70)"><g id="d2">
+    <path d="M12 0H68A10 10 0 0 0 88 0H288Q300 0 300 12V128Q300 140 288 140H88A10 10 0 0 0 68 140H12Q0 140 0 128V12Q0 0 12 0Z" fill="url(#goldDim)"/>
+    <clipPath id="clip-d2"><path d="M12 0H68A10 10 0 0 0 88 0H288Q300 0 300 12V128Q300 140 288 140H88A10 10 0 0 0 68 140H12Q0 140 0 128V12Q0 0 12 0Z"/></clipPath>
+    <g clip-path="url(#clip-d2)">
+      <rect x="0" y="0" width="78" height="140" fill="#f3e6c6"/>
+      <rect x="0" y="0" width="300" height="140" fill="url(#sheen)"/>
+    </g>
+    <line x1="78" y1="14" x2="78" y2="126" stroke="#2a1d05" stroke-opacity=".45" stroke-width="2" stroke-dasharray="4 5"/>
+    <g fill="#2a1d05" fill-opacity=".85"><rect x="14.0" y="24" width="3.4" height="92"/><rect x="20.4" y="24" width="2.4" height="92"/><rect x="24.4" y="24" width="4.2" height="92"/><rect x="31.6" y="24" width="2.4" height="92"/><rect x="36.2" y="24" width="1.6" height="92"/><rect x="40.8" y="24" width="1.6" height="92"/><rect x="45.4" y="24" width="1.6" height="92"/><rect x="50.0" y="24" width="2.4" height="92"/><rect x="54.6" y="24" width="4.2" height="92"/><rect x="61.0" y="24" width="3.4" height="92"/></g>
+    <g fill="#2a1d05" fill-opacity=".72"><rect x="100" y="28" width="88" height="8" rx="4"/><rect x="100" y="44" width="56" height="6" rx="3"/><rect x="100" y="112" width="64" height="6" rx="3"/></g>
+    <circle cx="238" cy="70" r="46" fill="#f6ead0" stroke="#2a1d05" stroke-width="2"/>
+    <circle cx="238" cy="70" r="34" fill="#c4421f"/>
+    <circle cx="238" cy="70" r="22" fill="#f6ead0"/>
+    <circle cx="238" cy="70" r="11" fill="#e3b955" stroke="#2a1d05" stroke-width="1.5"/>
+    <line x1="104" y1="96.0" x2="232" y2="72.0" stroke="#2a1d05" stroke-width="3" stroke-linecap="round"/><path d="M104 96.0l-12-9 4 11zM104 96.0l-11 8 12 1z" fill="#c4421f"/>
+  </g></g>
+  <g filter="url(#drop)" transform="translate(48 190) rotate(2 150 70)"><g id="d1">
+    <path d="M12 0H68A10 10 0 0 0 88 0H288Q300 0 300 12V128Q300 140 288 140H88A10 10 0 0 0 68 140H12Q0 140 0 128V12Q0 0 12 0Z" fill="url(#gold)"/>
+    <clipPath id="clip-d1"><path d="M12 0H68A10 10 0 0 0 88 0H288Q300 0 300 12V128Q300 140 288 140H88A10 10 0 0 0 68 140H12Q0 140 0 128V12Q0 0 12 0Z"/></clipPath>
+    <g clip-path="url(#clip-d1)">
+      <rect x="0" y="0" width="78" height="140" fill="#f3e6c6"/>
+      <rect x="0" y="0" width="300" height="140" fill="url(#sheen)"/>
+    </g>
+    <line x1="78" y1="14" x2="78" y2="126" stroke="#2a1d05" stroke-opacity=".45" stroke-width="2" stroke-dasharray="4 5"/>
+    <g fill="#2a1d05" fill-opacity=".85"><rect x="14.0" y="24" width="4.2" height="92"/><rect x="20.4" y="24" width="3.4" height="92"/><rect x="26.0" y="24" width="2.4" height="92"/><rect x="30.0" y="24" width="2.4" height="92"/><rect x="34.0" y="24" width="4.2" height="92"/><rect x="40.4" y="24" width="4.2" height="92"/><rect x="46.8" y="24" width="3.4" height="92"/><rect x="53.2" y="24" width="1.2" height="92"/><rect x="56.6" y="24" width="4.2" height="92"/></g>
+    <g fill="#2a1d05" fill-opacity=".72"><rect x="100" y="28" width="88" height="8" rx="4"/><rect x="100" y="44" width="56" height="6" rx="3"/><rect x="100" y="112" width="64" height="6" rx="3"/></g>
+    <circle cx="238" cy="70" r="46" fill="#f6ead0" stroke="#2a1d05" stroke-width="2"/>
+    <circle cx="238" cy="70" r="34" fill="#c4421f"/>
+    <circle cx="238" cy="70" r="22" fill="#f6ead0"/>
+    <circle cx="238" cy="70" r="11" fill="#e3b955" stroke="#2a1d05" stroke-width="1.5"/>
+    <line x1="104" y1="82.0" x2="232" y2="67.1" stroke="#2a1d05" stroke-width="3" stroke-linecap="round"/><path d="M104 82.0l-12-9 4 11zM104 82.0l-11 8 12 1z" fill="#c4421f"/><line x1="104" y1="96.0" x2="232" y2="72.0" stroke="#2a1d05" stroke-width="3" stroke-linecap="round"/><path d="M104 96.0l-12-9 4 11zM104 96.0l-11 8 12 1z" fill="#c4421f"/><line x1="104" y1="110.0" x2="232" y2="76.9" stroke="#2a1d05" stroke-width="3" stroke-linecap="round"/><path d="M104 110.0l-12-9 4 11zM104 110.0l-11 8 12 1z" fill="#c4421f"/>
+  </g></g>
+</svg>

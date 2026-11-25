@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ExcoRail, type RailTool } from "@/components/exco-rail";
+import { Ribbon } from "@/components/ribbon-footer";
 import { ShotProvider } from "@/components/shot-provider";
 import { TopBar } from "@/components/top-bar";
 import { can, getOptionalSession } from "@/lib/session";
@@ -35,20 +36,32 @@ export default async function ClubLayout({ children }: { children: React.ReactNo
 
   return (
     <ShotProvider>
+      <a className="skip" href="#content">Skip to content</a>
+      {/* Drifting colour fields behind the glass sections ("liquid" layer) */}
+      <div className="liquid" aria-hidden="true"><span className="blob blob--a" /><span className="blob blob--b" /><span className="blob blob--c" /></div>
       <div className="site-v2">
         <TopBar user={user} />
         {tools.length > 0 && <ExcoRail tools={tools} />}
-        <main className="main-v2 gutter">
+        <main className="main-v2 gutter" id="content">
           <div className="wrap wrap-v2">{children}</div>
         </main>
-        <footer className="foot-v2 gutter">
-          <div className="foot-in wrap-v2">
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, maxWidth: "44ch" }}>
-              <strong style={{ font: "800 1.2rem/1 var(--font-display)", fontStretch: "80%" }}>UNM Archery Club</strong>
-              <span className="muted small">University of Nottingham Malaysia. Training every Tuesday and Thursday, 4–7pm, at the Sports Complex.</span>
+        <footer className="footer">
+          <Ribbon />
+          <div className="footer__inner wrap-v2 gutter">
+            <div>
+              <Link className="brand brand--foot" href="/">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo.png" alt="" width={40} height={40} />
+                <span>UNM Archery Club</span>
+              </Link>
+              <p>University of Nottingham Malaysia. Training every Tuesday and Thursday, 4–7pm, at the Sports Complex.</p>
             </div>
-            <nav aria-label="Footer">
-              <Link href="/sessions">Book a session</Link><Link href="/shop">Shop</Link><Link href="/ranking">Ranking</Link><Link href="/faq">FAQ</Link><Link href={user ? "/me" : "/signup"}>Join Club</Link>
+            <nav className="footer__nav" aria-label="Footer">
+              <Link className="link" href="/sessions">Book a session</Link>
+              <Link className="link" href="/shop">Shop</Link>
+              <Link className="link" href="/ranking">Ranking</Link>
+              <Link className="link" href="/faq">FAQ</Link>
+              <Link className="link" href={user ? "/me" : "/signup"}>Join Club</Link>
             </nav>
           </div>
         </footer>

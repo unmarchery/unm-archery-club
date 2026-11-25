@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UNM Archery Club</title>
+  <meta name="description" content="UNM Archery Club trains every Tuesday and Thursday, 4–7pm, at the Sports Complex. Members shoot free.">
+  <meta name="theme-color" content="#183f32">
+  <link rel="icon" href="../../assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#join">Skip to content</a>
+
+  <!-- Drifting colour fields behind the glass sections ("liquid" layer) -->
+  <div class="liquid" aria-hidden="true">
+    <span class="blob blob--sage"></span>
+    <span class="blob blob--torii"></span>
+    <span class="blob blob--forest"></span>
+  </div>
+
+  <header class="topbar" data-topbar>
+    <div class="topbar__inner">
+      <a class="brand" href="#top" aria-label="UNM Archery Club, home">
+        <img src="../../assets/logo.png" alt="" width="44" height="44">
+        <span>UNM Archery Club</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a class="nav__link" href="#book">Book a session</a>
+        <a class="nav__link" href="#shop">Shop</a>
+        <a class="nav__link" href="#ranking">Ranking</a>
+      </nav>
+      <div class="topbar__actions">
+        <a class="btn btn--ghost btn--sm" href="#join" data-liquid><span class="btn__label">Join Club</span></a>
+        <a class="btn btn--solid btn--sm" href="#signin" data-liquid><span class="btn__label">Sign In</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO: the club's loop video is the background; headline + CTA reveal once when the arrow hits slow-mo -->
+    <section class="hero" data-hero aria-label="Introduction">
+      <div class="hero__stage">
+        <video class="hero__video" data-hero-video src="../../assets/hero-loop.mp4" poster="../../assets/hero-poster.jpg"
+               autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+        <h1 class="hero__title hero__title--stage" data-reveal>
+          <span class="line">Aim,</span>
+          <span class="line">Hit,</span>
+          <span class="line">and Never Quit</span>
+        </h1>
+      </div>
+      <div class="hero__scrim" aria-hidden="true"></div>
+
+      <p class="hero__title hero__title--flow" data-reveal aria-hidden="true">
+        <span class="line">Aim,</span>
+        <span class="line">Hit,</span>
+        <span class="line">and Never Quit</span>
+      </p>
+
+      <div class="hero__cta" data-reveal>
+        <a class="btn btn--paper btn--lg" id="book" href="#book" data-liquid data-magnetic>
+          <span class="btn__label">Book a session</span>
+          <svg class="btn__arrow" viewBox="0 0 32 12" aria-hidden="true"><path d="M0 6h28M22 1l6 5-6 5M3 1l5 5-5 5M9 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+
+      <button class="hero__pause" type="button" data-pause aria-label="Pause background video" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><g class="i-pause"><rect x="7" y="5" width="3.5" height="14" rx="1"/><rect x="13.5" y="5" width="3.5" height="14" rx="1"/></g><path class="i-play" d="M8 5.5v13l11-6.5z"/></svg>
+      </button>
+    </section>
+
+    <!-- DIVIDER: compound bow in ASCII, CRT phosphor; glyphs fixed, only the light moves -->
+    <div class="crt" aria-hidden="true"><canvas data-crt data-flip="false"></canvas></div>
+
+    <section class="section join" id="join" aria-labelledby="join-title">
+      <div class="wrap">
+        <div class="section__head">
+          <div>
+            <p class="eyebrow">Join the club</p>
+            <h2 id="join-title">Pick up a bow. <span class="soft">The club brings the rest.</span></h2>
+          </div>
+          <div class="section__lede">
+            <p>Membership puts you on the shooting line every Tuesday and Thursday with club equipment, a coach nearby and a score on the ranking board.</p>
+            <a class="btn btn--solid" href="#join" data-liquid>
+              <span class="btn__label">Join the club</span>
+              <svg class="btn__arrow" viewBox="0 0 32 12" aria-hidden="true"><path d="M0 6h28M22 1l6 5-6 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Benefit copy is a draft for the club to confirm -->
+        <ul class="cards cards--4" role="list">
+          <li class="card"><div class="card__body">
+            <svg class="card__icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16"/><circle cx="20" cy="20" r="10"/><circle cx="20" cy="20" r="4" class="fill"/></svg>
+            <h3>Shoot free, every session</h3>
+            <p>Members never pay range fees. Guests book an hour for RM5 or a day for RM12.</p>
+          </div></li>
+          <li class="card"><div class="card__body">
+            <svg class="card__icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M12 4c10 6 10 26 0 32"/><path d="M12 4v32" class="thin"/><path d="M6 20h30M31 16l5 4-5 4"/></svg>
+            <h3>All the gear is on the rack</h3>
+            <p>Bows, arrows, arm guards and finger tabs are provided. Bring closed shoes.</p>
+          </div></li>
+          <li class="card"><div class="card__body">
+            <svg class="card__icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="11" r="5"/><path d="M9 35c0-7 5-12 11-12s11 5 11 12"/><path d="M28 7l6-3" class="thin"/></svg>
+            <h3>A coach on the line</h3>
+            <p>New archers learn stance, draw and anchor before their first full end.</p>
+          </div></li>
+          <li class="card"><div class="card__body">
+            <svg class="card__icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M8 34V22h7v12M17 34V12h7v22M26 34V17h7v17"/><path d="M5 34h31" class="thin"/></svg>
+            <h3>Climb the club ranking</h3>
+            <p>Log your scores after each session and watch your place on the board move.</p>
+          </div></li>
+        </ul>
+
+        <dl class="facts">
+          <div><dt>Training</dt><dd>Tue &amp; Thu, 4–7pm</dd></div>
+          <div><dt>Venue</dt><dd>Sports Complex</dd></div>
+          <div><dt>Members</dt><dd>Free, every session</dd></div>
+          <div><dt>Guests</dt><dd>RM5 hour · RM12 day</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <div class="crt" aria-hidden="true"><canvas data-crt data-flip="true"></canvas></div>
+
+    <section class="section events" id="events" aria-labelledby="events-title">
+      <div class="wrap">
+        <div class="section__head section__head--row">
+          <div>
+            <p class="eyebrow">On the range</p>
+            <h2 id="events-title">Current events</h2>
+          </div>
+          <a class="link" href="#events">See all events <span aria-hidden="true">→</span></a>
+        </div>
+
+        <!-- PLACEHOLDER events: replace with the club's real calendar -->
+        <ul class="cards cards--3" role="list">
+          <li class="card card--event"><a class="card__body" href="#events">
+            <div class="date"><span class="date__m">Nov</span><span class="date__d">25</span><span class="date__w">Tue</span></div>
+            <span class="tag tag--open">Open session</span>
+            <h3>Open range night</h3>
+            <p class="meta">4–7pm · Sports Complex</p>
+            <span class="card__more">View details <span aria-hidden="true">→</span></span>
+          </a></li>
+          <li class="card card--event"><a class="card__body" href="#events">
+            <div class="date"><span class="date__m">Dec</span><span class="date__d">06</span><span class="date__w">Sat</span></div>
+            <span class="tag tag--comp">Competition</span>
+            <h3>Club indoor round, 18m</h3>
+            <p class="meta">9am–1pm · Sports Complex</p>
+            <span class="card__more">View details <span aria-hidden="true">→</span></span>
+          </a></li>
+          <li class="card card--event"><a class="card__body" href="#events">
+            <div class="date"><span class="date__m">Dec</span><span class="date__d">11</span><span class="date__w">Thu</span></div>
+            <span class="tag tag--social">Social</span>
+            <h3>End-of-semester shoot and supper</h3>
+            <p class="meta">5–8pm · Sports Complex</p>
+            <span class="card__more">View details <span aria-hidden="true">→</span></span>
+          </a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div>
+        <a class="brand brand--foot" href="#top"><img src="../../assets/logo.png" alt="" width="40" height="40"><span>UNM Archery Club</span></a>
+        <p>University of Nottingham Malaysia. Training every Tuesday and Thursday, 4–7pm, at the Sports Complex.</p>
+      </div>
+      <nav class="footer__nav" aria-label="Footer">
+        <a class="link" href="#book">Book a session</a>
+        <a class="link" href="#shop">Shop</a>
+        <a class="link" href="#ranking">Ranking</a>
+        <a class="link" href="#faq">FAQ</a>
+        <a class="link" href="#join">Join Club</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="bow-ascii.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

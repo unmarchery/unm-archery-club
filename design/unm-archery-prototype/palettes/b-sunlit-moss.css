@@ -1,0 +1,23 @@
+/* B · Sunlit Moss: colours from the hero animation on an atmospheric, warm-gradient structure
+   (sun through mist over moss). Sunlight gold leads; torii is the warm second voice. */
+:root {
+  --palette: "B · Sunlit Moss";
+  --canvas: #121712;
+  --canvas-2: #0c100c;
+  --surface: #1d241d;
+  --surface-2: #273027;
+  --hairline: #333b30;
+  --ink: #f3efe4;
+  --body: #b8ae96;
+  --muted: #968d78;
+  --primary: #e2b66e;     /* shafts of sunlight */
+  --primary-hover: #ecc583;
+  --on-primary: #1a1608;
+  --accent: #cf4a2c;      /* torii */
+  --gold: #e2b66e;
+  --sunset: linear-gradient(100deg, #e2b66e, #dc987f 45%, #cf4a2c);
+  --sign-tube: #ffcf73;
+  --sign-frame: #ff5b3a;
+  --sign-stud: #dc987f;
+  color-scheme: dark;
+}

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop Sign Sample</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" id="palette" href="../palettes/a-shrine-dusk.css">
+  <link rel="stylesheet" href="../components/shop-sign.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--canvas); color: var(--ink);
+      font: 17px/1.55 "Atkinson Hyperlegible Next", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased; overflow-x: clip;
+      transition: background-color .4s ease, color .4s ease;
+    }
+    .wrap { width: min(100% - 32px, 1240px); margin-inline: auto; }
+    .bar {
+      position: sticky; top: 0; z-index: 10;
+      background: color-mix(in oklab, var(--canvas) 78%, transparent);
+      backdrop-filter: blur(14px); border-bottom: 1px solid var(--hairline);
+    }
+    .bar .wrap { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; padding: 12px 0; }
+    .bar h1 { margin: 0; font: 400 22px/1 "VT323", monospace; letter-spacing: .04em; color: var(--muted); }
+    .chips, .acts { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip, .act {
+      min-height: 40px; padding: 0 16px; border-radius: 999px; cursor: pointer;
+      font: 600 14px/1 inherit; font-family: inherit; color: var(--ink);
+      background: var(--surface); border: 1px solid var(--hairline);
+      transition: background-color .2s, border-color .2s, transform .12s;
+    }
+    .chip:hover, .act:hover { border-color: var(--muted); }
+    .chip:active, .act:active { transform: scale(.97); }
+    .chip[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+    .act { background: transparent; }
+    @media (max-width: 600px) { .bar { position: static; } }
+
+    .stage { padding: clamp(56px, 10vw, 120px) 0; display: grid; gap: clamp(72px, 12vw, 150px); }
+    .row { display: grid; justify-items: start; }
+    .row--center { justify-items: center; }
+    .note { margin-top: 14px; color: var(--muted); font-size: 14px; }
+
+    .panel { border-top: 1px solid var(--hairline); padding: 40px 0 72px; display: grid; gap: 28px; }
+    .panel h2 { margin: 0; font: 800 22px/1.2 "Archivo", sans-serif; }
+    .sw { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .sw div { border: 1px solid var(--hairline); border-radius: 14px; overflow: hidden; background: var(--surface); font-size: 13px; }
+    .sw i { display: block; height: 54px; }
+    .sw span { display: block; padding: 8px 10px; color: var(--body); }
+    .sw b { color: var(--ink); display: block; }
+    .cr { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; font-size: 14px; }
+    .cr div { padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--hairline); color: var(--body); }
+    .cr .ok { color: var(--ink); }
+    .demo { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+    .btn {
+      display: inline-flex; align-items: center; min-height: 52px; padding: 0 26px; border-radius: 999px;
+      font: 700 16px/1 "Atkinson Hyperlegible Next", sans-serif; text-decoration: none;
+      background: var(--primary); color: var(--on-primary); border: 1px solid var(--primary);
+    }
+    .btn--ghost { background: transparent; color: var(--ink); border-color: var(--hairline); }
+    .card { max-width: 360px; padding: 22px; border-radius: 22px; background: var(--surface); border: 1px solid var(--hairline); }
+    .card h3 { margin: 0 0 6px; font: 800 20px/1.2 "Archivo", sans-serif; }
+    .card p { margin: 0; color: var(--body); }
+    .card small { color: var(--muted); display: block; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <header class="bar">
+    <div class="wrap">
+      <h1>SHOP SIGN // saved idea</h1>
+      <div class="chips" role="group" aria-label="Palette">
+        <button class="chip" data-p="a-shrine-dusk" aria-pressed="true">A · Shrine Dusk</button>
+        <button class="chip" data-p="b-sunlit-moss" aria-pressed="false">B · Sunlit Moss</button>
+        <button class="chip" data-p="c-armour-tech" aria-pressed="false">C · Armour Tech</button>
+        <button class="chip" data-p="v1-forest-paper" aria-pressed="false">v1 · Forest</button>
+      </div>
+      <div class="acts">
+        <button class="act" data-act="replay">Replay power-on</button>
+        <button class="act" data-act="spark">Spark now</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap stage">
+    <div class="row">
+      <div class="sign" data-sign data-tag="01 · ON THE RANGE"><h2 class="sign__title">Events</h2></div>
+      <p class="note">Left-aligned, as it sits at the top of a section.</p>
+    </div>
+    <div class="row">
+      <div class="sign" data-sign data-tag="02 · MEMBERSHIP"><h2 class="sign__title">Join Club</h2></div>
+    </div>
+    <div class="row row--center">
+      <div class="sign" data-sign data-tag="03 · EVERY WEEK"><h2 class="sign__title">Weekly Sessions</h2></div>
+      <p class="note">Centred variant. Long titles wrap inside the frame on phones.</p>
+    </div>
+  </main>
+
+  <section class="wrap panel" aria-labelledby="pal-title">
+    <h2 id="pal-title">Palette: <span data-name></span></h2>
+    <div class="sw" data-swatches></div>
+    <div class="cr" data-contrast></div>
+    <div class="demo">
+      <a class="btn" href="#" onclick="return false">Book a session</a>
+      <a class="btn btn--ghost" href="#" onclick="return false">Join Club</a>
+      <div class="card"><h3>Open range night</h3><p>Shoot at your own pace with club bows and a coach on the line.</p><small>Tue 25 Nov · 4–7pm · Sports Complex</small></div>
+    </div>
+  </section>
+
+  <script src="../components/shop-sign.js"></script>
+  <script>
+    const ROLES = ['canvas', 'surface', 'hairline', 'ink', 'body', 'muted', 'primary', 'on-primary', 'accent', 'gold', 'sign-tube', 'sign-frame', 'sign-stud'];
+    const link = document.getElementById('palette');
+    const lum = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
+      .map((v) => (v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4))
+      .reduce((s, v, i) => s + v * [.2126, .7152, .0722][i], 0);
+    const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+
+    function readPalette() {
+      const cs = getComputedStyle(document.documentElement);
+      const v = Object.fromEntries(ROLES.map((r) => [r, cs.getPropertyValue(`--${r}`).trim()]));
+      document.querySelector('[data-name]').textContent = cs.getPropertyValue('--palette').trim().replace(/"/g, '');
+      document.querySelector('[data-swatches]').innerHTML = ROLES.map((r) =>
+        `<div><i style="background:${v[r]}"></i><span><b>${r}</b>${v[r]}</span></div>`).join('');
+      const pairs = [['ink', 'canvas', 4.5], ['body', 'canvas', 4.5], ['body', 'surface', 4.5], ['muted', 'canvas', 4.5],
+        ['muted', 'surface', 4.5], ['on-primary', 'primary', 4.5], ['primary', 'canvas', 3]];
+      document.querySelector('[data-contrast]').innerHTML = pairs.map(([a, b, min]) => {
+        const r = ratio(v[a], v[b]);
+        return `<div class="${r >= min ? 'ok' : ''}">${a} on ${b}: <b>${r.toFixed(2)}:1</b> ${r >= min ? '✓ AA' : '✗ below ' + min}</div>`;
+      }).join('');
+    }
+
+    function setPalette(p) {
+      link.href = `../palettes/${p}.css`;
+      document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.p === p)));
+      history.replaceState(null, '', `#${p}`);
+    }
+    link.addEventListener('load', readPalette);
+    document.querySelectorAll('.chip').forEach((c) => c.addEventListener('click', () => setPalette(c.dataset.p)));
+    const fromHash = location.hash.slice(1);
+    if (fromHash && document.querySelector(`.chip[data-p="${fromHash}"]`)) setPalette(fromHash);
+    readPalette();
+
+    const signs = () => [...document.querySelectorAll('[data-sign]')].map((s) => s.sign).filter(Boolean);
+    document.querySelector('[data-act="replay"]').addEventListener('click', () => signs().forEach((s) => s.powerOn()));
+    document.querySelector('[data-act="spark"]').addEventListener('click', () => signs().forEach((s) => s.spark()));
+  </script>
+</body>
+</html>

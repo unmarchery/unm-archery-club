@@ -1,0 +1,22 @@
+/* C · Armour Tech: colours from the archer's armour in the hero animation on a charcoal-terminal
+   structure with one electric glow. Cyan leads, magenta seams accent, torii appears only in signs. */
+:root {
+  --palette: "C · Armour Tech";
+  --canvas: #141617;      /* gunmetal */
+  --canvas-2: #0e1011;
+  --surface: #212526;
+  --surface-2: #2a2f30;
+  --hairline: #33393b;
+  --ink: #e6e8e8;
+  --body: #9ea3a4;
+  --muted: #8a9091;
+  --primary: #3fc6d6;     /* visor cyan */
+  --primary-hover: #5fd4e1;
+  --on-primary: #061416;
+  --accent: #c86cb8;      /* armour seam magenta */
+  --gold: #c9b27a;
+  --sign-tube: #5fe6f2;
+  --sign-frame: #ff5138;
+  --sign-stud: #e27ad2;
+  color-scheme: dark;
+}

@@ -1,0 +1,39 @@
+/* CRT ASCII title: a block of terminal glyphs. The title is lit phosphor, everything else is dim glass.
+   Palette roles: --crt-glass, --crt-off, --crt-1..4 (edge → core), --crt-scan. Built by crt-title.js. */
+.crt-title {
+  --cell: clamp(3.6px, .34vw, 5px);             /* glyph cell width */
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: clamp(92px, 8.2vw, 122px);
+  border-radius: 8px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 140% at 50% 50%, color-mix(in oklab, var(--crt-glass) 70%, var(--crt-off)) 0%, var(--crt-glass) 70%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--crt-off) 80%, transparent),
+    inset 0 0 40px #000a,
+    0 0 0 1px #0006;
+  isolation: isolate;
+}
+.crt-title[data-lines="2"] { height: clamp(140px, 13vw, 180px); }
+.crt-title > h2, .crt-title > h1 {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0;
+}
+.crt-title canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  filter: drop-shadow(0 0 5px color-mix(in oklab, var(--crt-3) 45%, transparent));
+  animation: crt-flicker 7s steps(1, end) infinite;
+}
+/* scanlines + glass vignette */
+.crt-title::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background:
+    repeating-linear-gradient(to bottom, #0000 0 2px, #00000038 2px 3px),
+    radial-gradient(130% 120% at 50% 50%, #0000 55%, #000a 100%);
+}
+@keyframes crt-flicker { 0%, 100% { opacity: 1 } 41% { opacity: .96 } 42% { opacity: 1 } 77% { opacity: .975 } 78% { opacity: 1 } }
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-title canvas { animation: none; }
+}

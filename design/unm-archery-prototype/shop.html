@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop · UNM Archery Club</title>
+  <meta name="description" content="UNM Archery Club merch: Robin Hood, Cupid's Valentine and club collections. Pick up at training.">
+  <meta name="theme-color" content="#08130e">
+  <link rel="icon" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=JetBrains+Mono:wght@800&family=VT323&display=swap" rel="stylesheet">
+  <!-- Palette: swap this one file to re-colour the page (palettes/*.css; v1 original kept in versions/) -->
+  <link rel="stylesheet" href="palettes/f3-visor-mist.css">
+  <link rel="stylesheet" href="components/shop-sign.css">
+  <link rel="stylesheet" href="components/crt-title.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components/shop.css">
+</head>
+<body>
+  <a class="skip" href="#robin-title">Skip to content</a>
+
+  <!-- Drifting colour fields behind the glass sections ("liquid" layer) -->
+  <div class="liquid" aria-hidden="true">
+    <span class="blob blob--a"></span>
+    <span class="blob blob--b"></span>
+    <span class="blob blob--c"></span>
+  </div>
+
+  <header class="topbar is-solid" data-topbar>
+    <div class="topbar__inner">
+      <a class="brand" href="index.html" aria-label="UNM Archery Club, home">
+        <img src="assets/logo.png" alt="" width="44" height="44">
+        <span>UNM Archery Club</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a class="nav__link" href="book.html">Book a session</a>
+        <a class="nav__link is-active" href="shop.html" aria-current="page">Shop</a>
+        <a class="nav__link" href="#ranking">Ranking</a>
+      </nav>
+      <div class="topbar__actions">
+        <a class="btn btn--glass btn--sm" href="index.html#join" data-liquid><span class="btn__label">Join Club</span></a>
+        <a class="btn btn--light btn--sm" href="#signin" data-liquid><span class="btn__label">Sign In</span></a>
+      </div>
+    </div>
+  </header>
+
+
+  <main id="top" class="shop">
+    <div class="wrap shop-head">
+      <div class="sign" data-sign data-tag="MERCH · PICK-UP AT TRAINING"><h1 class="sign__title">Shop</h1></div>
+      <span class="shop-head__count" data-count aria-live="polite">(16)</span>
+      <!-- Cart: sits in line with the SHOP sign; once the header scrolls away it floats under the nav -->
+      <a class="btn cart" href="#cart" data-cart data-liquid aria-label="Cart">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="btn__label cart__label">Cart</span>
+        <span class="cart__count" data-cart-count>0</span>
+      </a>
+    </div>
+
+    <!-- ===== PASSES (guest view only: members shoot free) ===== -->
+    <section class="merch-sec crt--passes" id="passes" data-event="passes" data-only="guest" aria-labelledby="passes-title">
+      <div class="crt-title crt-band" data-crt-title data-font="slim" data-tag="SESSION PASSES · FOR GUESTS · TUE &amp; THU 4–7PM"><h2 id="passes-title">Passes</h2></div>
+      <ul class="wrap merch" role="list">
+        <li class="item" data-glow data-item data-name="Hour pass" data-price="RM5" data-img="assets/passes/hour-pass.svg" data-alt="A gold admission ticket with an arrow in the target" data-desc="One open hour slot on a Tuesday or Thursday, 4–7pm. Show it on your card when you book." data-specs="Any one hour slot|Valid this semester|Club bows included" data-label="Guests"><button class="item__btn" type="button" data-open aria-label="Hour pass, RM5. View and buy"><span class="item__tile"><span class="item__tag">Guests</span><img src="assets/passes/hour-pass.svg" alt="A gold admission ticket with an arrow in the target" loading="lazy"></span><span class="item__name">Hour pass</span><span class="item__price">RM5</span></button></li>
+        <li class="item" data-glow data-item data-name="Day pass" data-price="RM12" data-img="assets/passes/day-pass.svg" data-alt="Three stacked gold tickets, three arrows in the target" data-desc="All three hours of one session day, 4–7pm. Cheaper than three hour passes." data-specs="All three hours, 4–7pm|Valid this semester|Club bows included" data-label="Guests"><button class="item__btn" type="button" data-open aria-label="Day pass, RM12. View and buy"><span class="item__tile"><span class="item__tag">Guests</span><img src="assets/passes/day-pass.svg" alt="Three stacked gold tickets, three arrows in the target" loading="lazy"></span><span class="item__name">Day pass</span><span class="item__price">RM12</span></button></li>
+      </ul>
+    </section>
+
+    <!-- ===== ROBIN HOOD ===== -->
+    <section class="merch-sec crt--robin" data-event="robin" aria-labelledby="robin-title">
+      <div class="crt-title crt-band" data-crt-title data-tag="COLLECTION 01 · ROBIN HOOD · PRE-ORDERS OPEN · 05 ITEMS"><h2 id="robin-title">Robin Hood</h2></div>
+      <ul class="wrap merch" role="list">
+        <li class="item" data-glow data-item data-name="Robin Hood tee" data-price="RM35" data-img="assets/merch/robin-tee.jpg" data-alt="Two beige tees: a goose Robin Hood archer on the front, the club crest with bow and castle on the back" data-desc="Robin Hood of Nottingham Forest on the front, the UNM Archery Club crest on the back. A classic design with a timeless spirit." data-specs="Sizes S–XL|Cotton blend|Beige" data-label="Pre-order"><button class="item__btn" type="button" data-open aria-label="Robin Hood tee, RM35. View and buy"><span class="item__tile"><span class="item__tag">Pre-order</span><img src="assets/merch/robin-tee.jpg" alt="Two beige tees: a goose Robin Hood archer on the front, the club crest with bow and castle on the back" loading="lazy"></span><span class="item__name">Robin Hood tee</span><span class="item__price">RM35</span></button></li>
+        <li class="item" data-glow data-item data-name="Goose Robin keycap" data-price="RM15" data-img="assets/merch/robin-keycap-goose.jpg" data-alt="Cream keycap printed with a goose wearing a green feathered hat" data-desc="A small detail, a big touch of character. Robin the goose, ready for your keyboard." data-specs="Cherry profile|High-quality dye-sublimation|Fits most mechanical keyboards" data-label="Pre-order"><button class="item__btn" type="button" data-open aria-label="Goose Robin keycap, RM15. View and buy"><span class="item__tile"><span class="item__tag">Pre-order</span><img src="assets/merch/robin-keycap-goose.jpg" alt="Cream keycap printed with a goose wearing a green feathered hat" loading="lazy"></span><span class="item__name">Goose Robin keycap</span><span class="item__price">RM15</span></button></li>
+        <li class="item" data-glow data-item data-name="Robin Hood hat keycap" data-price="RM15" data-img="assets/merch/robin-keycap-hat.jpg" data-alt="Cream and forest-green keycap printed with Robin Hood&#x27;s feathered hat" data-desc="Bring a touch of the forest to your setup with the feathered Robin Hood hat." data-specs="Cherry MX &amp; MX clones|Dye-sublimated legend|Forest-green base" data-label="Pre-order"><button class="item__btn" type="button" data-open aria-label="Robin Hood hat keycap, RM15. View and buy"><span class="item__tile"><span class="item__tag">Pre-order</span><img src="assets/merch/robin-keycap-hat.jpg" alt="Cream and forest-green keycap printed with Robin Hood&#x27;s feathered hat" loading="lazy"></span><span class="item__name">Robin Hood hat keycap</span><span class="item__price">RM15</span></button></li>
+        <li class="item" data-glow data-item data-name="Goose Robin keychain" data-price="RM12" data-img="assets/merch/robin-keychain-goose.jpg" data-alt="Enamel keychain shaped like the goose in a feathered hat" data-desc="Carry the spirit wherever you go. Robin the goose in gold-edged enamel." data-specs="Premium enamel finish|Lightweight &amp; durable|Approx. 4 cm" data-label="Pre-order"><button class="item__btn" type="button" data-open aria-label="Goose Robin keychain, RM12. View and buy"><span class="item__tile"><span class="item__tag">Pre-order</span><img src="assets/merch/robin-keychain-goose.jpg" alt="Enamel keychain shaped like the goose in a feathered hat" loading="lazy"></span><span class="item__name">Goose Robin keychain</span><span class="item__price">RM12</span></button></li>
+        <li class="item" data-glow data-item data-name="Winged emblem keychain" data-price="RM12" data-img="assets/merch/robin-keychain-emblem.jpg" data-alt="Metal keychain with a winged target emblem and a UNM Archery Club banner" data-desc="A little emblem, a big passion: the winged target and the club banner." data-specs="Metal alloy|Approx. 4 cm|Split ring + chain" data-label="Pre-order"><button class="item__btn" type="button" data-open aria-label="Winged emblem keychain, RM12. View and buy"><span class="item__tile"><span class="item__tag">Pre-order</span><img src="assets/merch/robin-keychain-emblem.jpg" alt="Metal keychain with a winged target emblem and a UNM Archery Club banner" loading="lazy"></span><span class="item__name">Winged emblem keychain</span><span class="item__price">RM12</span></button></li>
+      </ul>
+    </section>
+
+    <!-- ===== CUPID'S VALENTINE ===== -->
+    <section class="merch-sec crt--cupid" data-event="cupid" aria-labelledby="cupid-title">
+      <div class="crt-title crt-band" data-crt-title data-tag="COLLECTION 02 · CUPID&#x27;S VALENTINE · 14 FEB · 09 ITEMS"><h2 id="cupid-title">Cupid&#x27;s Valentine</h2></div>
+      <ul class="wrap merch" role="list">
+        <li class="item" data-glow data-item data-name="DIY heart kit" data-price="RM20" data-img="assets/merch/cupid-diy-kit.jpg" data-alt="Craft supplies with paper hearts, pom-poms and markers" data-desc="Make your own Valentine on the line: card hearts, pom-poms, sequins and markers for two." data-specs="Made for pairs|All supplies included|Card + envelope" data-label="Coming soon"><button class="item__btn" type="button" data-open aria-label="DIY heart kit, RM20. View and buy"><span class="item__tile"><span class="item__tag">Coming soon</span><img src="assets/merch/cupid-diy-kit.jpg" alt="Craft supplies with paper hearts, pom-poms and markers" loading="lazy"></span><span class="item__name">DIY heart kit</span><span class="item__price">RM20</span></button></li>
+        <li class="item" data-glow data-item data-name="Cupid&#x27;s heart keychain" data-price="RM10" data-img="assets/merch/cupid-keychain.jpg" data-alt="Antique-finish heart charm on a key ring" data-desc="An antique-finish heart for the one who always hits your gold." data-specs="Metal alloy|Approx. 4 cm|Gift-ready pouch" data-label="Coming soon"><button class="item__btn" type="button" data-open aria-label="Cupid&#x27;s heart keychain, RM10. View and buy"><span class="item__tile"><span class="item__tag">Coming soon</span><img src="assets/merch/cupid-keychain.jpg" alt="Antique-finish heart charm on a key ring" loading="lazy"></span><span class="item__name">Cupid&#x27;s heart keychain</span><span class="item__price">RM10</span></button></li>
+        <li class="item" data-glow data-item data-name="Valentine tee" data-price="RM35" data-img="assets/merch/cupid-tee.jpg" data-alt="Pink tees hanging on a rail" data-desc="Blush-pink tee for the Cupid shoot, with a small arrow-through-heart on the chest." data-specs="Sizes S–XL|Cotton blend|Blush pink" data-label="Coming soon"><button class="item__btn" type="button" data-open aria-label="Valentine tee, RM35. View and buy"><span class="item__tile"><span class="item__tag">Coming soon</span><img src="assets/merch/cupid-tee.jpg" alt="Pink tees hanging on a rail" loading="lazy"></span><span class="item__name">Valentine tee</span><span class="item__price">RM35</span></button></li>
+        <li class="item" data-glow data-item data-name="Pairs bracelet" data-price="RM12" data-img="assets/merch/cupid-bracelet.jpg" data-alt="Colourful beaded bracelets on a wrist" data-desc="Beaded friendship bracelets, sold as a pair: one for you, one for your shooting partner." data-specs="Set of two|Elastic fit|Mixed beads" data-label="Coming soon"><button class="item__btn" type="button" data-open aria-label="Pairs bracelet, RM12. View and buy"><span class="item__tile"><span class="item__tag">Coming soon</span><img src="assets/merch/cupid-bracelet.jpg" alt="Colourful beaded bracelets on a wrist" loading="lazy"></span><span class="item__name">Pairs bracelet</span><span class="item__price">RM12</span></button></li>
+        <li class="item" data-glow data-item data-name="Cupid heart pin" data-price="RM8" data-img="assets/merch/cupid-pin.jpg" data-alt="Red enamel heart pin held between two fingers" data-desc="The heart Cupid aims for, as an enamel pin for your quiver strap." data-specs="Enamel finish|Butterfly clutch|Approx. 2.5 cm" data-label="Coming soon"><button class="item__btn" type="button" data-open aria-label="Cupid heart pin, RM8. View and buy"><span class="item__tile"><span class="item__tag">Coming soon</span><img src="assets/merch/cupid-pin.jpg" alt="Red enamel heart pin held between two fingers" loading="lazy"></span><span class="item__name">Cupid heart pin</span><span class="item__price">RM8</span></button></li>
+        <li class="item" data-glow data-item data-name="Valentine card set" data-price="RM12" data-img="assets/merch/cupid-cards.jpg" data-alt="A white card with a red heart being opened" data-desc="Five heart cards for notes between ends." data-specs="Set of 5|Envelopes included|Kraft + red" data-label="Coming soon"><button class="item__btn" type="button" data-open aria-label="Valentine card set, RM12. View and buy"><span class="item__tile"><span class="item__tag">Coming soon</span><img src="assets/merch/cupid-cards.jpg" alt="A white card with a red heart being opened" loading="lazy"></span><span class="item__name">Valentine card set</span><span class="item__price">RM12</span></button></li>
+        <li class="item" data-glow data-item data-name="Knitted heart patches" data-price="RM9" data-img="assets/merch/cupid-patches.jpg" data-alt="Rows of knitted hearts in pink and red" data-desc="Soft heart patches to stitch onto quivers, bags and caps." data-specs="Set of 6|Iron-on backing|Rose tones" data-label="Coming soon"><button class="item__btn" type="button" data-open aria-label="Knitted heart patches, RM9. View and buy"><span class="item__tile"><span class="item__tag">Coming soon</span><img src="assets/merch/cupid-patches.jpg" alt="Rows of knitted hearts in pink and red" loading="lazy"></span><span class="item__name">Knitted heart patches</span><span class="item__price">RM9</span></button></li>
+        <li class="item" data-glow data-item data-name="Quiver tote" data-price="RM25" data-img="assets/merch/cupid-tote.jpg" data-alt="Plain kraft-coloured tote bag" data-desc="A sturdy tote for your arm guard, finger tab and snacks." data-specs="Recycled fabric|Long handles|Kraft" data-label="Coming soon"><button class="item__btn" type="button" data-open aria-label="Quiver tote, RM25. View and buy"><span class="item__tile"><span class="item__tag">Coming soon</span><img src="assets/merch/cupid-tote.jpg" alt="Plain kraft-coloured tote bag" loading="lazy"></span><span class="item__name">Quiver tote</span><span class="item__price">RM25</span></button></li>
+        <li class="item" data-glow data-item data-name="Cupid gift box" data-price="RM30" data-img="assets/merch/cupid-giftbox.jpg" data-alt="Kraft gift box tied with red string among small hearts" data-desc="A wrapped box of small Cupid treats for your shooting partner." data-specs="Pin + patches + card|Gift-wrapped|Limited" data-label="Coming soon"><button class="item__btn" type="button" data-open aria-label="Cupid gift box, RM30. View and buy"><span class="item__tile"><span class="item__tag">Coming soon</span><img src="assets/merch/cupid-giftbox.jpg" alt="Kraft gift box tied with red string among small hearts" loading="lazy"></span><span class="item__name">Cupid gift box</span><span class="item__price">RM30</span></button></li>
+      </ul>
+    </section>
+
+    <!-- ===== CLUB MERCH ===== -->
+    <section class="merch-sec crt--club" data-event="club" aria-labelledby="club-title">
+      <div class="crt-title crt-band" data-crt-title data-tag="COLLECTION 03 · CLUB MERCH · ALWAYS ON · 02 ITEMS"><h2 id="club-title">Club Merch</h2></div>
+      <ul class="wrap merch" role="list">
+        <li class="item" data-glow data-item data-name="Club cap" data-price="RM35" data-img="assets/merch/club-cap.jpg" data-alt="Plain baseball cap on a light surface" data-desc="Low-profile cap with the embroidered club crest. Keeps the sun off on outdoor rounds." data-specs="Embroidered crest|Adjustable strap|One size" data-label=""><button class="item__btn" type="button" data-open aria-label="Club cap, RM35. View and buy"><span class="item__tile"><img src="assets/merch/club-cap.jpg" alt="Plain baseball cap on a light surface" loading="lazy"></span><span class="item__name">Club cap</span><span class="item__price">RM35</span></button></li>
+        <li class="item" data-glow data-item data-name="Club tee, navy" data-price="RM35" data-img="assets/merch/club-tee.jpg" data-alt="Navy t-shirt on a wooden hanger" data-desc="The everyday club tee in navy with the winged-target crest. Training, socials, everywhere." data-specs="Sizes S–XL|Cotton blend|Navy" data-label=""><button class="item__btn" type="button" data-open aria-label="Club tee, navy, RM35. View and buy"><span class="item__tile"><img src="assets/merch/club-tee.jpg" alt="Navy t-shirt on a wooden hanger" loading="lazy"></span><span class="item__name">Club tee, navy</span><span class="item__price">RM35</span></button></li>
+      </ul>
+    </section>
+
+    <!-- End-of-merch rule -->
+    <div class="merch-end" aria-hidden="true">
+      <span class="merch-end__rule"></span>
+      <span class="merch-end__text">[ END OF MERCH · SEE YOU ON THE LINE ]<b>█</b></span>
+      <span class="merch-end__rule"></span>
+    </div>
+
+    <!-- Item pop-up: big picture left, details right, price + quantity + add bottom right.
+         On phones the real site routes taps to a dedicated item page instead (see HANDOFF.md, section 5.12). -->
+    <dialog class="pop" data-pop aria-labelledby="pop-name">
+      <div class="pop__card">
+        <div class="pop__media"><img data-pop-img src="" alt=""></div>
+        <div class="pop__body">
+          <span class="pop__tag" data-pop-tag></span>
+          <h2 class="pop__name" id="pop-name" data-pop-name></h2>
+          <p class="pop__desc" data-pop-desc></p>
+          <ul class="pop__specs" role="list" data-pop-specs></ul>
+          <div class="pop__foot">
+            <span class="pop__price" data-pop-price></span>
+            <div class="qty" data-qty><button type="button" data-dec aria-label="Fewer">−</button><output data-n>1</output><button type="button" data-inc aria-label="More">+</button></div>
+            <a class="btn btn--order btn--lg" href="#" data-pop-add data-liquid autofocus><span class="btn__label">Add to cart</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a>
+          </div>
+        </div>
+        <button class="pop__close" type="button" data-pop-close aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+    </dialog>
+  </main>
+
+  <footer class="footer">
+    <!-- Curvy ribbon: the club line runs along a wave and never stops -->
+    <div class="ribbon" aria-hidden="true">
+      <svg viewBox="0 0 1440 240" preserveAspectRatio="xMidYMid slice">
+        <path id="wave" d="M-200 150C80 60 320 60 560 130S1040 210 1280 120 1560 60 1700 110" fill="none"/>
+        <use href="#wave" class="ribbon__band"/>
+        <text class="ribbon__text" dy="13"><textPath href="#wave" data-ribbon-path startOffset="0">AIM, HIT, AND NEVER QUIT ✦ JOIN THE CLUB ✦ WEEKLY SESSIONS · TUE &amp; THU ✦ BE PART OF US ✦ </textPath></text>
+      </svg>
+    </div>
+    <div class="wrap footer__inner">
+      <div>
+        <a class="brand brand--foot" href="index.html"><img src="assets/logo.png" alt="" width="40" height="40"><span>UNM Archery Club</span></a>
+        <p>University of Nottingham Malaysia. Training every Tuesday and Thursday, 4–7pm, at the Sports Complex.</p>
+      </div>
+      <nav class="footer__nav" aria-label="Footer">
+        <a class="link" href="book.html">Book a session</a>
+        <a class="link" href="shop.html">Shop</a>
+        <a class="link" href="#ranking">Ranking</a>
+        <a class="link" href="#faq">FAQ</a>
+        <a class="link" href="index.html#join">Join Club</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="components/view-mode.js"></script>
+  <script src="components/shop-sign.js"></script>
+  <script src="components/crt-title.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

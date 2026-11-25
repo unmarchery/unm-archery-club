@@ -35,16 +35,19 @@ export function TopBar({ user }: { user: BarUser | null }) {
   const path = usePathname();
   const [menu, setMenu] = useState(false);
   const [card, setCard] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  // Thin glass over a page's video hero ([data-hero]); solid dark glass once it has gone, or on pages without one.
+  const [overHero, setOverHero] = useState<{ path: string; on: boolean }>({ path: "", on: false });
+  const solid = !(overHero.path === path && overHero.on);
   const cardRef = useRef<HTMLDivElement>(null);
   const chipRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    const hero = document.querySelector("[data-hero]");
+    if (!hero) return;
+    const io = new IntersectionObserver(([e]) => setOverHero({ path, on: e.isIntersecting }), { rootMargin: "-72px 0px 0px 0px" });
+    io.observe(hero);
+    return () => io.disconnect();
+  }, [path]);
 
   // Close the menus when the page changes, on Escape, or on a tap outside the card.
   const [seenPath, setSeenPath] = useState(path);
@@ -64,42 +67,40 @@ export function TopBar({ user }: { user: BarUser | null }) {
   const current = (href: string) => (path === href || path.startsWith(`${href}/`) ? "page" : undefined);
 
   return (
-    <header className={`topbar${scrolled ? " scrolled" : ""}`}>
-      <div className="topbar-in wrap-v2 gutter">
-        <Link href="/" className="brand-v2" aria-label="UNM Archery Club, home">
+    <header className={`topbar${solid || menu ? " is-solid" : ""}`}>
+      <div className="topbar__inner">
+        <Link href="/" className="brand" aria-label="UNM Archery Club, home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="" width={360} height={260} />
+          <img src="/logo.png" alt="" width={44} height={44} />
           <span>UNM Archery Club</span>
         </Link>
-        <nav className="tabs" aria-label="Main">
-          <div className="tabs-main">
-            {TABS.map((t) => (
-              <Link key={t.href} href={t.href} className="tab" aria-current={current(t.href)}>{t.label}</Link>
-            ))}
-          </div>
-          <div className="tabs-account">
-            {!user?.member && <Link href={user ? "/me" : "/signup"} className="btn btn-ghost tab-join">Join Club</Link>}
-            {!user && <Link href="/login" className="btn">Sign In</Link>}
-            {user && (
-              <div className="chip-wrap">
-                <button ref={chipRef} type="button" className="profile-chip" aria-expanded={card} aria-controls="profile-card" aria-label="Open your profile card" onClick={() => setCard((v) => !v)}>
-                  <span className="avatar">{initials(user.name)}</span>
-                  <span className="chip-text">
-                    <span>{user.name.split(/\s+/)[0]}</span>
-                    <span className="chip-sub">
-                      {user.member ? <span className="mini-inf" aria-label="Unlimited sessions"><i />∞</span> : <><TicketIcon className="inline-icon" />{user.single} hour · {user.full} day</>}
-                    </span>
-                  </span>
-                  <ChevronDown />
-                </button>
-                {!user.member && <Link href="/shop" className="plus-btn" aria-label="Buy passes in the shop"><PlusIcon /></Link>}
-              </div>
-            )}
-          </div>
+        <nav className="nav" aria-label="Main">
+          {TABS.map((t) => (
+            <Link key={t.href} href={t.href} className={`nav__link${current(t.href) ? " is-active" : ""}`} aria-current={current(t.href)}>{t.label}</Link>
+          ))}
+        </nav>
+        <div className="topbar__actions">
+          {!user?.member && <Link href={user ? "/me" : "/signup"} className="btn btn--glass btn--sm topbar__join">Join Club</Link>}
+          {!user && <Link href="/login" className="btn btn--light btn--sm">Sign In</Link>}
+          {user && (
+            <div className="chip-wrap">
+              <button ref={chipRef} type="button" className="user-chip" aria-expanded={card} aria-controls="profile-card" aria-label="Open your profile card" onClick={() => setCard((v) => !v)}>
+                <span className="avatar">{initials(user.name)}</span>
+                <span className="user-chip__name">
+                  <span>{user.name.split(/\s+/)[0]}</span>
+                  {user.member
+                    ? <span className="user-chip__meta is-member" aria-label="Unlimited sessions">∞</span>
+                    : <span className="user-chip__meta">{user.single} hour · {user.full} day</span>}
+                </span>
+                <ChevronDown />
+              </button>
+              {!user.member && <Link href="/shop" className="plus-btn" aria-label="Buy passes in the shop"><PlusIcon /></Link>}
+            </div>
+          )}
           <button type="button" className="icon-btn menu-btn" aria-expanded={menu} aria-controls="mobile-menu" aria-label={menu ? "Close menu" : "Open menu"} onClick={() => setMenu((v) => !v)}>
             {menu ? <CloseIcon /> : <MenuIcon />}
           </button>
-        </nav>
+        </div>
       </div>
 
       {menu && (
