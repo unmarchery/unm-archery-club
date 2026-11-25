@@ -919,6 +919,20 @@ test('events: anyone can read; only people with the Events switch can post', asy
   }
 })
 
+test('events: a picture is set with a path, kept when left out, and removed with ""', async () => {
+  const pres = await ownerId()
+  const base = { title: 'Robin Hood Shoot', starts_on: '2026-11-03' }
+  const [{ save_event: id }] = await asUser(pres, `select save_event($1::jsonb)`, [JSON.stringify({ ...base, image_path: 'e/robin.jpg' })])
+  const pic = async () => (await one(`select image_path from events where id = $1`, [id])).image_path
+  assert.equal(await pic(), 'e/robin.jpg')
+  await asUser(pres, `select save_event($1::jsonb)`, [JSON.stringify({ ...base, id, title: 'Robin Hood Shoot II' })])
+  assert.equal(await pic(), 'e/robin.jpg')
+  await asUser(pres, `select save_event($1::jsonb)`, [JSON.stringify({ ...base, id, image_path: '' })])
+  assert.equal(await pic(), null)
+  await rejects(asUser(pres, `select save_event($1::jsonb)`, [JSON.stringify({ ...base, id, image_path: 'receipts/x.jpg' })]), 'events_image_path_check')
+  await db.query(`delete from events where id = $1`, [id])
+})
+
 test('profiles: usernames are unique and lower-case; members edit their own bio and Instagram', async () => {
   const a = (await one(`insert into auth.users (email, raw_user_meta_data) values ('u1@nottingham.edu.my', $1) returning id`,
     [JSON.stringify({ student_id: '20000201', full_name: 'User One', phone: '0123456789', username: 'Aisyah.R' })])).id

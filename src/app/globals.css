@@ -50,6 +50,8 @@ input, select, textarea { caret-color: var(--accent); }
 /* Plain text links only: styled links (.btn, .menu-item, .brand) keep their own colours. */
 a:not([class]) { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+/* Tailwind's reset zeroes every margin, which also removes the browser's centring of modal dialogs. */
+dialog:modal { margin: auto; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .skip { position: fixed; left: 16px; top: 12px; z-index: 100; padding: 10px 16px; border-radius: 999px; background: var(--primary); color: var(--on-primary); text-decoration: none; transform: translateY(-160%); transition: transform .25s var(--ease-out); }
 .skip:focus-visible { transform: none; }
@@ -301,3 +303,7 @@ a:not([class]) { color: var(--accent); text-underline-offset: 3px; text-decorati
   .modal-wrap { align-items: flex-end; padding: 0; }
   .modal { max-width: none; border-radius: 20px 20px 0 0; max-height: 88vh; }
 }
+
+/* Exco: event picture field */
+.event-pic { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.event-pic img { width: 120px; height: 80px; object-fit: cover; border-radius: 10px; border: 1px solid var(--hairline); }
