@@ -181,7 +181,7 @@ export function ConfirmCancel({ target, onClose }: { target: CancelTarget; onClo
 export function CancelButton({ bookingId, fullDay, note }: { bookingId: string; fullDay: boolean; note: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <>
+    <span className="cancel-inline">
       <button type="button" className="btn btn--danger btn--sm" onClick={() => setOpen(true)}><span className="btn__label">{fullDay ? "Cancel…" : "Cancel booking"}</span></button>
       {open && (
         <ConfirmCancel
@@ -189,7 +189,7 @@ export function CancelButton({ bookingId, fullDay, note }: { bookingId: string; 
           target={{ title: "Cancel this booking?", note, dayPass: fullDay, run: (whole) => cancelBooking(bookingId, whole) }}
         />
       )}
-    </>
+    </span>
   );
 }
 

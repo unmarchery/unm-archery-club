@@ -147,9 +147,6 @@
 @container (max-width: 430px) { .slot { grid-template-columns: minmax(0, 1fr) auto; } .slot__cap { grid-column: 1 / -1; grid-row: 2; } }
 .day { container-type: inline-size; }
 
-/* destructive buttons stay quiet until hovered */
-.btn.btn--danger { width: auto; background: transparent; color: #ff9a7e; border-color: #ff8a6a80; --fill: var(--primary); --fill-ink: #fff; }
-.btn.btn--danger:hover:not(:disabled) { border-color: var(--primary); box-shadow: none; }
 
 /* ---------- booking pop-up ---------- */
 .dlg.bk { width: min(620px, calc(100vw - 2 * var(--gutter))); }
