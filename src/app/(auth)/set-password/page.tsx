@@ -1,3 +1,4 @@
+import { ShopSign } from "@/components/shop-sign";
 import { SetPasswordForm } from "../forms";
 
 export default async function SetPasswordPage({ searchParams }: PageProps<"/set-password">) {
@@ -5,7 +6,8 @@ export default async function SetPasswordPage({ searchParams }: PageProps<"/set-
   return (
     <>
       <div>
-        <h1 className="h1">{first ? "Welcome! Choose your password" : "Set your password"}</h1>
+        <ShopSign as="h1" title="Password" className="sign--page" />
+        <p className="auth-lead">{first ? "Welcome! Choose your password" : "Set your password"}</p>
         <p className="sub">
           {first
             ? "Your starter password only works once. Pick your own; from now on you'll log in with your student ID and this password."

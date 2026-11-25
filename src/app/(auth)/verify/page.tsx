@@ -1,3 +1,4 @@
+import { ShopSign } from "@/components/shop-sign";
 import { VerifyForm } from "../forms";
 
 export default async function VerifyPage({ searchParams }: PageProps<"/verify">) {
@@ -7,7 +8,8 @@ export default async function VerifyPage({ searchParams }: PageProps<"/verify">)
   return (
     <>
       <div>
-        <h1 className="h1">Check your email</h1>
+        <ShopSign as="h1" title="Verify" className="sign--page" />
+        <p className="auth-lead">Check your email</p>
         <p className="sub">
           We sent a code to {to ? <strong>{to}</strong> : "your uni email"}. It can take a minute, and may land in Junk.
         </p>

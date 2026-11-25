@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ShopSign } from "@/components/shop-sign";
 import { getPublicInfo } from "@/lib/public-info";
 import { OpenFromHash } from "./open-from-hash";
 
@@ -22,11 +23,9 @@ export default async function FaqPage() {
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h1 className="h1">FAQ</h1>
-          <p className="sub">Answers for first-timers and members.</p>
-        </div>
+      <div className="faq-head">
+        <ShopSign as="h1" title="FAQ" tag="FIRST TIME? START HERE" className="sign--page" />
+        <p className="sub">Answers for first-timers and members.</p>
       </div>
       <OpenFromHash />
       <div className="faq">
