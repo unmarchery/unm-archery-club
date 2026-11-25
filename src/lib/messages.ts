@@ -24,6 +24,8 @@ const MESSAGES: Record<string, string> = {
   PASS_REQUIRED: "Choose which pass to use.",
   BOOKING_NOT_FOUND: "We couldn't find that booking.",
   NOT_CANCELLABLE: "That booking can't be cancelled any more.",
+  NOT_EDITABLE: "That booking can't be changed any more.",
+  INVALID_EQUIPMENT: "Please check your equipment choices.",
   ALREADY_STARTED: "That session has already started, so it can't be cancelled.",
   ALREADY_MEMBER: "You're already a member.",
   REQUEST_PENDING: "You already have a member check waiting for the exco.",

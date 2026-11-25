@@ -1,0 +1,57 @@
+/* Ranking (handoff 8.4): shop-sign title, a CRT band for the tier, a gold / kinari / vermilion podium
+   (like the Ranking Match art), and the table as glass rows with VT323 numbers and score bars. */
+.rank { display: flex; flex-direction: column; gap: 22px; }
+.rank-head { display: flex; justify-content: center; }
+.rank-title { margin: 0; font: 850 clamp(28px, 2.6vw, 38px)/1.05 var(--f-display); font-stretch: 80%; letter-spacing: -.02em; }
+.rank .panel-head p { color: var(--body); }
+
+/* view tabs: a glass rail, the current view lit in visor cyan */
+.rank .subtabs { background: var(--glass); border-color: var(--hairline); }
+.rank .subtabs a { color: var(--body); transition: background-color .25s, color .25s; }
+.rank .subtabs a:hover { color: var(--ink); background: color-mix(in oklab, var(--accent) 10%, transparent); }
+.rank .subtabs a[aria-current="page"] { background: var(--accent); color: var(--canvas); }
+.rank .tier-switch .chip { min-height: 40px; }
+.rank .callout { background: color-mix(in oklab, var(--gold) 8%, transparent); border: 1px solid color-mix(in oklab, var(--gold) 40%, transparent); color: var(--ink); }
+
+.rank-band { width: 100%; max-width: 760px; margin: 0 auto; }
+.rank-band .crt-title { border-radius: 14px; position: relative; top: auto; }
+
+/* podium: 1 gold, 2 kinari, 3 vermilion */
+.rank .podium { margin-top: 18px; }
+.rank .podium-name { color: var(--ink); }
+.rank .podium-score { font: 400 2rem/1 var(--f-mono); letter-spacing: .02em; }
+.rank .podium-block { font: 400 3.4rem/1 var(--f-mono); border: 0; box-shadow: inset 0 1px 0 #ffffff30, 0 24px 40px -24px #000; }
+.rank .p1 .podium-block { background: linear-gradient(180deg, var(--gold), color-mix(in oklab, var(--gold) 55%, var(--canvas))); color: var(--canvas); }
+.rank .p2 .podium-block { background: linear-gradient(180deg, var(--ink), color-mix(in oklab, var(--ink) 50%, var(--canvas))); color: var(--canvas); }
+.rank .p3 .podium-block { background: linear-gradient(180deg, var(--primary), color-mix(in oklab, var(--primary) 55%, var(--canvas))); color: #fff; }
+.rank .p1 .podium-score { color: var(--gold); text-shadow: 0 0 14px color-mix(in oklab, var(--gold) 60%, transparent); }
+.rank .p1 .avatar.lg { box-shadow: 0 0 0 3px var(--canvas), 0 0 0 6px var(--gold), 0 0 24px -4px var(--gold); }
+
+/* the table: glass rows, VT323 numbers, a score bar; the signed-in member's row glows cyan */
+.rank .lb { border-collapse: separate; border-spacing: 0 8px; }
+.rank .lb th { color: var(--muted); font: 400 16px/1 var(--f-mono); letter-spacing: .12em; }
+.rank .lb td { background: var(--glass); border-block: 1px solid var(--hairline); }
+.rank .lb td:first-child { border-left: 1px solid var(--hairline); border-radius: 14px 0 0 14px; font: 400 22px/1 var(--f-mono); color: var(--muted); }
+.rank .lb td:last-child { border-right: 1px solid var(--hairline); border-radius: 0 14px 14px 0; }
+.rank .lb tbody tr:hover td { background: color-mix(in oklab, var(--accent) 6%, var(--surface)); }
+.rank .lb tr.me td { background: color-mix(in oklab, var(--accent) 14%, var(--surface)); border-color: color-mix(in oklab, var(--accent) 55%, transparent); }
+.rank .lb tr.me td:first-child { color: var(--accent); box-shadow: -6px 0 22px -10px var(--accent); }
+.lb-score { white-space: nowrap; }
+.rank .lb-score { font: 400 26px/1 var(--f-mono); color: var(--ink); }
+.lb-bar { display: inline-block; vertical-align: middle; width: clamp(60px, 12vw, 160px); height: 6px; margin-right: 14px; border-radius: 3px; background: #ffffff10; overflow: hidden; }
+.lb-bar i { display: block; height: 100%; width: var(--w); border-radius: inherit; background: linear-gradient(90deg, color-mix(in oklab, var(--accent) 60%, var(--canvas)), var(--accent)); }
+.rank .lb-wrap.collapsed { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 96px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 96px), transparent); }
+.rank-more { align-self: center; }
+
+/* matches */
+.rank .match-list { border-top-color: var(--hairline); }
+.rank .match { border-bottom-color: var(--hairline); }
+.rank .match h3 { font-family: var(--f-display); }
+.rank .results li:nth-child(odd) { background: color-mix(in oklab, var(--ink) 4%, transparent); }
+.rank .results li span { font-family: var(--f-mono); font-size: 18px; }
+
+/* the name hover card is for pointers; on phones it would only push the page sideways */
+@media (max-width: 640px), (hover: none) { .hovercard { display: none; } .lb-bar { display: none; } }
+/* name cards open centred under the name, so the third-place card never pokes past the window */
+.rank .hovercard { left: 50%; transform: translate(-50%, -4px); }
+.rank .ulink-wrap:hover .hovercard, .rank .ulink-wrap:focus-within .hovercard { transform: translate(-50%, 0); }

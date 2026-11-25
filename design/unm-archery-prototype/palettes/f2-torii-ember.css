@@ -1,0 +1,26 @@
+/* F2 · Torii Ember: forest-led canvas, CRT titles burn like the reference plasma, plum edges → shu
+   vermilion → kin gold core, the torii gate glowing in the forest. Moegi green is the scan line. */
+:root {
+  --palette: "F2 · Torii Ember";
+  --canvas: #08130e;      /* forest at night (fukamidori, pushed to black) */
+  --canvas-2: #050d09;
+  --surface: #0f2119;
+  --surface-2: #163024;
+  --hairline: #22402f;
+  --ink: #f1efe4;         /* kinari, unbleached washi */
+  --body: #aab8a5;        /* lichen */
+  --muted: #8a9b84;
+  --gold: #e3b955;        /* kin, the target gold */
+  --crt-glass: #030906;   /* unlit CRT glass */
+  --primary: #e3b955;     /* kin gold */
+  --primary-hover: #ecc76d;
+  --on-primary: #1a1405;
+  --accent: #c4421f;      /* torii */
+  --crt-off: #213528;
+  --crt-1: #5b1a33;       /* dim beni plum, letter edges */
+  --crt-2: #c63a24;       /* shu vermilion */
+  --crt-3: #f0902c;
+  --crt-4: #ffe680;       /* kin core */
+  --crt-scan: #b9f5a0;    /* moegi light wave */
+  color-scheme: dark;
+}

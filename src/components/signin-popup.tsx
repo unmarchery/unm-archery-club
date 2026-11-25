@@ -7,7 +7,7 @@ import { CloseIcon, ShieldIcon } from "./icons";
 
 const SEEN = "unm-seen-signin";
 
-// Shown once to first-time visitors: after they scroll past the animation, or after 10 seconds.
+// Shown once to first-time visitors: after they scroll past the hero video, or after 10 seconds.
 export function SignInPopup() {
   const [open, setOpen] = useState(false);
   const dlg = useRef<HTMLDialogElement>(null);
@@ -18,7 +18,7 @@ export function SignInPopup() {
     if (seen) return;
     const show = () => { cleanup(); setOpen(true); };
     const timer = window.setTimeout(show, 10000);
-    const onScroll = () => { const r = document.querySelector(".range"); if (r && r.getBoundingClientRect().bottom < 0) show(); };
+    const onScroll = () => { const r = document.querySelector("[data-hero]"); if (r && r.getBoundingClientRect().bottom < 0) show(); };
     const cleanup = () => { window.clearTimeout(timer); window.removeEventListener("scroll", onScroll); };
     window.addEventListener("scroll", onScroll, { passive: true });
     return cleanup;

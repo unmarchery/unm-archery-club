@@ -1,0 +1,27 @@
+/* F1 · Shinrin Phosphor: forest-led. Night forest canvas, CRT titles in green phosphor that climbs
+   the Japanese greens (tokiwa → wakatake → moegi → kinari). Torii vermilion is the one action colour;
+   the robot visor cyan is the scan line. Colours from the hero animation + nihon no dentō-iro. */
+:root {
+  --palette: "F1 · Shinrin Phosphor";
+  --canvas: #08130e;      /* forest at night (fukamidori, pushed to black) */
+  --canvas-2: #050d09;
+  --surface: #0f2119;
+  --surface-2: #163024;
+  --hairline: #22402f;
+  --ink: #f1efe4;         /* kinari, unbleached washi */
+  --body: #aab8a5;        /* lichen */
+  --muted: #8a9b84;
+  --gold: #e3b955;        /* kin, the target gold */
+  --crt-glass: #030906;   /* unlit CRT glass */
+  --primary: #c4421f;     /* torii / shu, darkened for white text */
+  --primary-hover: #d4502b;
+  --on-primary: #ffffff;
+  --accent: #5fe3d6;      /* visor cyan (glow only) */
+  --crt-off: #1d3a2b;     /* dim, unlit glyphs: visible but dark */
+  --crt-1: #0c5a38;       /* tokiwa, letter edges */
+  --crt-2: #1f9a5c;       /* wakatake */
+  --crt-3: #8ee06a;       /* moegi glow */
+  --crt-4: #ecffd2;       /* white-hot core */
+  --crt-scan: #b6fff4;    /* the light wave: visor cyan-white */
+  color-scheme: dark;
+}

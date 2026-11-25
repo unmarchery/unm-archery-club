@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UNM Archery Club</title>
+  <meta name="description" content="UNM Archery Club trains every Tuesday and Thursday, 4–7pm, at the Sports Complex. Members shoot free.">
+  <meta name="theme-color" content="#08130e">
+  <link rel="icon" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=VT323&display=swap" rel="stylesheet">
+  <!-- Palette: swap this one file to re-colour the page (palettes/*.css; v1 original kept in versions/) -->
+  <link rel="stylesheet" href="palettes/f3-visor-mist.css">
+  <link rel="stylesheet" href="components/shop-sign.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#events">Skip to content</a>
+
+  <!-- Drifting colour fields behind the glass sections ("liquid" layer) -->
+  <div class="liquid" aria-hidden="true">
+    <span class="blob blob--a"></span>
+    <span class="blob blob--b"></span>
+    <span class="blob blob--c"></span>
+  </div>
+
+  <header class="topbar" data-topbar>
+    <div class="topbar__inner">
+      <a class="brand" href="#top" aria-label="UNM Archery Club, home">
+        <img src="assets/logo.png" alt="" width="44" height="44">
+        <span>UNM Archery Club</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a class="nav__link" href="book.html">Book a session</a>
+        <a class="nav__link" href="shop.html">Shop</a>
+        <a class="nav__link" href="#ranking">Ranking</a>
+      </nav>
+      <div class="topbar__actions">
+        <a class="btn btn--glass btn--sm" href="#join" data-liquid><span class="btn__label">Join Club</span></a>
+        <a class="btn btn--light btn--sm" href="#signin" data-liquid><span class="btn__label">Sign In</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO: the club's loop video is the background; headline + CTA reveal once when the arrow hits slow-mo -->
+    <section class="hero" data-hero aria-label="Introduction">
+      <div class="hero__stage" data-stage>
+        <video class="hero__video" data-hero-video src="assets/hero-loop.mp4" poster="assets/hero-poster.jpg"
+               autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+      </div>
+      <div class="hero__scrim" aria-hidden="true"></div>
+
+      <!-- Headline + CTA as one block, positioned in video coordinates (see .hero__copy) -->
+      <div class="hero__copy">
+        <h1 class="hero__title" data-reveal>
+          <span class="line">Aim,</span>
+          <span class="line">Hit,</span>
+          <span class="line">and Never Quit</span>
+        </h1>
+        <div class="hero__cta" data-reveal>
+          <a class="btn btn--light btn--lg" href="book.html" data-liquid data-magnetic>
+            <span class="btn__label">Book a session</span>
+            <svg class="btn__arrow" viewBox="0 0 32 12" aria-hidden="true"><path d="M0 6h28M22 1l6 5-6 5M3 1l5 5-5 5M9 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <button class="hero__pause" type="button" data-pause aria-label="Pause background video" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><g class="i-pause"><rect x="7" y="5" width="3.5" height="14" rx="1"/><rect x="13.5" y="5" width="3.5" height="14" rx="1"/></g><path class="i-play" d="M8 5.5v13l11-6.5z"/></svg>
+      </button>
+    </section>
+
+    <!-- Ambient fade: picks up the live colours along the video's bottom edge and melts them into the page -->
+    <div class="ambient" data-ambient aria-hidden="true"></div>
+
+    <!-- ============ EVENTS ============ -->
+    <section class="section events" id="events" aria-labelledby="events-title">
+      <div class="wrap">
+        <div class="sign" data-sign data-tag="01 · ON THE RANGE"><h2 class="sign__title" id="events-title">Events</h2></div>
+      </div>
+
+      <!-- PLACEHOLDER events: replace with the club's real calendar -->
+      <div class="carousel" data-carousel tabindex="0" aria-roledescription="carousel" aria-label="Current events">
+        <span class="carousel__glow" data-ev-glow aria-hidden="true"></span>
+        <div class="carousel__viewport" data-viewport>
+          <ul class="carousel__track" role="list">
+            <li class="ev" data-slide data-glow-rgb="128 228 112" aria-roledescription="slide">
+              <div class="ev__text">
+                <div class="ev__top"><span class="ev__badge ev__badge--now">Now on</span><span class="ev__date">Until 28 Nov</span></div>
+                <h3>Robin Hood Shoot</h3>
+                <p class="ev__desc">Lincoln green, feathered caps and the legendary shot: split an arrow already sitting in the gold. Prizes for the best Robin and the best Marian.</p>
+                <ul class="ev__info" role="list">
+                  <li><span>Time</span>Tue &amp; Thu, 4–7pm</li><li><span>Venue</span>Sports Complex</li><li><span>Dress</span>Lincoln green</li>
+                </ul>
+              </div>
+              <div class="ev__art" aria-hidden="true">
+                <svg viewBox="0 0 400 300"><g class="art-grid"><path d="M0 60h400M0 120h400M0 180h400M0 240h400M80 0v300M160 0v300M240 0v300M320 0v300"/></g>
+                  <path d="M0 300V120l26-48 22 40 18-70 24 64 20-44 24 58v180zM296 300V96l22-54 20 46 18-62 24 70 20-40v244z" class="f-s2"/>
+                  <circle cx="206" cy="158" r="96" class="f-s2 s-hair"/><circle cx="206" cy="158" r="76" class="f-none s-ink" stroke-width="2"/>
+                  <circle cx="206" cy="158" r="56" class="f-none s-acc" stroke-width="3"/><circle cx="206" cy="158" r="36" class="f-pri"/><circle cx="206" cy="158" r="17" class="f-gold"/>
+                  <path d="M206 158 318 66" class="s-ink" stroke-width="3.2" stroke-linecap="round"/>
+                  <path d="M318 66l15-3-7 13zM318 66l2 14 9-9z" class="f-green"/>
+                  <path d="M214 151 330 56" class="s-acc" stroke-width="2.4" stroke-linecap="round"/><path d="M330 56l16-4-8 14zM330 56l2 15 10-10z" class="f-acc"/>
+                  <g class="s-gold" stroke-width="2" stroke-linecap="round"><path d="M300 74l12-14M306 80l16-8M296 70l2-16"/></g>
+                  <g transform="translate(24 26)"><path d="M6 58C22 22 66 6 112 18c-8 8-12 18-12 30C70 38 38 44 6 58z" class="f-green"/><path d="M12 56c30-10 58-12 88-8" class="s-gold" stroke-width="3"/><path d="M84 30c20-26 50-34 78-30-26 6-48 18-68 40z" class="f-pri"/><path d="M90 34c20-18 42-26 66-28" class="s-ink" stroke-width="1.2" opacity=".6"/></g></svg>
+              </div>
+            </li>
+            <li class="ev" data-slide data-glow-rgb="227 185 85" aria-roledescription="slide">
+              <div class="ev__text">
+                <div class="ev__top"><span class="ev__badge">Upcoming</span><span class="ev__date">Sat 06 Dec</span></div>
+                <h3>Ranking Match, Round 1</h3>
+                <p class="ev__desc">Sixty arrows at eighteen metres. Every score feeds the club ranking board, so this is the one to climb on.</p>
+                <ul class="ev__info" role="list">
+                  <li><span>Time</span>9am–1pm</li><li><span>Venue</span>Sports Complex</li><li><span>Entry</span>Members</li>
+                </ul>
+              </div>
+              <div class="ev__art" aria-hidden="true">
+                <svg viewBox="0 0 400 300"><g class="art-grid"><path d="M0 60h400M0 120h400M0 180h400M0 240h400M80 0v300M160 0v300M240 0v300M320 0v300"/></g>
+                  <g class="t-mono"><text x="58" y="96" class="f-gold">01</text><text x="58" y="166" class="f-ink">02</text><text x="58" y="236" class="f-pri">03</text></g>
+                  <rect x="118" y="64" width="232" height="40" rx="8" class="f-s2 s-acc" stroke-width="2"/><rect x="118" y="64" width="208" height="40" rx="8" class="f-gold" opacity=".9"/>
+                  <rect x="118" y="134" width="180" height="40" rx="8" class="f-ink" opacity=".75"/><rect x="118" y="204" width="146" height="40" rx="8" class="f-pri"/>
+                  <g class="t-mono t-sm"><text x="312" y="94" text-anchor="end" class="f-canvas">572</text><text x="284" y="164" text-anchor="end" class="f-canvas">548</text><text x="250" y="234" text-anchor="end" class="f-ink">531</text></g>
+                  <path d="M360 150l14-18 14 18M374 132v52" class="f-none s-acc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </li>
+            <li class="ev" data-slide data-glow-rgb="255 128 180" aria-roledescription="slide">
+              <div class="ev__text">
+                <div class="ev__top"><span class="ev__badge">Upcoming</span><span class="ev__date">Sat 14 Feb</span></div>
+                <h3>Cupid's Valentine Shoot</h3>
+                <p class="ev__desc">Heart-shaped targets, pairs rounds and a rose for the arrow closest to the centre. Bring a partner, or find one on the line.</p>
+                <ul class="ev__info" role="list">
+                  <li><span>Time</span>2–5pm</li><li><span>Venue</span>Sports Complex</li><li><span>Format</span>Pairs</li>
+                </ul>
+              </div>
+              <div class="ev__art" aria-hidden="true">
+                <svg viewBox="0 0 400 300"><g class="art-grid"><path d="M0 60h400M0 120h400M0 180h400M0 240h400M80 0v300M160 0v300M240 0v300M320 0v300"/></g>
+                  <path d="M200 262C120 206 76 164 76 116c0-32 24-56 56-56 30 0 50 18 68 44 18-26 38-44 68-44 32 0 56 24 56 56 0 48-44 90-124 146z" class="f-pink"/>
+                  <path d="M200 226C146 188 116 158 116 124c0-18 14-32 32-32 22 0 36 16 52 38 16-22 30-38 52-38 18 0 32 14 32 32 0 34-30 64-84 102z" class="f-pri"/>
+                  <path d="M52 238 348 66" class="s-ink" stroke-width="3.2" stroke-linecap="round"/><path d="M348 66l17-1-9 14zM348 66l-2 16 13-7z" class="f-gold"/>
+                  <path d="M52 238l-6-15 12 3zM52 238l-15-2 9-10zM62 232l-6-15 12 3zM62 232l-15-2 9-10z" class="f-pink"/>
+                  <g class="f-pink" opacity=".7"><path d="M330 200c-8-6-12-10-12-15 0-4 3-6 6-6s5 2 6 4c1-2 3-4 6-4s6 2 6 6c0 5-4 9-12 15z"/><path d="M80 52c-6-4-9-7-9-11 0-3 2-5 5-5 2 0 3 1 4 3 1-2 2-3 4-3 3 0 5 2 5 5 0 4-3 7-9 11z"/></g>
+                  <g class="s-gold" stroke-width="2" stroke-linecap="round"><path d="M300 236v14M293 243h14M110 268v10M105 273h10"/></g></svg>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="carousel__controls">
+          <button class="ctrl" type="button" data-prev aria-label="Previous event">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <a class="ctrl ctrl--open" href="#events" data-open aria-label="Open event details" data-liquid>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-8 8M10 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-4"/></svg>
+          </a>
+          <button class="ctrl" type="button" data-next aria-label="Next event">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+        <p class="sr-only" aria-live="polite" data-status></p>
+      </div>
+    </section>
+
+    <!-- DIVIDER: 4 arrows flying left → right through 3 lanes at a steady pace -->
+    <div class="arrows arrows--ltr" data-arrows aria-hidden="true">
+      <span class="arrows__lane" style="--lane:0"></span><span class="arrows__lane" style="--lane:1"></span><span class="arrows__lane" style="--lane:2"></span>
+      <span class="fly" style="--i:0;--lane:0;--d:8.5s;--delay:-1.2s;--trail:#5fe3d6;--w:1"><span class="fly__trail"></span><img src="assets/arrows/volt.png" alt=""></span>
+      <span class="fly" style="--i:1;--lane:1;--d:9.5s;--delay:-3.4s;--trail:#5fe3d6;--w:1"><span class="fly__trail"></span><img src="assets/arrows/broadhead.png" alt=""></span>
+      <span class="fly" style="--i:2;--lane:1;--d:9.5s;--delay:-8.15s;--trail:#f5c84a;--w:0.85"><span class="fly__trail"></span><img src="assets/arrows/vane.png" alt=""></span>
+      <span class="fly" style="--i:3;--lane:2;--d:7.5s;--delay:-4.6s;--trail:#ff7a3d;--w:0.95"><span class="fly__trail"></span><img src="assets/arrows/ember.png" alt=""></span>
+    </div>
+
+    <!-- ============ JOIN CLUB ============ -->
+    <section class="section join" id="join" data-join aria-labelledby="join-title">
+      <div class="wrap join__grid">
+       <div class="join__main">
+        <div class="sign" data-sign data-tag="02 · MEMBERSHIP"><h2 class="sign__title" id="join-title">Join Club</h2></div>
+        <p class="lede">One membership puts you on the shooting line every week, with the gear, the coaching and a place on the board.</p>
+
+        <p class="perks__label">Perks:</p>
+        <ul class="perks" role="list">
+          <li class="perk" data-glow>
+            <svg class="perk__icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M6 20a14 14 0 1 0 4-9.9"/><path d="M6 6v6h6"/><path d="M20 12v8l5 3"/></svg>
+            <div><h3>Unlimited sessions</h3><p>Shoot every Tuesday and Thursday with no range fees.</p></div>
+          </li>
+          <li class="perk" data-glow>
+            <svg class="perk__icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M8 34V22h7v12M17 34V12h7v22M26 34V17h7v17"/><path d="M5 34h31"/></svg>
+            <div><h3>Ranking system unlocked</h3><p>Log your scores and climb the club board.</p></div>
+          </li>
+          <li class="perk" data-glow>
+            <svg class="perk__icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="11" r="5"/><path d="M9 35c0-7 5-12 11-12s11 5 11 12"/><path d="M29 6l6-3"/></svg>
+            <div><h3>Coaches on the line</h3><p>Form checks from stance and draw to anchor and release.</p></div>
+          </li>
+          <li class="perk perk--price" data-glow>
+            <svg class="perk__icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="15"/><circle cx="20" cy="20" r="9"/><circle cx="20" cy="20" r="3"/></svg>
+            <div><h3><span class="price">RM30</span> for the whole academic year</h3><p>One payment covers every session until next year.</p></div>
+          </li>
+        </ul>
+
+        <div class="join__cta">
+          <a class="btn btn--primary btn--lg" href="#join" data-liquid data-magnetic>
+            <span class="btn__label">Join Club</span>
+            <svg class="btn__arrow" viewBox="0 0 32 12" aria-hidden="true"><path d="M0 6h28M22 1l6 5-6 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+       </div>
+
+        <!-- Bow showcase behind the right side of the perks (cards overlap it): barebow -> recurve -> compound,
+             one at a time. Slides in from the right as the section arrives, out to the left as it ends. -->
+        <aside class="bows" data-bows aria-hidden="true">
+          <div class="bows__stage" data-bows-stage>
+            <span class="bows__glow" aria-hidden="true"></span>
+            <figure class="bow is-on" data-bow data-kind="Barebow" data-desc="No sight, no stabiliser. You aim by instinct."><img src="assets/bows/barebow.webp" alt="Wooden barebow with two arrows"></figure>
+            <figure class="bow" data-bow data-kind="Recurve" data-desc="The Olympic bow. Limbs curve away to store more power."><img src="assets/bows/recurve.webp" alt="Recurve bow with a wooden riser and three arrows"></figure>
+            <figure class="bow" data-bow data-kind="Compound" data-desc="Cams and cables lighten the hold at full draw."><img src="assets/bows/compound.webp" alt="Blue compound bow with sight and stabiliser"></figure>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- DIVIDER: 4 arrows flying right → left -->
+    <div class="arrows arrows--rtl" data-arrows aria-hidden="true">
+      <span class="arrows__lane" style="--lane:0"></span><span class="arrows__lane" style="--lane:1"></span><span class="arrows__lane" style="--lane:2"></span>
+      <span class="fly" style="--i:0;--lane:0;--d:9s;--delay:-4.1s;--trail:#ff7a3d;--w:0.95"><span class="fly__trail"></span><img src="assets/arrows/ember.png" alt=""></span>
+      <span class="fly" style="--i:1;--lane:1;--d:8s;--delay:-0.8s;--trail:#5fe3d6;--w:1"><span class="fly__trail"></span><img src="assets/arrows/broadhead.png" alt=""></span>
+      <span class="fly" style="--i:2;--lane:1;--d:8s;--delay:-4.8s;--trail:#c9d3d4;--w:0.8"><span class="fly__trail"></span><img src="assets/arrows/carbon.png" alt=""></span>
+      <span class="fly" style="--i:3;--lane:2;--d:10s;--delay:-2.2s;--trail:#5fe3d6;--w:1"><span class="fly__trail"></span><img src="assets/arrows/volt.png" alt=""></span>
+    </div>
+
+    <!-- ============ WEEKLY SESSIONS ============ -->
+    <section class="section weekly" id="book" aria-labelledby="weekly-title">
+      <div class="wrap">
+        <div class="sign" data-sign data-tag="03 · EVERY WEEK"><h2 class="sign__title" id="weekly-title">Weekly Sessions</h2></div>
+      </div>
+      <div class="marquee" data-marquee>
+        <ul class="marquee__track" role="list">
+          <li class="info"><span class="info__k">When</span><span class="info__v">Every Tue &amp; Thu</span><span class="info__s">4–7pm</span></li>
+          <li class="info"><span class="info__k">Venue</span><span class="info__v">Sports Complex</span><span class="info__s">Indoor range</span></li>
+          <li class="info"><span class="info__k">Members</span><span class="info__v">Free</span><span class="info__s">Every session</span></li>
+          <li class="info"><span class="info__k">Guests</span><span class="info__v">RM5 / hour</span><span class="info__s">RM12 / day</span></li>
+          <li class="info"><span class="info__k">Beginners</span><span class="info__v">Welcome</span><span class="info__s">Coached from day one</span></li>
+        </ul>
+      </div>
+      <div class="wrap weekly__cta">
+        <a class="btn btn--primary btn--lg" href="book.html" data-liquid data-magnetic>
+          <span class="btn__label">Book a session</span>
+          <svg class="btn__arrow" viewBox="0 0 32 12" aria-hidden="true"><path d="M0 6h28M22 1l6 5-6 5M3 1l5 5-5 5M9 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <!-- Curvy ribbon: the club line runs along a wave and never stops -->
+    <div class="ribbon" aria-hidden="true">
+      <svg viewBox="0 0 1440 240" preserveAspectRatio="xMidYMid slice">
+        <path id="wave" d="M-200 150C80 60 320 60 560 130S1040 210 1280 120 1560 60 1700 110" fill="none"/>
+        <use href="#wave" class="ribbon__band"/>
+        <text class="ribbon__text" dy="13"><textPath href="#wave" data-ribbon-path startOffset="0">AIM, HIT, AND NEVER QUIT ✦ JOIN THE CLUB ✦ WEEKLY SESSIONS · TUE &amp; THU ✦ BE PART OF US ✦ </textPath></text>
+      </svg>
+    </div>
+    <div class="wrap footer__inner">
+      <div>
+        <a class="brand brand--foot" href="#top"><img src="assets/logo.png" alt="" width="40" height="40"><span>UNM Archery Club</span></a>
+        <p>University of Nottingham Malaysia. Training every Tuesday and Thursday, 4–7pm, at the Sports Complex.</p>
+      </div>
+      <nav class="footer__nav" aria-label="Footer">
+        <a class="link" href="book.html">Book a session</a>
+        <a class="link" href="shop.html">Shop</a>
+        <a class="link" href="#ranking">Ranking</a>
+        <a class="link" href="#faq">FAQ</a>
+        <a class="link" href="#join">Join Club</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="components/shop-sign.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

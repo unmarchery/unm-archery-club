@@ -1,0 +1,25 @@
+/* Exco pages: calm. Dense readable tables on --surface, VT323 for IDs and numbers, and vermilion only for
+   destructive actions; everyday buttons are quiet kinari/cyan outlines. */
+.exco { display: flex; flex-direction: column; gap: 22px; }
+.exco-band .crt-title { position: relative; top: auto; border-radius: 14px; }
+.exco-band .crt-title h1, .exco-band .crt-title h2 { display: none; }
+
+/* everyday actions: quiet; the fill comes from the accent */
+.exco .btn:not(.btn-danger):not(.btn-ghost):not(:disabled) { background: var(--surface-2); color: var(--ink); border-color: color-mix(in oklab, var(--accent) 45%, transparent); --fill: var(--accent); --fill-ink: var(--canvas); }
+.exco .btn:not(.btn-danger):not(.btn-ghost):hover:not(:disabled) { box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 16%, transparent); }
+.exco .btn-ghost:hover:not(:disabled) { box-shadow: none; }
+/* destructive actions are the only vermilion */
+.exco .btn.btn-danger { background: var(--primary); color: #fff; --fill: #fff; --fill-ink: var(--primary); }
+
+/* dense tables on the surface */
+.exco .table-wrap { background: var(--surface); border: 1px solid var(--hairline); border-radius: 14px; margin: 0; padding: 0 4px; }
+.exco .table th { font: 400 15px/1 var(--f-mono); letter-spacing: .1em; color: var(--muted); }
+.exco .table td { border-bottom-color: color-mix(in oklab, var(--hairline) 70%, transparent); }
+.exco .table tbody tr:hover td { background: color-mix(in oklab, var(--accent) 5%, transparent); }
+.exco .table td.num, .exco .stat-value, .exco .amount, .exco .stepper-value { font-family: var(--f-mono); font-weight: 400; letter-spacing: .02em; }
+.exco .table td.num { font-size: 18px; }
+.exco .stat-value { font-size: 36px; color: var(--ink); }
+.exco .amount { font-size: 32px; color: var(--gold); }
+.exco .card { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: var(--hairline); box-shadow: none; }
+.exco .h1 { font-size: clamp(28px, 22px + 1.4vw, 38px); }
+.exco .eyebrow { font: 400 16px/1 var(--f-mono); letter-spacing: .12em; }

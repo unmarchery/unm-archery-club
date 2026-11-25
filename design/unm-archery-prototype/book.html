@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book a session · UNM Archery Club</title>
+  <meta name="description" content="Book a UNM Archery Club session: Tuesdays and Thursdays, 4–7pm, in hour slots.">
+  <meta name="theme-color" content="#08130e">
+  <link rel="icon" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=VT323&display=swap" rel="stylesheet">
+  <!-- Palette: swap this one file to re-colour the page (palettes/*.css; v1 original kept in versions/) -->
+  <link rel="stylesheet" href="palettes/f3-visor-mist.css">
+  <link rel="stylesheet" href="components/shop-sign.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components/booking.css">
+</head>
+<body>
+  <a class="skip" href="#days">Skip to the sessions</a>
+
+  <div class="liquid" aria-hidden="true">
+    <span class="blob blob--a"></span>
+    <span class="blob blob--b"></span>
+    <span class="blob blob--c"></span>
+  </div>
+
+  <header class="topbar is-solid" data-topbar>
+    <div class="topbar__inner">
+      <a class="brand" href="index.html" aria-label="UNM Archery Club, home">
+        <img src="assets/logo.png" alt="" width="44" height="44">
+        <span>UNM Archery Club</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a class="nav__link is-active" href="book.html" aria-current="page">Book a session</a>
+        <a class="nav__link" href="shop.html">Shop</a>
+        <a class="nav__link" href="#ranking">Ranking</a>
+      </nav>
+      <div class="topbar__actions">
+        <!-- signed-in chip, like the live site (avatar, name, a bar with ∞ / passes). Opens the card. -->
+        <button class="user-chip" type="button" data-user-chip aria-haspopup="dialog" aria-label="My card and bookings">
+          <span class="user-chip__av">CC</span>
+          <span class="user-chip__name">Cheng<span class="user-chip__meta" data-chip-meta>∞</span></span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top" class="book">
+    <div class="wrap book-head">
+      <div class="book-head__text">
+        <div class="sign" data-sign data-tag="TUE &amp; THU · 4–7PM"><h1 class="sign__title">Book a session</h1></div>
+        <!-- Schedule rail: three stops on one lit line, like a route map -->
+        <p class="schedule" aria-label="Every Tuesday and Thursday, 4pm to 7pm, at the Sports Complex">
+          <span class="schedule__live" aria-hidden="true"></span>
+          <span class="stop"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span><small>Every</small> Tue &amp; Thu</span></span>
+          <span class="schedule__rail" aria-hidden="true"></span>
+          <span class="stop"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>4pm–7pm</span></span>
+          <span class="schedule__rail" aria-hidden="true"></span>
+          <span class="stop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span><small>at</small> Sports Complex</span></span>
+        </p>
+      </div>
+      <!-- the member / guest card floats beside a half-revealed card reader; click it to open My bookings -->
+      <div class="wallet-spot">
+        <div class="card-tap" data-tap><div class="card-float">
+          <div class="mcard" data-card role="button" tabindex="0" aria-haspopup="dialog" aria-label="Open my card and bookings"></div>
+        </div></div>
+      </div>
+      <svg class="reader" viewBox="0 0 200 300" aria-hidden="true">
+        <defs><filter id="lcd-glow" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <linearGradient id="rd-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1c2326"/><stop offset="1" stop-color="#0c1012"/></linearGradient></defs>
+        <rect x="8" y="8" width="184" height="284" rx="30" fill="url(#rd-body)" stroke="#2f383b" stroke-width="2"/>
+        <rect x="22" y="24" width="156" height="98" rx="12" fill="#04100c" stroke="#1d3a33" stroke-width="2"/>
+        <g class="reader__lcd-text" filter="url(#lcd-glow)" font-family="VT323, monospace" fill="#5fe3d6">
+          <text x="34" y="64" font-size="30">TAP ▸</text><text x="34" y="96" font-size="17" fill="#2e8f86">READY</text></g>
+        <g class="reader__ok" fill="none" stroke="#5ff2a0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" filter="url(#lcd-glow)"><path d="M38 72l14 14 26-30"/></g>
+        <circle class="reader__led" cx="40" cy="142" r="5" fill="#5fe3d6"/>
+        <circle class="reader__ring" cx="108" cy="215" r="34" fill="none" stroke="#5ff2a0" stroke-width="3"/>
+        <rect x="30" y="162" width="140" height="112" rx="18" fill="#0b0f11" stroke="#2f383b" stroke-width="2"/>
+        <g fill="none" stroke="#5fe3d6" stroke-width="5" stroke-linecap="round" opacity=".9">
+          <path d="M84 196c10 10 10 28 0 38"/><path d="M96 186c16 16 16 42 0 58"/><path d="M108 176c22 22 22 56 0 78"/></g>
+      </svg>
+    </div>
+
+    <div class="wrap pager">
+      <span class="pager__label">Days 1–2 of 2</span>
+      <div class="pager__btns">
+        <button type="button" disabled aria-label="Previous days"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button type="button" disabled aria-label="Next days"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+    <div class="wrap days" id="days" data-days></div>
+
+    <!-- Booking pop-up: a page-level dialog (the live site's pop-up was trapped inside the day card) -->
+    <dialog class="dlg bk" data-bk aria-labelledby="bk-title">
+      <div class="bk__card">
+        <button class="dlg__x" type="button" data-bk-close aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <h2 class="bk__title" id="bk-title" data-bk-title></h2>
+        <span class="bk__price" data-bk-price></span>
+        <span class="bk__label">EQUIPMENT</span>
+        <div class="seg"><button type="button" data-opt="equip:club">Club bow</button><button type="button" data-opt="equip:own">Own bow</button></div>
+        <div class="seg"><button type="button" data-opt="hand:Right">Right-handed</button><button type="button" data-opt="hand:Left">Left-handed</button></div>
+        <div data-weights>
+          <span class="bk__label">DRAW WEIGHT</span>
+          <div class="chips"><button type="button" data-opt="lbs:14 lbs">14 lbs</button><button type="button" data-opt="lbs:18 lbs">18 lbs</button><button type="button" data-opt="lbs:20 lbs">20 lbs</button><button type="button" data-opt="lbs:22 lbs">22 lbs</button><button type="button" data-opt="lbs:24 lbs">24 lbs</button><button type="button" data-opt="lbs:Not sure">Not sure</button></div>
+          <p class="bk__note">This is a preference. Club bows are shared, so it isn't guaranteed.</p>
+        </div>
+        <p class="bk__warn">If you book and don't come, it counts as a no-show. 2 no-shows bring a warning; 3 mean no bookings for 14 days.</p>
+        <div class="bk__foot">
+          <span class="bk__summary" data-bk-summary></span>
+          <span class="bk__acts">
+            <button class="btn btn--danger btn--sm" type="button" data-bk-drop data-liquid hidden><span class="btn__label">Cancel this slot</span></button>
+            <button class="btn btn--primary bk__go" type="button" data-bk-go data-liquid><span class="btn__label">Confirm booking</span></button>
+          </span>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- The card, enlarged to the centre, with My bookings -->
+    <dialog class="dlg wallet" data-wallet aria-label="My card and bookings">
+      <div class="wallet__body">
+        <div class="mcard mcard--big" data-big-card></div>
+        <section class="wallet__list" aria-label="My bookings"><h3>MY BOOKINGS</h3><ul role="list" data-bk-list></ul></section>
+      </div>
+      <button class="dlg__x" type="button" data-wallet-close aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </dialog>
+
+    <!-- Cancel always asks first -->
+    <dialog class="dlg confirm" data-confirm aria-labelledby="cf-title">
+      <div class="confirm__card">
+        <h2 id="cf-title" data-confirm-title>Cancel this booking?</h2>
+        <p data-confirm-text></p>
+        <p class="bk__note">Your place goes back to the pool for someone else.</p>
+        <div class="confirm__acts">
+          <button class="btn btn--glass btn--sm" type="button" data-keep data-liquid><span class="btn__label">Keep it</span></button>
+          <button class="btn btn--primary btn--sm" type="button" data-do-cancel data-liquid><span class="btn__label">Cancel booking</span></button>
+        </div>
+      </div>
+    </dialog>
+  </main>
+
+  <footer class="footer">
+    <!-- Curvy ribbon: the club line runs along a wave and never stops -->
+    <div class="ribbon" aria-hidden="true">
+      <svg viewBox="0 0 1440 240" preserveAspectRatio="xMidYMid slice">
+        <path id="wave" d="M-200 150C80 60 320 60 560 130S1040 210 1280 120 1560 60 1700 110" fill="none"/>
+        <use href="#wave" class="ribbon__band"/>
+        <text class="ribbon__text" dy="13"><textPath href="#wave" data-ribbon-path startOffset="0">AIM, HIT, AND NEVER QUIT ✦ JOIN THE CLUB ✦ WEEKLY SESSIONS · TUE &amp; THU ✦ BE PART OF US ✦ </textPath></text>
+      </svg>
+    </div>
+    <div class="wrap footer__inner">
+      <div>
+        <a class="brand brand--foot" href="index.html"><img src="assets/logo.png" alt="" width="40" height="40"><span>UNM Archery Club</span></a>
+        <p>University of Nottingham Malaysia. Training every Tuesday and Thursday, 4–7pm, at the Sports Complex.</p>
+      </div>
+      <nav class="footer__nav" aria-label="Footer">
+        <a class="link" href="book.html">Book a session</a>
+        <a class="link" href="shop.html">Shop</a>
+        <a class="link" href="#ranking">Ranking</a>
+        <a class="link" href="#faq">FAQ</a>
+        <a class="link" href="index.html#join">Join Club</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="components/view-mode.js"></script>
+  <script src="components/shop-sign.js"></script>
+  <script src="main.js"></script>
+  <script src="components/booking.js"></script>
+</body>
+</html>

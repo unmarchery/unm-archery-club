@@ -1,0 +1,100 @@
+/* Neon ASCII sign: a section title as a shop sign.
+   Needs palette roles --sign-tube, --sign-frame, --sign-stud, --canvas. Built by sign.js. */
+.sign {
+  --tube: var(--sign-tube, #ff5a36);
+  --frame: var(--sign-frame, #56d4e2);
+  --stud: var(--sign-stud, #e2b66e);
+  --cell-f: clamp(14px, 1.5vw, 20px);          /* ASCII frame glyph size */
+  --tube-core: color-mix(in oklab, var(--tube) 62%, #fff);
+  --frame-core: color-mix(in oklab, var(--frame) 60%, #fff);
+  --tube-dead: color-mix(in oklab, var(--tube) 16%, var(--canvas, #0e1310));
+  --frame-dead: color-mix(in oklab, var(--frame) 18%, var(--canvas, #0e1310));
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  max-width: 100%;
+  isolation: isolate;
+}
+
+/* Light pooled on the wall behind the sign */
+.sign::before {
+  content: ""; position: absolute; inset: -18% -8%; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60% 55% at 50% 50%, color-mix(in oklab, var(--tube) 26%, transparent), transparent 70%),
+    radial-gradient(80% 90% at 50% 50%, color-mix(in oklab, var(--frame) 12%, transparent), transparent 75%);
+  opacity: 0; filter: blur(18px);
+  transition: opacity .9s ease-out;
+}
+.sign.is-lit::before { opacity: 1; animation: sign-breathe 5.5s ease-in-out 1.8s infinite; }
+.sign.is-humming::before { animation: sign-hum .5s ease-out, sign-breathe 5.5s ease-in-out .5s infinite; }
+
+/* ---------- ASCII frame ---------- */
+.sign__frame {
+  position: absolute; inset: 0; margin: 0; z-index: 0;
+  font: 400 var(--cell-f)/1 "VT323", ui-monospace, monospace;
+  white-space: pre; user-select: none; pointer-events: none;
+  color: var(--frame-dead);
+}
+.sign__frame b { font-weight: 400; transition: color .08s linear, text-shadow .08s linear; }
+.sign__frame b.is-on {
+  color: var(--frame-core);
+  text-shadow: 0 0 .25em var(--frame), 0 0 .7em var(--frame), 0 0 1.6em color-mix(in oklab, var(--frame) 55%, transparent);
+}
+.sign__frame b.is-stud.is-on {
+  color: color-mix(in oklab, var(--stud) 55%, #fff);
+  text-shadow: 0 0 .3em var(--stud), 0 0 .9em var(--stud);
+}
+.sign__frame b.is-tag.is-on {
+  color: var(--frame-core);
+  text-shadow: 0 0 .25em var(--frame), 0 0 .6em var(--frame);
+}
+.sign__frame b.is-rail { opacity: .55; }
+
+/* ---------- Neon tube lettering ---------- */
+.sign__title {
+  position: relative; z-index: 1; margin: 0;
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 900; font-stretch: 112%;
+  font-size: clamp(42px, 9.4vw, 132px);
+  line-height: .95; letter-spacing: .02em; text-transform: uppercase;
+  text-align: center; text-wrap: balance;
+}
+.sign__ch {
+  display: inline-block;
+  color: transparent;
+  -webkit-text-stroke: max(1.5px, .028em) var(--tube-dead);
+  transition: -webkit-text-stroke-color .06s linear, filter .06s linear;
+}
+.sign__ch.is-on {
+  -webkit-text-stroke-color: var(--tube-core);
+  filter:
+    drop-shadow(0 0 .04em var(--tube))
+    drop-shadow(0 0 .14em var(--tube))
+    drop-shadow(0 0 .38em color-mix(in oklab, var(--tube) 60%, transparent));
+}
+.sign__sp { display: inline-block; width: .32em; }
+
+/* Ignite: a few irregular flicker patterns, picked per letter */
+.sign__ch.ignite-a { animation: ig-a .62s steps(1, end) both; }
+.sign__ch.ignite-b { animation: ig-b .78s steps(1, end) both; }
+.sign__ch.ignite-c { animation: ig-c .5s steps(1, end) both; }
+@keyframes ig-a { 0%{opacity:1;filter:none;-webkit-text-stroke-color:var(--tube-dead)} 18%{-webkit-text-stroke-color:var(--tube-core)} 26%{-webkit-text-stroke-color:var(--tube-dead)} 48%{-webkit-text-stroke-color:var(--tube-core)} 56%{opacity:.45} 70%{opacity:1} }
+@keyframes ig-b { 0%{filter:none;-webkit-text-stroke-color:var(--tube-dead)} 10%{-webkit-text-stroke-color:var(--tube-core)} 16%{-webkit-text-stroke-color:var(--tube-dead)} 40%{-webkit-text-stroke-color:var(--tube-core);opacity:.5} 52%{opacity:1} 60%{opacity:.3} 76%{opacity:1} }
+@keyframes ig-c { 0%{filter:none;-webkit-text-stroke-color:var(--tube-dead)} 30%{-webkit-text-stroke-color:var(--tube-core);opacity:.6} 44%{opacity:.2} 62%{opacity:1} }
+
+/* Fault: a letter or frame run shorts out, stutters, relights */
+.sign .is-fault { animation: fault .9s steps(1, end) both; }
+@keyframes fault {
+  0% { opacity: 1 } 6% { opacity: .08 } 14% { opacity: 1 } 20% { opacity: .1 }
+  42% { opacity: .1 } 48% { opacity: .7 } 54% { opacity: .15 } 70% { opacity: 1 } 100% { opacity: 1 }
+}
+.sign.is-humming .sign__title { animation: title-hum .5s ease-out; }
+@keyframes title-hum { 0% { opacity: 1 } 30% { opacity: .82 } 60% { opacity: 1 } }
+@keyframes sign-hum { 0% { opacity: .4 } 35% { opacity: 1.4 } 100% { opacity: 1 } }
+@keyframes sign-breathe { 0%, 100% { opacity: 1 } 50% { opacity: .78 } }
+
+.sign__sparks { position: absolute; inset: -60px; width: calc(100% + 120px); height: calc(100% + 120px); pointer-events: none; z-index: 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sign *, .sign::before { animation: none !important; transition: none !important; }
+}

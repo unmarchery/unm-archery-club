@@ -1,0 +1,22 @@
+/* A · Shrine Dusk: colours sampled from the hero animation, laid out on a cinematic-dark structure
+   (footage leads, quiet chrome). Torii vermilion is the one action colour; armour cyan only ever glows. */
+:root {
+  --palette: "A · Shrine Dusk";
+  --canvas: #0e1310;      /* moss-black shadow */
+  --canvas-2: #090d0b;
+  --surface: #1a201b;
+  --surface-2: #232a24;
+  --hairline: #2f382f;
+  --ink: #e8e9e3;         /* haze */
+  --body: #a9a596;        /* lichen stone */
+  --muted: #8c887a;
+  --primary: #c23f25;     /* torii gate */
+  --primary-hover: #d24a2e;
+  --on-primary: #ffffff;
+  --accent: #56d4e2;      /* armour visor cyan (glow only, never text) */
+  --gold: #d8b46a;        /* sunlight */
+  --sign-tube: #ff5a36;   /* neon letters */
+  --sign-frame: #56d4e2;  /* neon frame */
+  --sign-stud: #e2b66e;
+  color-scheme: dark;
+}

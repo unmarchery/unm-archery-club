@@ -1,9 +1,18 @@
+import Link from "next/link";
+import "./auth.css";
+
+// Sign in, sign up and the password pages (handoff 8.4): a dark glass card centred over a dimmed,
+// blurred frame of the hero video, with the page's shop-sign title.
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="auth">
+      <div className="auth__bg" aria-hidden="true" />
       <div className="auth-card">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="logo" src="/logo.png" alt="UNM Archery Club logo" width={360} height={260} />
+        <Link href="/" className="auth-home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="" width={44} height={44} />
+          <span>UNM Archery Club</span>
+        </Link>
         {children}
       </div>
     </main>

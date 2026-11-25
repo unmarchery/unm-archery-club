@@ -45,6 +45,29 @@ export async function bookSlot(input: { slotId: string; pass: "single" | "full" 
   return { ok: true };
 }
 
+// Changes the equipment on an upcoming booking (a day pass: every hour of that day). Like booking,
+// the choice also becomes the archer's default for next time.
+export async function editBooking(input: { bookingId: string; gear: Gear }): Promise<ActionResult> {
+  const supabase = await signedInClient();
+  if (!supabase) return { ok: false, message: messageFor({ message: "NOT_SIGNED_IN" }) };
+  if (!UUID.test(input.bookingId)) return { ok: false, message: messageFor({ message: "BOOKING_NOT_FOUND" }) };
+  const gear = cleanGear(input.gear);
+  if (!gear) return { ok: false, message: "Please check your equipment choices." };
+
+  const { error } = await supabase.rpc("update_booking_equipment", { p_booking: input.bookingId, p_equipment: gear });
+  if (error) return { ok: false, message: messageFor(error) };
+  await supabase.rpc("save_my_gear", {
+    p_hand: gear.hand,
+    p_draw_lbs: gear.draw_lbs,
+    p_own_bow: gear.own_bow,
+    p_own_bow_type: gear.own_bow_type,
+    p_own_bow_lbs: gear.own_bow_lbs,
+  });
+
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
 export async function cancelBooking(bookingId: string, wholeDay: boolean): Promise<ActionResult> {
   const supabase = await signedInClient();
   if (!supabase) return { ok: false, message: messageFor({ message: "NOT_SIGNED_IN" }) };

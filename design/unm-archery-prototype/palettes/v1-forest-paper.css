@@ -1,0 +1,38 @@
+/* v1 "Forest & Paper" palette (round-1 build, live-site colours + torii accent). Full build snapshot: versions/v1-forest-paper/ */
+:root {
+  --paper: #f7f7f0;
+  --forest: #183f32;
+  --forest-hover: #22533f;
+  --forest-press: #0f2a20;
+  --forest-deep: #0b1f17;
+  --sage: #e6ebdd;
+  --line: #d9ded3;
+  --line-strong: #c6cdbf;
+  --ink: #183f32;
+  --muted: #5d685f;
+  --bull: #d8a928;
+  --torii: #c8452c;
+  --torii-ink: #a8361f;   /* torii as text on paper (AA) */
+  --torii-soft: #f6dfd5;
+  --ph-glass: #120a06;    /* unlit CRT glass */
+  --ph-dim: #6e1d0e;
+  --ph-mid: #d2541f;
+  --ph-hot: #f3a53c;
+  --ph-white: #ffe8b6;
+  --surface: #ffffffa6;
+  --glass-edge: #ffffffd9;
+  --glass-shadow: inset 0 1px 0 #ffffffe6, 0 18px 40px -24px #0f2a2059, 0 1px 3px #0f2a200f;
+  --glass-shadow-lift: inset 0 1px 0 #ffffffe6, 0 28px 50px -26px #0f2a2073, 0 2px 6px #0f2a2014;
+  color-scheme: light;
+}
+
+/* Role aliases so v1 can be previewed on the round-2 dark components */
+:root {
+  --palette: "v1 · Forest & Paper";
+  --canvas: #0b1f17; --canvas-2: #07150f; --surface: #183f32; --surface-2: #22533f; --hairline: #2a4a3d;
+  --ink: #f7f7f0; --body: #c9d1c5; --muted: #a2b0a5;
+  --primary: #f7f7f0; --primary-hover: #ffffff; --on-primary: #183f32;
+  --accent: #c8452c; --gold: #d8a928;
+  --sign-tube: #f0563a; --sign-frame: #f3c34a; --sign-stud: #e6ebdd;
+  color-scheme: dark;
+}

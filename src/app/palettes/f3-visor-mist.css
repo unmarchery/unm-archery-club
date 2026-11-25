@@ -1,0 +1,29 @@
+/* F3 · Visor Mist: forest-led canvas, CRT titles in the archer-robot's visor teal climbing from
+   tetsu (iron blue-green) to aotake to cyan-white. Torii vermilion is the scan line and the CTA. */
+:root {
+  --palette: "F3 · Visor Mist";
+  --canvas: #08130e;      /* forest at night (fukamidori, pushed to black) */
+  --canvas-2: #050d09;
+  --surface: #0f2119;
+  --surface-2: #163024;
+  --hairline: #22402f;
+  --ink: #f1efe4;         /* kinari, unbleached washi */
+  --body: #aab8a5;        /* lichen */
+  --muted: #8a9b84;
+  --gold: #e3b955;        /* kin, the target gold */
+  --crt-glass: #030906;   /* unlit CRT glass */
+  --primary: #c4421f;
+  --primary-hover: #d4502b;
+  --on-primary: #ffffff;
+  --accent: #5fe3d6;
+  --crt-off: #183a33;
+  --crt-1: #0b4a48;       /* tetsu-iro */
+  --crt-2: #1c8f88;
+  --crt-3: #5fe3d6;       /* visor */
+  --crt-4: #e9fffb;
+  --crt-scan: #ff7a4a;    /* torii light wave */
+  --sign-tube: #5fe3d6;   /* shop-sign titles: visor-cyan neon letters */
+  --sign-frame: #ff6a3d;  /* torii neon frame */
+  --sign-stud: #e3b955;   /* kin gold bolts */
+  color-scheme: dark;
+}
